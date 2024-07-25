@@ -1,23 +1,12 @@
 "use client";
 
-import React, {useRef} from 'react';
+import React from 'react';
 import SecretContent from "@/components/views/secret-content";
-import {useScroll, motion , useMotionValueEvent} from "framer-motion";
+import { motion } from "framer-motion";
 
 const AboutMe = () => {
-  const ref = useRef<HTMLDivElement>(null);
-  // const scroll = useScroll({
-  //   target: ref,
-  //   offset: ["start end", "end end"],
-  // });
-
-  // useMotionValueEvent(scroll.scrollYProgress, "change", (latest) => {
-  //   console.log("Page scroll: ", latest);
-  // });
-
-
   return (
-    <div className="relative flex flex-col content-center items-center justify-center" ref={ref}>
+    <div className="relative flex flex-col content-center items-center justify-center">
       <div className="absolute h-[100%] w-[100%] bg-neutral-900 z-[-1]"/>
       <div className="flex flex-col mb-20 mt-20 w-[65%] h-fit content-start items-start">
         <h1 className={"text-cyan-100 font-bold text-center mb-10"} id={"ABOUT_ME_SECTION"}> About Me </h1>

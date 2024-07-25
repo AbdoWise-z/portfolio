@@ -9,10 +9,6 @@ const MovingBg = () => {
     target: ref,
     offset: ["start end", "end end"],
   });
-  useMotionValueEvent(scroll.scrollYProgress, "change", (latest) => {
-    console.log("moving PG: ", latest);
-  });
-
   const tV = useTransform(scroll.scrollYProgress , [0 , 1] , [0 , 350]);
   const template = useMotionTemplate`-${tV}px`;
 
