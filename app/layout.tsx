@@ -8,6 +8,7 @@ import SecretContent from "@/components/views/secret-content";
 import {Code, Github, Linkedin, LinkedinIcon, LucideGithub} from "lucide-react";
 import Image from "next/image";
 import {Tooltip, TooltipContent, TooltipProvider, TooltipTrigger} from "@/components/ui/tooltip";
+import GoogleAnalytics from "@/components/GoogleAnalytics";
 
 const JetBrainsMono = JetBrains_Mono({ subsets: ["latin"] });
 
@@ -23,6 +24,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
+      <GoogleAnalytics />
       <body className={JetBrainsMono.className}>
       <TooltipProvider>
 
