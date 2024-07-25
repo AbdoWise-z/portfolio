@@ -7,6 +7,7 @@ import LeftNav from "@/components/views/nav/left-nav";
 import RightNav from "@/components/views/nav/right-nav";
 import AboutMe from "@/components/views/screens/about_me";
 import MovingBg from "@/components/views/screens/moving-bg";
+import Projects from "@/components/views/screens/projects";
 
 export default function Home() {
 
@@ -17,6 +18,7 @@ export default function Home() {
         <SecretContentIndicator/>
         <Landing/>
         <AboutMe/>
+        <Projects/>
       </div>
 
       <LeftNav/>

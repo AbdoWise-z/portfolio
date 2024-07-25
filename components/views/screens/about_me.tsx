@@ -29,7 +29,7 @@ const AboutMe = () => {
             opacity: 1,
           }}
         >
-          <div className={"text-xl md:text-6xl text-cyan-100 font-bold"}>
+          <div className={"text-xl md:text-4xl lg:text-5xl xl:text-6xl text-cyan-100 font-bold"}>
             {"I'm a "}
             <SecretContent className={"inline-block"} focusMaskWidth={240} secret={(
               <h1 className={"text-black inline"}>{"Just one more"}</h1>

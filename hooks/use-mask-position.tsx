@@ -6,8 +6,8 @@ import {useSecretContextValues} from "@/components/views/providers/secret-conten
 export const useMaskPosition = (ref: React.RefObject<any>) => {
   const contextData = useSecretContextValues();
   
-  const vMouseX = useMotionValue(0);
-  const vMouseY = useMotionValue(0);
+  const vMouseX = useMotionValue(-1000); //to avoid the initial weird clip
+  const vMouseY = useMotionValue(-1000);
 
   const vMaskX = useSpring(vMouseX,{ stiffness: 1800, damping: 150 });
   const vMaskY = useSpring(vMouseY,{ stiffness: 1800, damping: 150 });
