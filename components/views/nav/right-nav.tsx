@@ -26,7 +26,7 @@ const RightNav = () => {
   }
 
   return (
-    <div className={"flex absolute right-0 top-0 gap-3 p-8 flex-col h-full md:w-[240px]"}>
+    <div className={"flex fixed right-0 top-0 gap-3 p-8 flex-col h-full md:w-[240px]"}>
       <div className={"md:hidden"}>
         <Sheet>
           <SheetTrigger asChild>

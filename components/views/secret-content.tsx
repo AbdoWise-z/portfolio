@@ -11,6 +11,7 @@ const SecretContent = (
     secret,
     maskSize,
     className,
+    innerClassName,
     maskWidth,
     focusMaskWidth,
   } : {
@@ -20,6 +21,7 @@ const SecretContent = (
     maskY?: MotionValue<number>,
     maskSize?: MotionValue<number>,
     className?: string,
+    innerClassName?: string,
     maskWidth?: number;
     focusMaskWidth?: number;
   }
@@ -65,6 +67,8 @@ const SecretContent = (
           maskSize: maskSizeT1,
           maskPosition: maskPosition1,
         }}
+
+        className={innerClassName}
       >
         {secret}
       </motion.div>
@@ -80,6 +84,7 @@ const SecretContent = (
           maskSize: maskSizeT2,
           maskPosition: maskPosition2,
         }}
+        className={innerClassName}
       >
         {children}
       </motion.div>

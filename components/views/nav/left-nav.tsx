@@ -5,7 +5,7 @@ import {Tooltip, TooltipContent, TooltipTrigger} from "@/components/ui/tooltip";
 
 const LeftNav = () => {
   return (
-    <div className={"flex absolute left-0 top-0 gap-3 p-8 w-full flex-row md:flex-col md:h-full md:w-[120px]"}>
+    <div className={"flex fixed left-0 top-0 gap-3 p-8 w-full flex-row md:flex-col md:h-full md:w-[120px]"}>
       <a className={"rounded-full content-center flex justify-center aspect-square items-center"} href={"/"}>
         <Image src={"/personal_photo.jpg"} width={45} height={45} alt={"Me"} className={"rounded-full"}/>
       </a>

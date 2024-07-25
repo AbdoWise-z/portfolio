@@ -3,7 +3,7 @@ import React from "react";
 
 const Landing = () => {
   return (
-    <div className="relative h-[100vh] flex flex-col content-center items-center justify-center">
+    <div className="relative mb-20 h-[100vh] flex flex-col content-center items-center justify-center">
       <SecretContent focusMaskWidth={420} className={"items-center content-center justify-center"} secret={(
         <div className={"content-center justify-center items-center w-full"}>
           <h1 className={"text-black font-bold text-center mb-10"}> Abdulrahman Mohammed </h1>
