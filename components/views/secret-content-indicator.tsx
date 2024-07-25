@@ -20,7 +20,7 @@ const SecretContentIndicator = (
   const Y = useMotionTemplate`${transformedY}px`;
 
   return (
-    <div className="absolute top-0 left-0 w-[100%] h-[100%]" ref={ref}>
+    <div className="absolute top-0 left-0 w-[100%] h-[100%] overflow-hidden" ref={ref}>
       <motion.div
         style={{
           position: "absolute",
