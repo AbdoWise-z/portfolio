@@ -2,7 +2,7 @@
 
 import React from 'react';
 import {Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious} from "@/components/ui/carousel";
-import {ArrowBigDownDash, ArrowRightCircle, GithubIcon, List} from "lucide-react";
+import {ArrowRightCircle, GithubIcon, List} from "lucide-react";
 import {AnimatePresence, motion} from "framer-motion";
 import SecretIndicatorFade from "@/components/views/secret-indicator-fade";
 import {cn} from "@/lib/utils";
@@ -212,7 +212,7 @@ const Projects = () => {
     <div className="relative flex flex-col h-auto min-h-[100vh] w-full content-center items-center justify-center">
       <div className="absolute h-[100%] w-[100%] bg-neutral-900 z-[-1]"/>
       <div className="flex flex-col mt-10 w-[65%] h-fit content-start items-start">
-        <h1 className={"text-cyan-100 font-bold text-center mb-10"}> Previous Projects </h1>
+        <h1 className={"text-cyan-100 font-bold text-center mb-10"} id={"PROJECTS_SECTION"}> Previous Projects </h1>
       </div>
       <div className={"flex flex-1 flex-col w-[65%]"}>
         {/*projects cards*/}

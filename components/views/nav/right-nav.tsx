@@ -2,7 +2,7 @@
 
 import React from 'react';
 import {
-  Sheet,
+  Sheet, SheetClose,
   SheetContent,
   SheetTrigger
 } from "@/components/ui/sheet";
@@ -14,15 +14,15 @@ import SecretIndicatorFade from "@/components/views/secret-indicator-fade";
 
 const RightNav = () => {
   const handleAboutClick = () => {
-    //TODO:
+    document.querySelector("#ABOUT_ME_SECTION")!.scrollIntoView({ behavior: 'smooth' });
   }
 
   const handleProjectsClick = () => {
-    //TODO
+    document.querySelector("#PROJECTS_SECTION")!.scrollIntoView({ behavior: 'smooth' });
   }
 
   const handleContactClick = () => {
-    //TODO
+    alert("Not yet");
   }
 
   return (
@@ -36,9 +36,18 @@ const RightNav = () => {
           </SheetTrigger>
           <SheetContent>
             <div className={"flex flex-col"}>
-              <button className={"text-black"} onClick={handleAboutClick}>About</button>
-              <button className={"text-black"} onClick={handleProjectsClick}>Projects</button>
-              <button className={"text-black"} onClick={handleContactClick}>Contact</button>
+              <SheetClose asChild>
+                <button className={"text-black"} onClick={handleAboutClick}>About</button>
+              </SheetClose>
+
+              <SheetClose asChild>
+                <button className={"text-black"} onClick={handleProjectsClick}>Projects</button>
+              </SheetClose>
+
+              <SheetClose asChild>
+                <button className={"text-black"} onClick={handleContactClick}>Contact</button>
+              </SheetClose>
+
             </div>
           </SheetContent>
         </Sheet>
@@ -97,14 +106,5 @@ const RightNav = () => {
   )
 };
 
-const RightNavContent = () => {
-  return (
-    <>
-      <p>Item 1</p>
-      <p>Item 2</p>
-      <p>Item 3</p>
-    </>
-  );
-}
 
 export default RightNav;

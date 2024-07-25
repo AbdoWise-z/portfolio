@@ -20,7 +20,7 @@ const AboutMe = () => {
     <div className="relative flex flex-col content-center items-center justify-center" ref={ref}>
       <div className="absolute h-[100%] w-[100%] bg-neutral-900 z-[-1]"/>
       <div className="flex flex-col mb-20 mt-20 w-[65%] h-fit content-start items-start">
-        <h1 className={"text-cyan-100 font-bold text-center mb-10"}> About Me </h1>
+        <h1 className={"text-cyan-100 font-bold text-center mb-10"} id={"ABOUT_ME_SECTION"}> About Me </h1>
         <motion.div
           style={{
             opacity: 0.8,
