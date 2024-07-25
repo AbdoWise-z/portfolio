@@ -90,7 +90,7 @@ const ProjectsData: ProjectData[] = [
     name: "Irminsul",
     disc: (
       <div className={"text-white"}>
-        Irminsul is a fullstack search engine written the front-end is written <p
+        Irminsul is a fullstack search engine, the front-end is written <p
         className={"text-blue-500 inline"}>{"Flutter "}</p>
         while the backend is written in <p className={"text-red-500 inline"}>{"Java "}</p> SpringBot.
       </div>
@@ -147,8 +147,8 @@ const ProjectsData: ProjectData[] = [
     name: "Font Type Detector",
     disc: (
       <div className={"text-white"}>
-        An AI Pipeline to detect the type of font of a text that exists on an image, reaching a accuracy of <p className={"inline text-orange-500"} >99.8%</p> on our university text set, securing the first place
-        among all the presented projects for the same problem in our department.
+        An AI Pipeline to detect the type of font of a text that exists on an image, reaching a accuracy of <p className={"inline text-orange-500"} >99.8%</p> on our university test set, securing the first place
+        among all other presented projects for the same problem in our department.
       </div>
     ),
     tech: [
