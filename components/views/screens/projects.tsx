@@ -80,7 +80,7 @@ const ProjectsData: ProjectData[] = [
       },
       {
         text: "Live Demo",
-        target: "https://github.com/AbdoWise-z/discordo",
+        target: "https://discordo-production.up.railway.app/",
         icon: <ArrowRightCircle />,
       },
     ]
