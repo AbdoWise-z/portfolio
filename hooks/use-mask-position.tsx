@@ -15,12 +15,16 @@ export const useMaskPosition = (ref: React.RefObject<any>) => {
   useEffect(() => {
     if (!ref.current) return;
     const onMouseMove = ({clientX, clientY }: any) => {
+      if (ref == null || ref.current == null) return;
       const layoutRect = ref.current.getBoundingClientRect();
       vMouseX.set(clientX - contextData.MaskSize!.get() / 2 - layoutRect.left);
       vMouseY.set(clientY - contextData.MaskSize!.get() / 2 - layoutRect.top);
     }
 
     window.addEventListener("mousemove" , onMouseMove);
+    return () => {
+      window.removeEventListener("mousemove", onMouseMove);
+    };
   }, [vMouseX, vMouseY, ref, contextData.MaskSize]);
 
   // const windowSize = useWindowSize();
