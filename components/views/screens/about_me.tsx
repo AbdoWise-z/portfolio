@@ -54,7 +54,7 @@ const AboutMe = () => {
             {"and "}
             <h1 className={"text-orange-800 inline"}>{"Circuits design"}</h1>
             {". I focus on creating "}
-            <SecretContent className={"inline"} focusMaskWidth={240} secret={(
+            <SecretContent className={"inline-block"} focusMaskWidth={240} secret={(
               <h1 className={"text-yellow-500 inline"}><s style={{
                 textDecorationThickness: "10px",
                 textDecorationColor: "gold",

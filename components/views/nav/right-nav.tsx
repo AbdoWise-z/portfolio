@@ -44,7 +44,9 @@ const RightNav = () => {
         </Sheet>
       </div>
       <div className={"hidden md:block w-[100%] h-full justify-end content-end pb-20"}>
-        <p className={"text-white text-2xl mr-20"}>Content</p>
+        <SecretContent focusMaskWidth={60} secret={<p className={"text-black text-2xl mr-20"}>Content</p>}>
+          <p className={"text-white text-2xl mr-20"}>Content</p>
+        </SecretContent>
         <motion.div
           className={"items-end justify-items-end place-items-end"}
           style={{
@@ -56,9 +58,9 @@ const RightNav = () => {
             scale: 1.2,
           }}
         >
-          <SecretIndicatorFade>
+          <SecretContent focusMaskWidth={0} secret={<button className={"text-black"} onClick={handleAboutClick}>About</button>}>
             <button className={"text-white"} onClick={handleAboutClick}>About</button>
-          </SecretIndicatorFade>
+          </SecretContent>
         </motion.div>
 
         <motion.div
@@ -71,9 +73,9 @@ const RightNav = () => {
             scale: 1.2,
           }}
         >
-          <SecretIndicatorFade>
+          <SecretContent focusMaskWidth={0} secret={<button className={"text-black"} onClick={handleProjectsClick}>Projects</button>}>
             <button className={"text-white"} onClick={handleProjectsClick}>Projects</button>
-          </SecretIndicatorFade>
+          </SecretContent>
         </motion.div>
 
         <motion.div
@@ -86,9 +88,9 @@ const RightNav = () => {
             scale: 1.2,
           }}
         >
-          <SecretIndicatorFade>
+          <SecretContent focusMaskWidth={0} secret={<button className={"text-black"} onClick={handleContactClick}>Contact</button>}>
             <button className={"text-white"} onClick={handleContactClick}>Contact</button>
-          </SecretIndicatorFade>
+          </SecretContent>
         </motion.div>
       </div>
     </div>
