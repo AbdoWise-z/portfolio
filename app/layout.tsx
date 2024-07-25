@@ -2,7 +2,12 @@ import type { Metadata } from "next";
 import { JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import React from "react";
-import SecretContentContextProvider from "@/views/providers/secret-content-context-provider";
+import SecretContentContextProvider from "@/components/views/providers/secret-content-context-provider";
+import {Button} from "@/components/ui/button";
+import SecretContent from "@/components/views/secret-content";
+import {Code, Github, Linkedin, LinkedinIcon, LucideGithub} from "lucide-react";
+import Image from "next/image";
+import {Tooltip, TooltipContent, TooltipProvider, TooltipTrigger} from "@/components/ui/tooltip";
 
 const JetBrainsMono = JetBrains_Mono({ subsets: ["latin"] });
 
@@ -19,9 +24,13 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={JetBrainsMono.className}>
-        <SecretContentContextProvider>
-          {children}
-        </SecretContentContextProvider>
+      <TooltipProvider>
+
+      <SecretContentContextProvider>
+        {children}
+
+      </SecretContentContextProvider>
+      </TooltipProvider>
       </body>
     </html>
   );

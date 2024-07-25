@@ -1,7 +1,7 @@
 import {useMotionValue, useSpring, useTransform} from "framer-motion";
 import React, {useEffect, useState} from "react";
 import {useWindowSize} from "@/hooks/use-window-size";
-import {useSecretContextValues} from "@/views/providers/secret-content-context-provider";
+import {useSecretContextValues} from "@/components/views/providers/secret-content-context-provider";
 
 export const useMaskPosition = (ref: React.RefObject<any>) => {
   const contextData = useSecretContextValues();

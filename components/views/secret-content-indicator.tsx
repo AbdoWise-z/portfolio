@@ -2,7 +2,7 @@
 
 import React, {useEffect, useRef, useState} from 'react';
 import {motion, useMotionTemplate, useMotionValue, useTransform} from "framer-motion";
-import {useSecretContextValues} from "@/views/providers/secret-content-context-provider";
+import {useSecretContextValues} from "@/components/views/providers/secret-content-context-provider";
 import {useWindowSize} from "@/hooks/use-window-size";
 import {className} from "postcss-selector-parser";
 import {useMaskPosition} from "@/hooks/use-mask-position";
@@ -20,7 +20,7 @@ const SecretContentIndicator = (
   const Y = useMotionTemplate`${transformedY}px`;
 
   return (
-    <div className="absolute top-0 left-0 w-[100%] h-[100%] z-[-1]" ref={ref}>
+    <div className="absolute top-0 left-0 w-[100%] h-[100%]" ref={ref}>
       <motion.div
         style={{
           position: "absolute",
