@@ -176,7 +176,7 @@ const ProjectsData: ProjectData[] = [
     name: "Promptopia",
     disc: (
       <div className={"text-white"}>
-        A platform where people can share public posts to the world, its features the following: <br/>
+        A platform where people can share public posts to the world, it features the following: <br/>
         - Creating post with tags.
         - Authentication & Users Profiles.
         - Post Delete / Edit / Search etc..
