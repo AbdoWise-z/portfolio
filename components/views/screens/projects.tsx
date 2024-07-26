@@ -212,7 +212,7 @@ const Projects = () => {
     <div className="relative flex flex-col h-auto min-h-[100vh] w-full content-center items-center justify-center">
       <div className="absolute h-[100%] w-[100%] bg-neutral-900 z-[-1]"/>
       <div className="flex flex-col mt-10 w-[65%] h-fit content-start items-start">
-        <h1 className={"text-cyan-100 font-bold text-center mb-10"} id={"PROJECTS_SECTION"}> Previous Projects </h1>
+        <h1 className={"text-cyan-100 font-bold text-center mb-10 pt-10"} id={"PROJECTS_SECTION"}> Previous Projects </h1>
       </div>
       <div className={"flex flex-1 flex-col w-[65%]"}>
         {/*projects cards*/}

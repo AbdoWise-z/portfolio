@@ -1,6 +1,6 @@
 "use client";
 import React, {useEffect, useRef} from 'react';
-import {useSecretContextValues} from "@/components/views/providers/secret-content-context-provider";
+import {useSecretContextValues} from "@/components/providers/secret-content-context-provider";
 import {cn} from "@/lib/utils";
 
 const SecretIndicatorFade = ({children, className} : {children: React.ReactNode , className?: string}) => {

@@ -30,7 +30,7 @@ const ProjectItem = (
       className={cn(
         "relative flex flex-col w-full h-auto min-h-[20%]",
         "rounded-xl overflow-auto",
-        !data.previewUrl && "w-[70%]"
+        !data.previewUrl && "w-full md:w-[70%]"
       )}
     >
       <div className={"absolute top-0 left-0 w-full h-full bg-neutral-800 z-[-1]"}/>

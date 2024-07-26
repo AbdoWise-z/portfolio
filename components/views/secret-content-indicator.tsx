@@ -2,7 +2,7 @@
 
 import React, {useEffect, useRef, useState} from 'react';
 import {motion, useMotionTemplate, useMotionValue, useTransform} from "framer-motion";
-import {useSecretContextValues} from "@/components/views/providers/secret-content-context-provider";
+import {useSecretContextValues} from "@/components/providers/secret-content-context-provider";
 import {useWindowSize} from "@/hooks/use-window-size";
 import {className} from "postcss-selector-parser";
 import {useMaskPosition} from "@/hooks/use-mask-position";
