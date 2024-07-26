@@ -242,8 +242,8 @@ const Projects = () => {
                 </CarouselItem>
               ))}
             </CarouselContent>
-            <CarouselPrevious/>
-            <CarouselNext/>
+            <CarouselPrevious className={"z-10"}/>
+            <CarouselNext className={"z-10"}/>
           </Carousel>
         </div>
         {/*actual projects*/}
