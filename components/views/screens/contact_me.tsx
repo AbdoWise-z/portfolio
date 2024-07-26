@@ -38,8 +38,8 @@ const ContactMe = () => {
     modal.open(ModalType.LOADING);
     try {
       await axios.post("https://formspree.io/f/xrbzpznw", values,);
-      //await sleep(5000);
       modal.open(ModalType.SUCCESS);
+      form.reset();
     } catch (e) {
       console.log(e);
       modal.open(ModalType.ERROR);
@@ -47,7 +47,7 @@ const ContactMe = () => {
   }
   
   const maskControl = useSecretContextValues();
-  const ref = useRef<HTMLFormElement>(null);
+  const ref = useRef<HTMLDivElement>(null);
   
   useEffect(() => {
     if (!ref.current) return;
@@ -64,12 +64,12 @@ const ContactMe = () => {
   return (
     <div className="relative flex flex-col contect-start items-center justify-start min-h-[110vh]">
       <div className="absolute h-[100%] w-[100%] bg-neutral-900 z-[-1]"/>
-      <div className="flex flex-col mb-20 mt-20 w-[65%] h-fit content-start items-start justify-start">
+      <div className="flex flex-col mb-20 mt-20 w-[65%] h-fit content-start items-start justify-start" ref={ref}>
         <h1 className={"text-white font-bold text-center pt-10 text-2xl md:text-4xl"} id={"CONTACT_ME_SECTION"}> {"Let's Talk"} </h1>
         <p className={"text-neutral-400 mb-10 "}>Fill the following form to send me a message</p>
 
         <Form {...form}>
-          <form ref={ref} onSubmit={form.handleSubmit(onSubmit)} className="gap-y-2 w-full">
+          <form onSubmit={form.handleSubmit(onSubmit)} className="gap-y-2 w-full">
             <FormField
               control={form.control}
               name="name"

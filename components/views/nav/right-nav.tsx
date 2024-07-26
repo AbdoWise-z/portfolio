@@ -10,7 +10,6 @@ import {Button} from "@/components/ui/button";
 import {motion} from "framer-motion";
 import {Menu} from "lucide-react";
 import SecretContent from "@/components/views/secret-content";
-import SecretIndicatorFade from "@/components/views/secret-indicator-fade";
 
 const RightNav = () => {
   const handleAboutClick = () => {
