@@ -10,6 +10,7 @@ import {Button} from "@/components/ui/button";
 import {motion} from "framer-motion";
 import {Menu} from "lucide-react";
 import SecretContent from "@/components/views/secret-content";
+import {Separator} from "@/components/ui/separator";
 
 const RightNav = () => {
   const handleAboutClick = () => {
@@ -35,17 +36,31 @@ const RightNav = () => {
           </SheetTrigger>
           <SheetContent>
             <div className={"flex flex-col"}>
-              <SheetClose asChild>
-                <button className={"text-black"} onClick={handleAboutClick}>About</button>
+              <SheetClose asChild className={"mt-8"}>
+                <Button onClick={handleAboutClick} variant={"outline"} className={"hover:bg-neutral-700 transition-all rounded-full"}>About</Button>
               </SheetClose>
 
-              <SheetClose asChild>
-                <button className={"text-black"} onClick={handleProjectsClick}>Projects</button>
-              </SheetClose>
+              <Separator className={"my-2"}/>
 
               <SheetClose asChild>
-                <button className={"text-black"} onClick={handleContactClick}>Contact</button>
+                <Button onClick={handleProjectsClick} variant={"outline"} className={"hover:bg-neutral-700 transition-all rounded-full"}>Projects</Button>
               </SheetClose>
+
+              <Separator className={"my-2"}/>
+
+              <SheetClose asChild>
+                <Button onClick={handleContactClick} variant={"outline"} className={"hover:bg-neutral-700 transition-all rounded-full"}>Contact</Button>
+              </SheetClose>
+
+              <div className={"flex h-[40px]"}/>
+              <div className="flex w-full items-center justify-end content-end">
+                <a href={"/my_cv.pdf"} target="_blank" rel="noopener noreferrer">
+                  <SecretContent
+                    secret={<Button variant={"outline"} className={"px-12 rounded-full"}>My CV</Button>}>
+                    <Button variant={"default"} className={"px-12 rounded-full"}>My CV</Button>
+                  </SecretContent>
+                </a>
+              </div>
 
             </div>
           </SheetContent>
