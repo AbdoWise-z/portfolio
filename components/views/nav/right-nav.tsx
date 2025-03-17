@@ -71,7 +71,6 @@ const RightNav = () => {
           <p className={"text-white text-2xl mr-20"}>Content</p>
         </SecretContent>
         <motion.div
-          className={"items-end justify-items-end place-items-end"}
           style={{
             opacity: 0.7,
             scale: 1,
