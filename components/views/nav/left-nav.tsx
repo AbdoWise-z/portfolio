@@ -51,7 +51,7 @@ const LeftNav = () => {
       </a>
 
       <a className={"rounded-full content-center flex justify-center aspect-square items-center"}
-         href={"https://www.linkedin.com/in/abdulrahman-mohamed-5b3506252/"} target={"_blank"}>
+         href={"https://www.linkedin.com/in/xabdomo/"} target={"_blank"}>
         <SecretContent focusMaskWidth={60} secret={(
           <svg width={24} height={24} role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
             <title>LinkedIn</title>
