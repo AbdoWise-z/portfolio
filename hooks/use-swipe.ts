@@ -5,40 +5,50 @@ interface SwipeCallbacks {
     onSwipeRight?: () => void;
 }
 
-export function useSwipe({ onSwipeLeft, onSwipeRight }: SwipeCallbacks) {
+export function useSwipe(
+    ref: React.RefObject<HTMLElement>,
+    { onSwipeLeft, onSwipeRight }: SwipeCallbacks
+) {
     const startX = useRef(0);
     const startY = useRef(0);
     const startTime = useRef(0);
 
     useEffect(() => {
-        const threshold = 50; // minimum horizontal distance
-        const maxVertical = 100; // maximum vertical deviation
-        const maxTime = 500; // maximum swipe duration in ms
+        if (!ref.current) return;
 
-        const onPointerDown = (e: PointerEvent) => {
-            startX.current = e.clientX;
-            startY.current = e.clientY;
+        const threshold = 50; // min horizontal distance
+        const maxVertical = 100; // max vertical deviation
+        const maxTime = 500; // max swipe duration
+
+        const onTouchStart = (e: TouchEvent) => {
+            if (e.touches.length !== 1) return;
+            const t = e.touches[0];
+            startX.current = t.clientX;
+            startY.current = t.clientY;
             startTime.current = e.timeStamp;
         };
 
-        const onPointerUp = (e: PointerEvent) => {
-            const dx = e.clientX - startX.current;
-            const dy = e.clientY - startY.current;
+        const onTouchEnd = (e: TouchEvent) => {
+            if (!startTime.current) return;
+            const t = e.changedTouches[0];
+            const dx = t.clientX - startX.current;
+            const dy = t.clientY - startY.current;
             const dt = e.timeStamp - startTime.current;
 
             if (dt > maxTime) return; // too slow
-            if (Math.abs(dy) > maxVertical) return; // mostly vertical movement
+            if (Math.abs(dy) > maxVertical) return; // mostly vertical
 
             if (dx > threshold) onSwipeRight?.();
             else if (dx < -threshold) onSwipeLeft?.();
         };
 
-        window.addEventListener("pointerdown", onPointerDown);
-        window.addEventListener("pointerup", onPointerUp);
+        const node = ref.current;
+        node.addEventListener("touchstart", onTouchStart, { passive: true });
+        node.addEventListener("touchend", onTouchEnd);
 
         return () => {
-            window.removeEventListener("pointerdown", onPointerDown);
-            window.removeEventListener("pointerup", onPointerUp);
+            node.removeEventListener("touchstart", onTouchStart);
+            node.removeEventListener("touchend", onTouchEnd);
         };
-    }, [onSwipeLeft, onSwipeRight]);
+    }, [ref, onSwipeLeft, onSwipeRight]);
 }

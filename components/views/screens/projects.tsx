@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import {useState, useEffect, useCallback, useRef} from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Github, Layers, Smartphone, Cpu, ChevronLeft, ChevronRight, Gamepad2, Truck, Type, MessageSquare, Search, Edit3 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -185,7 +185,9 @@ export default function ProjectsPage() {
         return () => window.removeEventListener("keydown", handleKeyDown);
     }, [handleKeyDown]);
 
-    useSwipe({
+    const ref = useRef<HTMLDivElement>(null);
+    useSwipe(
+        ref, {
         onSwipeLeft: () => paginate(1),
         onSwipeRight: () => paginate(-1),
     });
@@ -194,7 +196,7 @@ export default function ProjectsPage() {
 
     return (
         <SecretIndicatorFade className={"relative w-full h-[120vh]"}>
-            <div className="sticky top-0 w-full h-screen overflow-hidden bg-black text-white" id={"PROJECTS_SECTION"}>
+            <div ref={ref} className="sticky top-0 w-full h-screen overflow-hidden bg-black text-white" id={"PROJECTS_SECTION"}>
 
                 {/* Slideshow */}
                 <AnimatePresence initial={false} custom={direction} mode="popLayout">

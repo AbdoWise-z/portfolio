@@ -35,23 +35,33 @@ const SecretContentContextProvider = (
 
     //const [oldSize, setSize] = useState<number>(0);
 
+    const mob = useIsMobile();
+
     useEffect(() => {
-        const up = () => {
-            innerMaskSize.set(0);
-        };
+        if (mob) {
 
-        const down = () => {
-            innerMaskSize.set(60);
-        };
 
-        window.addEventListener('touchstart', down);
-        window.addEventListener('touchend', up);
+            const onTouchStart = (e: TouchEvent) => {
+                setMaskSize(60);
+                setEnabled!(true);
+            };
 
-        return () => {
-            window.removeEventListener('touchstart', down);
-            window.removeEventListener('touchend', up);
+            const onTouchEnd = (e: TouchEvent) => {
+                setMaskSize(0);
+                setEnabled!(false);
+            };
+
+            window.addEventListener("touchstart", onTouchStart, {passive: true});
+            window.addEventListener("touchend", onTouchEnd);
+            window.addEventListener("touchcancel", onTouchEnd);
+
+            return () => {
+                window.removeEventListener("touchstart", onTouchStart);
+                window.removeEventListener("touchend", onTouchEnd);
+                window.removeEventListener("touchcancel", onTouchEnd);
+            };
         }
-    }, [innerMaskSize]);
+    }, [mob, setMaskSize]);
 
     return (
         <SecretContentContext.Provider value={{
