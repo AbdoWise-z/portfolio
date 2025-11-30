@@ -298,11 +298,11 @@ export default function ProjectsPage() {
                 </AnimatePresence>
 
                 {/* Navigation Controls */}
-                <div className="absolute inset-y-0 left-48 w-24 z-40 items-center justify-center group hidden md:flex">
+                <div className="absolute inset-y-0 left-24 w-24 z-40 items-center justify-center group hidden md:flex">
                     <Button
                         variant="ghost"
                         size="icon"
-                        className="w-14 h-14 rounded-full bg-black/20 hover:bg-white/10 backdrop-blur-md text-white/50 hover:text-white border border-transparent hover:border-white/20 transition-all duration-300"
+                        className="w-14 h-14 rounded-full bg-black/20 hover:bg-white/10 backdrop-blur-md text-white/50 hover:text-white border border-white/20 hover:border-white/80 transition-all duration-300"
                         onClick={() => paginate(-1)}
                     >
                         <ChevronLeft className="w-8 h-8" />
@@ -313,7 +313,7 @@ export default function ProjectsPage() {
                     <Button
                         variant="ghost"
                         size="icon"
-                        className="w-14 h-14 rounded-full bg-black/20 hover:bg-white/10 backdrop-blur-md text-white/50 hover:text-white border border-transparent hover:border-white/20 transition-all duration-300"
+                        className="w-14 h-14 rounded-full bg-black/20 hover:bg-white/10 backdrop-blur-md text-white/50 hover:text-white border border-white/20 hover:border-white/80 transition-all duration-300"
                         onClick={() => paginate(1)}
                     >
                         <ChevronRight className="w-8 h-8" />
