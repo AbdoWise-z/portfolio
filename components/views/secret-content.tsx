@@ -4,6 +4,7 @@ import React, {useEffect, useRef} from 'react';
 import {MotionValue, useMotionTemplate, motion, useMotionValue, useTransform} from "framer-motion";
 import {cn} from "@/lib/utils";
 import {useMaskPosition} from "@/hooks/use-mask-position";
+import {useSecretContextValues} from "@/components/providers/secret-content-context-provider";
 
 const SecretContent = (
   {
@@ -30,6 +31,7 @@ const SecretContent = (
   const ref1 = useRef<HTMLDivElement>(null);
   const ref2 = useRef<HTMLDivElement>(null);
 
+  const {enabled} = useSecretContextValues();
   const mask1 = useMaskPosition(ref1);
   const maskPosition1 = useMotionTemplate`center, ${mask1.transformedX}px ${mask1.transformedY}px`;
   const maskSizeT1    = useMotionTemplate`contain, ${maskSize ?? mask1.contextData.MaskSize ?? 50}px ${maskSize ?? mask1.contextData.MaskSize ?? 50}px`;
@@ -42,17 +44,17 @@ const SecretContent = (
     if (!ref.current) return;
    
     ref.current.onmouseenter = (e) => {
-      if (mask1.contextData.setMaskSize){
+      if (mask1.contextData.setMaskSize && enabled) {
         mask1.contextData.setMaskSize(focusMaskWidth ?? 160);
       }
     }
 
     ref.current.onmouseleave = (e) => {
-      if (mask1.contextData.setMaskSize){
+      if (mask1.contextData.setMaskSize && enabled){
         mask1.contextData.setMaskSize(maskWidth ?? 60);
       }
     }
-  }, [mask1.contextData, focusMaskWidth, maskWidth]);
+  }, [mask1.contextData, focusMaskWidth, maskWidth, enabled]);
 
   return (
     <div ref={ref} className={cn("flex w-fit h-fit", className)}>

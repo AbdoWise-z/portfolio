@@ -1,39 +1,73 @@
-import {useMotionValue, useSpring, useTransform} from "framer-motion";
-import React, {useEffect, useState} from "react";
-import {useWindowSize} from "@/hooks/use-window-size";
-import {useSecretContextValues} from "@/components/providers/secret-content-context-provider";
+import { useMotionValue, useSpring } from "framer-motion";
+import React, { useEffect } from "react";
+import { useSecretContextValues } from "@/components/providers/secret-content-context-provider";
 
 export const useMaskPosition = (ref: React.RefObject<any>) => {
-  const contextData = useSecretContextValues();
-  
-  const vMouseX = useMotionValue(-1000); //to avoid the initial weird clip
-  const vMouseY = useMotionValue(-1000);
+	const contextData = useSecretContextValues();
 
-  const vMaskX = useSpring(vMouseX,{ stiffness: 1800, damping: 150 });
-  const vMaskY = useSpring(vMouseY,{ stiffness: 1800, damping: 150 });
+	// Track ONLY raw mouse position in viewport (no transforms)
+	const vMouseX = useMotionValue(-1000);
+	const vMouseY = useMotionValue(-1000);
 
-  useEffect(() => {
-    if (!ref.current) return;
-    const onMouseMove = ({clientX, clientY }: any) => {
-      if (ref == null || ref.current == null) return;
-      const layoutRect = ref.current.getBoundingClientRect();
-      vMouseX.set(clientX - contextData.MaskSize!.get() / 2 - layoutRect.left);
-      vMouseY.set(clientY - contextData.MaskSize!.get() / 2 - layoutRect.top);
-    }
+	// Smooth spring versions
+	const vMaskX = useSpring(vMouseX, { stiffness: 1800, damping: 150 });
+	const vMaskY = useSpring(vMouseY, { stiffness: 1800, damping: 150 });
 
-    window.addEventListener("mousemove" , onMouseMove);
-    return () => {
-      window.removeEventListener("mousemove", onMouseMove);
-    };
-  }, [vMouseX, vMouseY, ref, contextData.MaskSize]);
+    useEffect(() => {
+        const onMove = (e: PointerEvent) => {
+            vMouseX.set(e.clientX);
+            vMouseY.set(e.clientY);
+        };
 
-  // const windowSize = useWindowSize();
-  // const transformedX = useTransform(vMaskX, [-windowSize.width, windowSize.width], [-windowSize.width, windowSize.width]);
-  // const transformedY = useTransform(vMaskY, [-windowSize.height, windowSize.height], [-windowSize.height, windowSize.height]);
+        window.addEventListener("pointermove", onMove);
 
-  return {
-    transformedX: vMaskX,
-    transformedY: vMaskY,
-    contextData
-  }
-}
+        return () => window.removeEventListener("pointermove", onMove);
+    }, [vMouseX, vMouseY]);
+
+
+    //
+	// RETURN SCROLL-AWARE COORDINATES
+	//
+	const transformedX = useSpring(vMaskX, { stiffness: 1200, damping: 100 });
+	const transformedY = useSpring(vMaskY, { stiffness: 1200, damping: 100 });
+
+	useEffect(() => {
+		const update = () => {
+			if (!ref.current) return;
+
+			const layoutRect = ref.current.getBoundingClientRect();
+
+			// Apply scroll offset + center the mask
+			const finalX =
+				vMouseX.get() -
+				layoutRect.left -
+				contextData.MaskSize!.get() / 2;
+
+			const finalY =
+				vMouseY.get() -
+				layoutRect.top -
+				contextData.MaskSize!.get() / 2;
+
+			transformedX.set(finalX);
+			transformedY.set(finalY);
+		};
+
+		update(); // run once
+		window.addEventListener("scroll", update, { passive: true });
+		const unsubX = vMaskX.onChange(update);
+		const unsubY = vMaskY.onChange(update);
+
+		return () => {
+			window.removeEventListener("scroll", update);
+			unsubX();
+			unsubY();
+		};
+	}, [ref, contextData.MaskSize, vMouseX, vMouseY, vMaskX, vMaskY, transformedX, transformedY]);
+
+
+	return {
+		transformedX,
+		transformedY,
+		contextData,
+	};
+};

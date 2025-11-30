@@ -1,5 +1,5 @@
 "use client";
-import React, {useEffect, useRef} from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 import {useSecretContextValues} from "@/components/providers/secret-content-context-provider";
 import {cn} from "@/lib/utils";
 
@@ -7,21 +7,22 @@ const SecretIndicatorFade = ({children, className} : {children: React.ReactNode 
   const ref = useRef<HTMLDivElement>(null);
   const contextData = useSecretContextValues();
 
+  const [oldSize, setSize] = useState<number>(0);
+
   useEffect(() => {
     if (!ref.current) return;
 
     ref.current.onmouseenter = (e) => {
-      if (contextData.setMaskSize){
-        contextData.setMaskSize(0);
-      }
+        setSize(contextData.innerMaskSize!.get());
+        contextData.setMaskSize!(0);
+        contextData.setEnabled!(false);
     }
 
     ref.current.onmouseleave = (e) => {
-      if (contextData.setMaskSize){
-        contextData.setMaskSize(60);
-      }
+        contextData.setMaskSize!(oldSize);
+        contextData.setEnabled!(true);
     }
-  }, [contextData]);
+  }, [contextData, oldSize]);
 
 
   return (

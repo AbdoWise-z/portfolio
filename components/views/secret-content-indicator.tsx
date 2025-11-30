@@ -6,34 +6,36 @@ import {useSecretContextValues} from "@/components/providers/secret-content-cont
 import {useWindowSize} from "@/hooks/use-window-size";
 import {className} from "postcss-selector-parser";
 import {useMaskPosition} from "@/hooks/use-mask-position";
+import {useFadeFromEnabled} from "@/hooks/use-fade-from-enabled";
 
 const SecretContentIndicator = (
-  {color} : {color?: string}
+    {color} : {color?: string}
 ) => {
 
-  const ref = useRef<HTMLDivElement>(null);
+    const ref = useRef<HTMLDivElement>(null);
 
-  const {transformedX , transformedY, contextData} = useMaskPosition(ref);
+    const {transformedX , transformedY, contextData} = useMaskPosition(ref);
+    const size = useMotionTemplate`${contextData.MaskSize ?? 50}px`;
+    const X = useMotionTemplate`${transformedX}px`;
+    const Y = useMotionTemplate`${transformedY}px`;
 
-  const size = useMotionTemplate`${contextData.MaskSize ?? 50}px`;
-  const X = useMotionTemplate`${transformedX}px`;
-  const Y = useMotionTemplate`${transformedY}px`;
+    return (
+        <div className="absolute top-0 left-0 w-[100%] h-[100%] overflow-hidden" ref={ref}>
+            <motion.div
+                style={{
+                    position: "absolute",
+                    width: size,
+                    height: size,
+                    backgroundColor: `${color ?? "#007af3"}`,
+                    borderRadius: "100%",
+                    x: X,
+                    y: Y,
+                }}
 
-  return (
-    <div className="absolute top-0 left-0 w-[100%] h-[100%] overflow-hidden" ref={ref}>
-      <motion.div
-        style={{
-          position: "absolute",
-          width: size,
-          height: size,
-          backgroundColor: `${color ?? "#007af3"}`,
-          borderRadius: "100%",
-          x: X,
-          y: Y,
-        }}
-      />
-    </div>
-  );
+                transition={{ duration: 0.6 }}
+            />
+        </div>
+    );
 };
 
 export default SecretContentIndicator;

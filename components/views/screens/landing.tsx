@@ -3,10 +3,10 @@ import React from "react";
 
 const Landing = () => {
   return (
-    <div className="relative mb-20 h-[100vh] flex flex-col content-center items-center justify-center">
+    <div className="relative mb-20 h-[100vh] flex flex-col content-center items-center justify-center select-none">
       <SecretContent focusMaskWidth={420} className={"items-center content-center justify-center"} secret={(
         <div className={"content-center justify-center items-center w-full"}>
-          <h1 className={"text-black font-bold text-center mb-10"}> Abdulrahman Mohammed </h1>
+          <h1 className={"text-black font-bold text-center mb-10"}> Abdelrahman Mahmoud </h1>
           <h1 className={"text-black font-bold text-center text-4xl md:text-8xl"}> Fixing </h1>
           <h1 className={"text-black font-bold text-center text-4xl md:text-8xl"}> Bugs That    </h1>
           <h1 className={"text-black font-bold text-center text-4xl md:text-8xl"}> I Created </h1>
@@ -14,7 +14,7 @@ const Landing = () => {
         </div>
       )}>
         <div className={"content-center justify-center items-center w-full"}>
-          <h1 className={"text-cyan-100 font-bold text-center mb-10"}> Abdulrahman Mohammed </h1>
+          <h1 className={"text-cyan-100 font-bold text-center mb-10"}> Abdelrahman Mahmoud </h1>
           <h1 className={"text-cyan-100 font-bold text-center text-4xl md:text-8xl"}> Building </h1>
           <h1 className={"text-cyan-800 font-bold text-center text-4xl md:text-8xl"}> Application </h1>
           <h1 className={"text-cyan-800 font-bold text-center text-4xl md:text-8xl"}> & Websites </h1>
