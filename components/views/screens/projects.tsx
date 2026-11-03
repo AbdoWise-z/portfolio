@@ -7,7 +7,6 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import Image, {StaticImageData} from "next/image";
-import SecretIndicatorFade from "@/components/views/secret-indicator-fade";
 import {useSwipe} from "@/hooks/use-swipe";
 import {SECTIONS} from "@/lib/site";
 
@@ -193,7 +192,7 @@ export default function ProjectsPage() {
     });
 
     return (
-        <SecretIndicatorFade className="relative h-[120vh] w-full">
+        <div className="relative h-[120vh] w-full">
             <section
                 ref={ref}
                 id={SECTIONS.projects}
@@ -328,6 +327,6 @@ export default function ProjectsPage() {
                     </div>
                 </div>
             </section>
-        </SecretIndicatorFade>
+        </div>
     );
 }

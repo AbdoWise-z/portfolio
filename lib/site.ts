@@ -7,7 +7,7 @@ export const SITE_DESCRIPTION =
   "Projects in AI, game engines, chip design, robotics, and full-stack web.";
 
 /** Set NEXT_PUBLIC_SITE_URL in .env to the deployed origin so absolute URLs resolve. */
-export const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
+export const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://portfolio-xabdomos-projects.vercel.app";
 
 export const SOCIAL_LINKS = {
   github: "https://github.com/AbdoWise-z",

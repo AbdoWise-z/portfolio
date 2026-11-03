@@ -5,11 +5,15 @@ import React, { useEffect, useRef } from "react";
 /**
  * Interactive starfield drawn on a fixed, full-viewport canvas.
  *
- * - Three parallax layers of twinkling stars that shift with the pointer and scroll.
- * - Stars near the pointer brighten and link up into a small constellation.
+ * - Three parallax layers of twinkling stars that drift slowly, shift with the
+ *   pointer and scroll, and stretch into streaks when the page scrolls fast.
+ * - Stars near the pointer are pulled toward it, brighten, and link up into a
+ *   small constellation. Bright stars get a four-point flare.
  * - Soft nebula tints pre-rendered once per resize.
- * - Shooting stars at random intervals, and one from wherever the user clicks or taps.
- * - Pauses while the tab is hidden; draws a single static frame under reduced motion.
+ * - Shooting stars at random intervals. A click or tap sends a ripple through
+ *   the stars and launches a shooting star from that point.
+ * - Follows the light/dark theme, pauses while the tab is hidden, and draws a
+ *   single static frame under reduced motion.
  */
 
 type Star = {
@@ -34,17 +38,61 @@ type Shooter = {
   len: number;
 };
 
+type Ripple = { x: number; y: number; life: number };
+
 type NearStar = { x: number; y: number; w: number };
 
-const TINTS = ["255,255,255", "190,220,255", "255,236,200", "170,240,255"];
-const NEBULA_BLOBS = [
-  { x: 0.18, y: 0.28, r: 0.55, c: "120,40,170" },
-  { x: 0.82, y: 0.22, r: 0.5, c: "0,110,200" },
-  { x: 0.66, y: 0.82, r: 0.6, c: "200,40,120" },
-  { x: 0.14, y: 0.86, r: 0.45, c: "0,170,190" },
-];
-const CONSTELLATION_RADIUS = 160;
+type Palette = {
+  bg: string;
+  tints: string[];
+  alpha: number;
+  line: string;
+  shooter: string;
+  ripple: string;
+  nebulaAlpha: number;
+  nebula: { x: number; y: number; r: number; c: string }[];
+};
+
+const DARK: Palette = {
+  bg: "#05070f",
+  tints: ["255,255,255", "190,220,255", "255,236,200", "170,240,255"],
+  alpha: 1,
+  line: "170,230,255",
+  shooter: "255,255,255",
+  ripple: "170,230,255",
+  nebulaAlpha: 0.26,
+  nebula: [
+    { x: 0.18, y: 0.28, r: 0.55, c: "120,40,170" },
+    { x: 0.82, y: 0.22, r: 0.5, c: "0,110,200" },
+    { x: 0.66, y: 0.82, r: 0.6, c: "200,40,120" },
+    { x: 0.14, y: 0.86, r: 0.45, c: "0,170,190" },
+  ],
+};
+
+const LIGHT: Palette = {
+  bg: "#eef2fa",
+  tints: ["30,41,59", "37,99,235", "124,58,237", "8,145,178"],
+  alpha: 0.85,
+  line: "37,99,235",
+  shooter: "30,41,59",
+  ripple: "37,99,235",
+  nebulaAlpha: 0.2,
+  nebula: [
+    { x: 0.18, y: 0.28, r: 0.55, c: "167,139,250" },
+    { x: 0.82, y: 0.22, r: 0.5, c: "96,165,250" },
+    { x: 0.66, y: 0.82, r: 0.6, c: "244,114,182" },
+    { x: 0.14, y: 0.86, r: 0.45, c: "45,212,191" },
+  ],
+};
+
+const CONSTELLATION_RADIUS = 170;
 const CONSTELLATION_LINK = 110;
+const GRAVITY_RADIUS = 240;
+const GRAVITY_PULL = 16;
+const RIPPLE_SPEED = 420; // px per second
+const RIPPLE_LIFE = 0.9; // seconds
+const RIPPLE_WIDTH = 70;
+const RIPPLE_PUSH = 22;
 
 const rand = (a: number, b: number) => a + Math.random() * (b - a);
 
@@ -60,23 +108,45 @@ const SpaceBackground = () => {
     const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     const coarsePointer = window.matchMedia("(pointer: coarse)").matches;
 
+    let palette: Palette = document.documentElement.classList.contains("dark") ? DARK : LIGHT;
     let width = 0;
     let height = 0;
     let layers: Layer[] = [];
     let nebula: HTMLCanvasElement | null = null;
     const shooters: Shooter[] = [];
+    const ripples: Ripple[] = [];
 
     // Pointer offset from the viewport centre, normalised to [-1, 1], smoothed per frame.
     const pointer = { x: 0, y: 0, tx: 0, ty: 0 };
-    // Pointer position in viewport pixels, for the constellation effect.
+    // Pointer position in viewport pixels, for the constellation and gravity effects.
     const pointerPx = { x: -1e4, y: -1e4, active: false };
     let scrollTarget = window.scrollY;
     let scroll = scrollTarget;
+    let scrollVelocity = 0; // px per second, smoothed
 
     let raf = 0;
     let running = false;
     let last = performance.now();
     let nextShooterIn = rand(1500, 4000);
+
+    const buildNebula = () => {
+      nebula = document.createElement("canvas");
+      nebula.width = Math.ceil(width / 2);
+      nebula.height = Math.ceil(height / 2);
+      const nctx = nebula.getContext("2d");
+      if (!nctx) return;
+      const nw = nebula.width;
+      const nh = nebula.height;
+      for (const b of palette.nebula) {
+        const radius = b.r * Math.max(nw, nh);
+        const g = nctx.createRadialGradient(b.x * nw, b.y * nh, 0, b.x * nw, b.y * nh, radius);
+        g.addColorStop(0, `rgba(${b.c},${palette.nebulaAlpha})`);
+        g.addColorStop(0.45, `rgba(${b.c},${(palette.nebulaAlpha * 0.35).toFixed(3)})`);
+        g.addColorStop(1, `rgba(${b.c},0)`);
+        nctx.fillStyle = g;
+        nctx.fillRect(0, 0, nw, nh);
+      }
+    };
 
     const build = () => {
       width = window.innerWidth;
@@ -101,28 +171,11 @@ const SpaceBackground = () => {
           base: rand(0.35, 1),
           phase: Math.random() * Math.PI * 2,
           speed: rand(0.4, 1.6),
-          tint: Math.floor(Math.random() * TINTS.length),
+          tint: Math.floor(Math.random() * 4),
         })),
       }));
 
-      // Nebula: a few large radial gradients, rendered once at half resolution.
-      nebula = document.createElement("canvas");
-      nebula.width = Math.ceil(width / 2);
-      nebula.height = Math.ceil(height / 2);
-      const nctx = nebula.getContext("2d");
-      if (nctx) {
-        const nw = nebula.width;
-        const nh = nebula.height;
-        for (const b of NEBULA_BLOBS) {
-          const radius = b.r * Math.max(nw, nh);
-          const g = nctx.createRadialGradient(b.x * nw, b.y * nh, 0, b.x * nw, b.y * nh, radius);
-          g.addColorStop(0, `rgba(${b.c},0.26)`);
-          g.addColorStop(0.45, `rgba(${b.c},0.09)`);
-          g.addColorStop(1, `rgba(${b.c},0)`);
-          nctx.fillStyle = g;
-          nctx.fillRect(0, 0, nw, nh);
-        }
-      }
+      buildNebula();
     };
 
     const spawnShooter = (x?: number, y?: number) => {
@@ -145,9 +198,11 @@ const SpaceBackground = () => {
     const draw = (now: number, dt: number) => {
       pointer.x += (pointer.tx - pointer.x) * Math.min(1, dt * 4);
       pointer.y += (pointer.ty - pointer.y) * Math.min(1, dt * 4);
+      const prevScroll = scroll;
       scroll += (scrollTarget - scroll) * Math.min(1, dt * 6);
+      if (dt > 0) scrollVelocity += ((scroll - prevScroll) / dt - scrollVelocity) * Math.min(1, dt * 8);
 
-      ctx.fillStyle = "#05070f";
+      ctx.fillStyle = palette.bg;
       ctx.fillRect(0, 0, width, height);
 
       if (nebula) {
@@ -162,35 +217,86 @@ const SpaceBackground = () => {
       }
 
       const t = now * 0.001;
-      const constellation = !reducedMotion && pointerPx.active;
+      const interactive = !reducedMotion && pointerPx.active;
       const near: NearStar[] = [];
+      // Streak length from scroll speed, clamped; sign follows the direction.
+      const warp = reducedMotion ? 0 : Math.max(-36, Math.min(36, scrollVelocity * 0.01));
 
       for (const layer of layers) {
-        const ox = -pointer.x * 28 * layer.depth;
+        const drift = reducedMotion ? 0 : t * 2.5 * layer.depth;
+        const ox = -pointer.x * 28 * layer.depth + drift;
         const oy = -pointer.y * 18 * layer.depth - scroll * 0.22 * layer.depth;
-        for (const s of layer.stars) {
-          const sx = (((s.x + ox) % width) + width) % width;
-          const sy = (((s.y + oy) % height) + height) % height;
-          const twinkle = reducedMotion ? 1 : 0.65 + 0.35 * Math.sin(s.phase + t * s.speed * 2.2);
-          let alpha = s.base * twinkle;
+        const streak = warp * layer.depth;
 
-          if (constellation) {
-            const dx = sx - pointerPx.x;
-            const dy = sy - pointerPx.y;
+        for (const s of layer.stars) {
+          let sx = (((s.x + ox) % width) + width) % width;
+          let sy = (((s.y + oy) % height) + height) % height;
+          const twinkle = reducedMotion ? 1 : 0.65 + 0.35 * Math.sin(s.phase + t * s.speed * 2.2);
+          let alpha = s.base * twinkle * palette.alpha;
+
+          if (interactive) {
+            const dx = pointerPx.x - sx;
+            const dy = pointerPx.y - sy;
             const d = Math.hypot(dx, dy);
-            if (d < CONSTELLATION_RADIUS) {
-              const w = 1 - d / CONSTELLATION_RADIUS;
+            if (d < GRAVITY_RADIUS && d > 0.001) {
+              // Ease toward the pointer; strongest for the nearest layer.
+              const g = (1 - d / GRAVITY_RADIUS) ** 2 * GRAVITY_PULL * layer.depth;
+              sx += (dx / d) * g;
+              sy += (dy / d) * g;
+            }
+            const d2 = Math.hypot(pointerPx.x - sx, pointerPx.y - sy);
+            if (d2 < CONSTELLATION_RADIUS) {
+              const w = 1 - d2 / CONSTELLATION_RADIUS;
               alpha = Math.min(1, alpha + w * 0.7);
               near.push({ x: sx, y: sy, w });
             }
           }
 
-          const colour = TINTS[s.tint];
+          // Ripples push stars outward as the wavefront passes.
+          for (const rp of ripples) {
+            const radius = rp.life * RIPPLE_SPEED;
+            const dx = sx - rp.x;
+            const dy = sy - rp.y;
+            const d = Math.hypot(dx, dy);
+            const band = Math.abs(d - radius);
+            if (band < RIPPLE_WIDTH && d > 0.001) {
+              const f = (1 - band / RIPPLE_WIDTH) * (1 - rp.life / RIPPLE_LIFE) * RIPPLE_PUSH;
+              sx += (dx / d) * f;
+              sy += (dy / d) * f;
+              alpha = Math.min(1, alpha + f / RIPPLE_PUSH * 0.5);
+            }
+          }
+
+          const colour = palette.tints[s.tint];
+
+          if (Math.abs(streak) > 1.5) {
+            ctx.strokeStyle = `rgba(${colour},${(alpha * 0.7).toFixed(3)})`;
+            ctx.lineWidth = Math.max(0.6, s.r * 0.9);
+            ctx.lineCap = "round";
+            ctx.beginPath();
+            ctx.moveTo(sx, sy);
+            ctx.lineTo(sx, sy + streak);
+            ctx.stroke();
+            continue;
+          }
+
           if (s.r > 1.3) {
             ctx.fillStyle = `rgba(${colour},${(alpha * 0.14).toFixed(3)})`;
             ctx.beginPath();
             ctx.arc(sx, sy, s.r * 3.2, 0, Math.PI * 2);
             ctx.fill();
+          }
+          if (s.r > 1.6) {
+            // Four-point flare on the brightest stars.
+            const len = s.r * 4.5 * twinkle;
+            ctx.strokeStyle = `rgba(${colour},${(alpha * 0.45).toFixed(3)})`;
+            ctx.lineWidth = 0.6;
+            ctx.beginPath();
+            ctx.moveTo(sx - len, sy);
+            ctx.lineTo(sx + len, sy);
+            ctx.moveTo(sx, sy - len);
+            ctx.lineTo(sx, sy + len);
+            ctx.stroke();
           }
           ctx.fillStyle = `rgba(${colour},${alpha.toFixed(3)})`;
           ctx.beginPath();
@@ -204,7 +310,7 @@ const SpaceBackground = () => {
         ctx.lineWidth = 0.8;
         ctx.lineCap = "round";
         for (const a of near) {
-          ctx.strokeStyle = `rgba(170,230,255,${(a.w * 0.45).toFixed(3)})`;
+          ctx.strokeStyle = `rgba(${palette.line},${(a.w * 0.45).toFixed(3)})`;
           ctx.beginPath();
           ctx.moveTo(pointerPx.x, pointerPx.y);
           ctx.lineTo(a.x, a.y);
@@ -217,7 +323,7 @@ const SpaceBackground = () => {
             const d = Math.hypot(a.x - b.x, a.y - b.y);
             if (d > CONSTELLATION_LINK) continue;
             const w = (1 - d / CONSTELLATION_LINK) * Math.min(a.w, b.w);
-            ctx.strokeStyle = `rgba(170,230,255,${(w * 0.5).toFixed(3)})`;
+            ctx.strokeStyle = `rgba(${palette.line},${(w * 0.5).toFixed(3)})`;
             ctx.beginPath();
             ctx.moveTo(a.x, a.y);
             ctx.lineTo(b.x, b.y);
@@ -226,6 +332,23 @@ const SpaceBackground = () => {
         }
       }
 
+      // Ripple rings
+      for (let i = ripples.length - 1; i >= 0; i--) {
+        const rp = ripples[i];
+        rp.life += dt;
+        if (rp.life >= RIPPLE_LIFE) {
+          ripples.splice(i, 1);
+          continue;
+        }
+        const k = rp.life / RIPPLE_LIFE;
+        ctx.strokeStyle = `rgba(${palette.ripple},${((1 - k) * 0.35).toFixed(3)})`;
+        ctx.lineWidth = 1.2;
+        ctx.beginPath();
+        ctx.arc(rp.x, rp.y, rp.life * RIPPLE_SPEED, 0, Math.PI * 2);
+        ctx.stroke();
+      }
+
+      // Shooting stars
       for (let i = shooters.length - 1; i >= 0; i--) {
         const sh = shooters[i];
         sh.life += dt;
@@ -240,8 +363,8 @@ const SpaceBackground = () => {
         const tailY = sh.y - (sh.vy / speed) * sh.len;
         const a = Math.sin((Math.PI * sh.life) / sh.maxLife);
         const g = ctx.createLinearGradient(sh.x, sh.y, tailX, tailY);
-        g.addColorStop(0, `rgba(255,255,255,${a.toFixed(3)})`);
-        g.addColorStop(1, "rgba(255,255,255,0)");
+        g.addColorStop(0, `rgba(${palette.shooter},${a.toFixed(3)})`);
+        g.addColorStop(1, `rgba(${palette.shooter},0)`);
         ctx.strokeStyle = g;
         ctx.lineWidth = 1.6;
         ctx.lineCap = "round";
@@ -307,6 +430,7 @@ const SpaceBackground = () => {
 
     const onPointerDown = (e: PointerEvent) => {
       if (reducedMotion) return;
+      ripples.push({ x: e.clientX, y: e.clientY, life: 0 });
       spawnShooter(e.clientX, e.clientY);
     };
 
@@ -318,6 +442,16 @@ const SpaceBackground = () => {
       if (document.hidden) stop();
       else start();
     };
+
+    // Follow the theme class that next-themes sets on <html>.
+    const themeObserver = new MutationObserver(() => {
+      const next = document.documentElement.classList.contains("dark") ? DARK : LIGHT;
+      if (next === palette) return;
+      palette = next;
+      buildNebula();
+      if (reducedMotion) draw(performance.now(), 0);
+    });
+    themeObserver.observe(document.documentElement, { attributes: true, attributeFilter: ["class"] });
 
     build();
     if (reducedMotion) {
@@ -339,6 +473,7 @@ const SpaceBackground = () => {
 
     return () => {
       stop();
+      themeObserver.disconnect();
       window.removeEventListener("resize", onResize);
       window.removeEventListener("pointermove", onPointerMove);
       window.removeEventListener("touchmove", onTouchMove);
@@ -356,7 +491,7 @@ const SpaceBackground = () => {
     <canvas
       ref={canvasRef}
       aria-hidden
-      className="pointer-events-none fixed inset-0 z-[-20] h-full w-full bg-[#05070f]"
+      className="pointer-events-none fixed inset-0 z-[-20] h-full w-full bg-[#eef2fa] dark:bg-[#05070f]"
     />
   );
 };

@@ -5,7 +5,6 @@ import { Sheet, SheetClose, SheetContent, SheetTitle, SheetTrigger } from "@/com
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
 import { Menu } from "lucide-react";
-import SecretContent from "@/components/views/secret-content";
 import { Separator } from "@/components/ui/separator";
 import { CV_PATH, SECTIONS } from "@/lib/site";
 
@@ -18,16 +17,22 @@ const LINKS = [
 
 /**
  * Section navigation. A sheet menu behind a button below the lg breakpoint,
- * a vertical list in the bottom-right corner from lg up.
+ * a vertical list in the bottom-right corner from lg up. Drawn white with
+ * difference blending so it stays readable over any section in either theme.
  */
 const RightNav = () => {
   return (
-    <div className="pointer-events-none fixed right-0 top-0 flex h-full flex-col gap-3 p-6 md:p-8 lg:w-[210px]">
+    <div className="pointer-events-none fixed right-0 top-0 z-30 flex h-full flex-col gap-3 p-6 text-white mix-blend-difference md:p-8 lg:w-[210px]">
       {/* Small screens: sheet menu */}
       <div className="pointer-events-auto lg:hidden">
         <Sheet>
           <SheetTrigger asChild>
-            <Button variant="outline" size="icon" aria-label="Open menu">
+            <Button
+              variant="outline"
+              size="icon"
+              aria-label="Open menu"
+              className="border-white/50 bg-transparent text-white hover:bg-white/15 hover:text-white"
+            >
               <Menu />
             </Button>
           </SheetTrigger>
@@ -36,10 +41,9 @@ const RightNav = () => {
             <nav aria-label="Sections" className="mt-8 flex flex-col gap-2">
               {LINKS.map((link, i) => (
                 <React.Fragment key={link.id}>
-                  {i === 1 && <Separator className="my-2" />}
-                  {i === 3 && <Separator className="my-2" />}
+                  {(i === 1 || i === 3) && <Separator className="my-2" />}
                   <SheetClose asChild>
-                    <Button asChild variant="outline" className="rounded-full transition-all hover:bg-neutral-700">
+                    <Button asChild variant="outline" className="rounded-full">
                       <a href={`#${link.id}`}>{link.label}</a>
                     </Button>
                   </SheetClose>
@@ -49,9 +53,9 @@ const RightNav = () => {
               <div className="h-10" />
               <div className="flex w-full justify-end">
                 <SheetClose asChild>
-                  <a href={CV_PATH} target="_blank" rel="noopener noreferrer">
-                    <Button variant="default" className="rounded-full px-12">My CV</Button>
-                  </a>
+                  <Button asChild variant="default" className="rounded-full px-12">
+                    <a href={CV_PATH} target="_blank" rel="noopener noreferrer">My CV</a>
+                  </Button>
                 </SheetClose>
               </div>
             </nav>
@@ -61,27 +65,22 @@ const RightNav = () => {
 
       {/* Large screens: vertical list */}
       <nav aria-label="Sections" className="pointer-events-auto mt-auto hidden w-full pb-20 lg:block">
-        <SecretContent focusMaskWidth={60} secret={<p className="eyebrow mb-3 text-black/70">Menu</p>}>
-          <p className="eyebrow mb-3">Menu</p>
-        </SecretContent>
+        <p className="eyebrow mb-3 text-white/60">Menu</p>
 
         {LINKS.map((link) => (
-          <motion.div key={link.id} className="w-fit origin-left" style={{ opacity: 0.75 }} whileHover={{ opacity: 1, scale: 1.12 }}>
-            <SecretContent
-              focusMaskWidth={0}
-              secret={<a className="text-black" href={`#${link.id}`}>{link.label}</a>}
-            >
-              <a className="text-white" href={`#${link.id}`}>{link.label}</a>
-            </SecretContent>
+          <motion.div key={link.id} className="w-fit origin-left" style={{ opacity: 0.8 }} whileHover={{ opacity: 1, scale: 1.12 }}>
+            <a className="text-white" href={`#${link.id}`}>{link.label}</a>
           </motion.div>
         ))}
 
         <div className="h-10" />
-        <a href={CV_PATH} target="_blank" rel="noopener noreferrer" className="inline-block">
-          <SecretContent secret={<Button variant="default" className="rounded-full px-12" tabIndex={-1}>My CV</Button>}>
-            <Button variant="outline" className="rounded-full px-12" tabIndex={-1}>My CV</Button>
-          </SecretContent>
-        </a>
+        <Button
+          asChild
+          variant="outline"
+          className="rounded-full border-white/60 bg-transparent px-12 text-white hover:bg-white/15 hover:text-white"
+        >
+          <a href={CV_PATH} target="_blank" rel="noopener noreferrer">My CV</a>
+        </Button>
       </nav>
     </div>
   );

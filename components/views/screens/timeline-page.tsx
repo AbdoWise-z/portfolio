@@ -1,7 +1,6 @@
 import React from 'react';
 import {Timeline, TimelineItemData} from "@/components/views/time-line";
 import {Briefcase, CircuitBoard, GraduationCap, Laptop, Shield, Trophy} from "lucide-react";
-import SecretIndicatorFade from "@/components/views/secret-indicator-fade";
 import {SECTIONS} from "@/lib/site";
 
 import bgCyber from "@/public/banners/abstract_geometric_cyber_aesthetic_background.webp";
@@ -58,7 +57,7 @@ const timelineData: TimelineItemData[] = [
         title: "Software R&D Intern",
         subtitle: "Siemens",
         description: "Worked in the HAV team developing critical debugging and profiling tools for threading and ethernet communications. Enhanced system reliability and diagnostic capabilities.",
-        date: "Sep 2024 – Dec 2025",
+        date: "Sep 2024 – Dec 2024",
         icon: <Briefcase className="h-6 w-6" />,
         background: bgCircuit,
         certificateUrl: "https://drive.google.com/file/d/1YaMegP1iBODK0qmDokjOPm_8blHV414V/view?usp=sharing",
@@ -130,11 +129,9 @@ const timelineData: TimelineItemData[] = [
 
 const TimelinePage = () => {
     return (
-        <SecretIndicatorFade className="h-full w-full">
-            <section id={SECTIONS.timeline} aria-label="Timeline">
-                <Timeline items={timelineData} />
-            </section>
-        </SecretIndicatorFade>
+        <section id={SECTIONS.timeline} aria-label="Timeline">
+            <Timeline items={timelineData} />
+        </section>
     );
 };
 

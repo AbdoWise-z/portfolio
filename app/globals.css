@@ -75,6 +75,14 @@
     @apply px-6 md:pl-[130px] md:pr-8 lg:pr-[210px];
   }
   .eyebrow {
-    @apply text-xs font-semibold uppercase tracking-[0.3em] text-cyan-200/70;
+    @apply text-xs font-semibold uppercase tracking-[0.3em] text-cyan-700/80 dark:text-cyan-200/70;
+  }
+  /* Colour for "secret" text: the lens inverts it, so it ends up contrasting with the inverted page. */
+  .secret-ink {
+    @apply text-black dark:text-white;
+  }
+  /* Translucent panel over the starfield for text sections. */
+  .section-panel {
+    @apply bg-white/75 dark:bg-[#080b14]/80;
   }
 }

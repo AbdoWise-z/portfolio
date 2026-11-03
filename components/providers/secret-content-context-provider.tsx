@@ -16,8 +16,6 @@ type SecretContentContextType = {
     /** Spring-smoothed pointer position in viewport coordinates. */
     maskX: MotionValue<number> | null,
     maskY: MotionValue<number> | null,
-    enabled: boolean,
-    setEnabled: ((value: boolean) => void) | null,
 };
 
 const SecretContentContext = createContext<SecretContentContextType>({
@@ -28,18 +26,17 @@ const SecretContentContext = createContext<SecretContentContextType>({
     pointerY: null,
     maskX: null,
     maskY: null,
-    enabled: true,
-    setEnabled: null,
 });
 
 const SPRING = { stiffness: 1800, damping: 150 };
 
+export const DEFAULT_MASK_SIZE = 60;
+
 const SecretContentContextProvider = (
     { children }: { children: React.ReactNode }
 ) => {
-    const innerMaskSize = useMotionValue<number>(60);
+    const innerMaskSize = useMotionValue<number>(DEFAULT_MASK_SIZE);
     const MaskSize = useSpring(innerMaskSize, SPRING);
-    const [enabled, setEnabled] = React.useState<boolean>(true);
 
     const setMaskSize = useCallback((maskSize: number) => {
         innerMaskSize.set(maskSize);
@@ -73,21 +70,22 @@ const SecretContentContextProvider = (
         };
     }, [pointerX, pointerY]);
 
+    // On touch devices the lens only exists while a finger is down.
     const mob = useIsMobile();
 
     useEffect(() => {
         if (!mob) return;
 
-        const onTouchStart = () => {
-            setMaskSize(60);
-            setEnabled(true);
+        const onTouchStart = (e: TouchEvent) => {
+            if (e.touches.length > 0) {
+                pointerX.set(e.touches[0].clientX);
+                pointerY.set(e.touches[0].clientY);
+            }
+            setMaskSize(DEFAULT_MASK_SIZE);
         };
+        const onTouchEnd = () => setMaskSize(0);
 
-        const onTouchEnd = () => {
-            setMaskSize(0);
-            setEnabled(false);
-        };
-
+        setMaskSize(0);
         window.addEventListener("touchstart", onTouchStart, {passive: true});
         window.addEventListener("touchend", onTouchEnd);
         window.addEventListener("touchcancel", onTouchEnd);
@@ -97,7 +95,7 @@ const SecretContentContextProvider = (
             window.removeEventListener("touchend", onTouchEnd);
             window.removeEventListener("touchcancel", onTouchEnd);
         };
-    }, [mob, setMaskSize]);
+    }, [mob, setMaskSize, pointerX, pointerY]);
 
     return (
         <SecretContentContext.Provider value={{
@@ -108,8 +106,6 @@ const SecretContentContextProvider = (
             pointerY,
             maskX,
             maskY,
-            enabled,
-            setEnabled,
         }}>
             {children}
         </SecretContentContext.Provider>

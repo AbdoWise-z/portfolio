@@ -1,14 +1,12 @@
 "use client";
 
 import React from 'react';
-import SecretContent from "@/components/views/secret-content";
 import {z} from "zod"
 import {zodResolver} from "@hookform/resolvers/zod";
 import {useForm} from "react-hook-form";
 import {Form, FormControl, FormField, FormItem, FormLabel, FormMessage} from "@/components/ui/form";
 import {Input} from "@/components/ui/input";
 import {Button} from "@/components/ui/button";
-import {useSecretContextValues} from "@/components/providers/secret-content-context-provider";
 import {Textarea} from "@/components/ui/textarea";
 import {ModalType, useModal} from "@/hooks/use-modal";
 import {CV_PATH, SECTIONS, SOCIAL_LINKS} from "@/lib/site";
@@ -21,11 +19,10 @@ const formSchema = z.object({
   message: z.string().min(1, "Please write a message.").max(500, "Keep it under 500 characters."),
 })
 
-const directLink = "text-cyan-300 underline-offset-4 transition-colors hover:text-cyan-100 hover:underline";
+const directLink = "text-cyan-700 underline-offset-4 transition-colors hover:text-cyan-900 hover:underline dark:text-cyan-300 dark:hover:text-cyan-100";
 
 const ContactMe = () => {
   const modal = useModal();
-  const {setMaskSize} = useSecretContextValues();
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -55,35 +52,31 @@ const ContactMe = () => {
   return (
     <section
       id={SECTIONS.contact}
-      className="section-gutter relative flex min-h-screen scroll-mt-24 flex-col bg-[#080b14]/80 pb-10 pt-24 md:pt-32"
+      className="section-gutter section-panel relative flex min-h-screen scroll-mt-24 flex-col pb-10 pt-24 md:pt-32"
     >
-      <div
-        className="mx-auto grid w-full max-w-5xl flex-1 gap-12 lg:grid-cols-[1fr_1.2fr] lg:gap-20"
-        onMouseEnter={() => setMaskSize?.(0)}
-        onMouseLeave={() => setMaskSize?.(60)}
-      >
+      <div className="mx-auto grid w-full max-w-5xl flex-1 gap-12 lg:grid-cols-[1fr_1.2fr] lg:gap-20">
         <div>
           <h2 className="eyebrow mb-6">Contact</h2>
-          <p className="text-3xl font-bold text-white md:text-5xl">{"Let's talk."}</p>
-          <p className="mt-4 max-w-md text-neutral-400">
+          <p className="text-3xl font-bold text-foreground md:text-5xl">{"Let's talk."}</p>
+          <p className="mt-4 max-w-md text-muted-foreground">
             Have a project, a question, or just want to say hi? Send a message with the form, or reach me directly.
           </p>
 
           <dl className="mt-10 space-y-3 text-sm">
             <div className="flex flex-wrap gap-x-4">
-              <dt className="w-20 text-neutral-500">Email</dt>
+              <dt className="w-20 text-muted-foreground/80">Email</dt>
               <dd><a className={directLink} href={`mailto:${SOCIAL_LINKS.email}`}>{SOCIAL_LINKS.email}</a></dd>
             </div>
             <div className="flex flex-wrap gap-x-4">
-              <dt className="w-20 text-neutral-500">LinkedIn</dt>
+              <dt className="w-20 text-muted-foreground/80">LinkedIn</dt>
               <dd><a className={directLink} href={SOCIAL_LINKS.linkedin} target="_blank" rel="noopener noreferrer">in/xabdomo</a></dd>
             </div>
             <div className="flex flex-wrap gap-x-4">
-              <dt className="w-20 text-neutral-500">GitHub</dt>
+              <dt className="w-20 text-muted-foreground/80">GitHub</dt>
               <dd><a className={directLink} href={SOCIAL_LINKS.github} target="_blank" rel="noopener noreferrer">AbdoWise-z</a></dd>
             </div>
             <div className="flex flex-wrap gap-x-4">
-              <dt className="w-20 text-neutral-500">CV</dt>
+              <dt className="w-20 text-muted-foreground/80">CV</dt>
               <dd><a className={directLink} href={CV_PATH} target="_blank" rel="noopener noreferrer">Download PDF</a></dd>
             </div>
           </dl>
@@ -97,7 +90,7 @@ const ContactMe = () => {
                 name="name"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-white">Name</FormLabel>
+                    <FormLabel>Name</FormLabel>
                     <FormControl>
                       <Input placeholder="Your name" autoComplete="name" {...field} />
                     </FormControl>
@@ -111,7 +104,7 @@ const ContactMe = () => {
                 name="email"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-white">Email</FormLabel>
+                    <FormLabel>Email</FormLabel>
                     <FormControl>
                       <Input type="email" placeholder="you@example.com" autoComplete="email" {...field} />
                     </FormControl>
@@ -126,7 +119,7 @@ const ContactMe = () => {
               name="message"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="text-white">Message</FormLabel>
+                  <FormLabel>Message</FormLabel>
                   <FormControl>
                     <Textarea placeholder="Type your message here" rows={6} {...field} />
                   </FormControl>
@@ -136,17 +129,13 @@ const ContactMe = () => {
             />
 
             <div className="pt-2">
-              <SecretContent maskWidth={0} secret={
-                <Button type="submit" variant="outline" className="rounded-full px-12" tabIndex={-1}>Send</Button>
-              }>
-                <Button type="submit" className="rounded-full px-12" disabled={form.formState.isSubmitting}>Send</Button>
-              </SecretContent>
+              <Button type="submit" className="rounded-full px-12" disabled={form.formState.isSubmitting}>Send</Button>
             </div>
           </form>
         </Form>
       </div>
 
-      <footer className="mx-auto mt-20 flex w-full max-w-5xl flex-wrap items-center justify-between gap-2 border-t border-white/10 pt-6 text-xs text-neutral-500">
+      <footer className="mx-auto mt-20 flex w-full max-w-5xl flex-wrap items-center justify-between gap-2 border-t border-foreground/10 pt-6 text-xs text-muted-foreground">
         <span>© {new Date().getFullYear()} Abdelrahman Mahmoud</span>
         <span>Built with Next.js. Click anywhere for a shooting star.</span>
       </footer>

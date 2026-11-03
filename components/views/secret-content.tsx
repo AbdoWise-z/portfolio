@@ -4,14 +4,15 @@ import React, {useRef} from 'react';
 import {MotionValue, useMotionTemplate, motion} from "framer-motion";
 import {cn} from "@/lib/utils";
 import {useMaskPosition} from "@/hooks/use-mask-position";
-import {useSecretContextValues} from "@/components/providers/secret-content-context-provider";
+import {DEFAULT_MASK_SIZE, useSecretContextValues} from "@/components/providers/secret-content-context-provider";
 
 const MASK_IMAGE = "linear-gradient(white, white), url(\"/circle.svg\")";
 
 /**
- * Renders `children` normally, and `secret` only inside the cursor-following
- * circular mask. The secret layer is stretched over the content layer's box
+ * Renders `children` normally, and `secret` only inside the pointer-following
+ * circle. The secret layer is stretched over the content layer's box
  * (absolute, inset 0) so a single mask position is correct for both.
+ * Give secret text the `secret-ink` class: the lens inverts it.
  */
 const SecretContent = (
   {
@@ -36,26 +37,18 @@ const SecretContent = (
 ) => {
   const contentRef = useRef<HTMLDivElement>(null);
 
-  const {enabled, setMaskSize} = useSecretContextValues();
+  const {setMaskSize} = useSecretContextValues();
   const {transformedX, transformedY, contextData} = useMaskPosition(contentRef);
 
   const size = maskSize ?? contextData.MaskSize ?? 50;
   const maskPosition = useMotionTemplate`center, ${transformedX}px ${transformedY}px`;
   const maskSizeT = useMotionTemplate`contain, ${size}px ${size}px`;
 
-  const onMouseEnter = () => {
-    if (setMaskSize && enabled) setMaskSize(focusMaskWidth ?? 160);
-  };
-
-  const onMouseLeave = () => {
-    if (setMaskSize && enabled) setMaskSize(maskWidth ?? 60);
-  };
-
   return (
     <div
       className={cn("relative flex w-fit h-fit", className)}
-      onMouseEnter={onMouseEnter}
-      onMouseLeave={onMouseLeave}
+      onMouseEnter={() => setMaskSize?.(focusMaskWidth ?? 160)}
+      onMouseLeave={() => setMaskSize?.(maskWidth ?? DEFAULT_MASK_SIZE)}
     >
       <motion.div
         aria-hidden
