@@ -85,7 +85,7 @@ const Skills = () => {
                 </span>
                 <SecretContent
                   focusMaskWidth={200}
-                  secret={<h3 className="secret-ink text-lg font-bold">{group.secret}</h3>}
+                  secret={<span className="secret-ink block text-lg font-bold">{group.secret}</span>}
                 >
                   <h3 className="text-lg font-bold text-slate-900 dark:text-cyan-50">{group.title}</h3>
                 </SecretContent>

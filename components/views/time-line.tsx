@@ -258,6 +258,7 @@ export function Timeline({ items, coveredBy }: TimelineProps) {
                                                                 href={item.certificateUrl}
                                                                 target="_blank"
                                                                 rel="noopener noreferrer"
+                                                                tabIndex={isCurrent ? 0 : -1}
                                                                 className="text-xs text-primary transition-colors hover:text-primary/80 hover:underline"
                                                             >
                                                                 View →

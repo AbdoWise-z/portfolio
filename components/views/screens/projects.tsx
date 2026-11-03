@@ -238,11 +238,12 @@ export default function ProjectsPage() {
             <motion.section
                 ref={ref}
                 id={SECTIONS.projects}
-                aria-label="Projects"
+                aria-labelledby="projects-heading"
                 aria-roledescription="carousel"
                 className="sticky top-0 h-screen supports-[height:100dvh]:h-dvh w-full overflow-hidden bg-black text-white"
                 style={{ borderRadius, scale, filter, opacity }}
             >
+                <h2 id="projects-heading" className="sr-only">Projects</h2>
                 <p className="section-gutter absolute left-0 top-24 z-20 text-xs font-semibold uppercase tracking-[0.3em] text-white/60 md:top-8" aria-hidden>
                     03 · Projects
                 </p>

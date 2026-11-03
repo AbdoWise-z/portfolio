@@ -18,7 +18,8 @@ const target = process.argv[3] || "Building"; // text inside the SecretContent t
   await page.goto("http://localhost:3000", { waitUntil: "networkidle" });
   await page.waitForTimeout(500);
 
-  const h = page.locator(`:is(h1,p,span):has-text("${target}")`).first();
+  // Innermost element with the text, so the walk up lands on the masked layer, not a wrapper above it.
+  const h = page.locator(`:is(h1,p,span):has-text("${target}")`).last();
   await h.scrollIntoViewIfNeeded();
   const box = await h.boundingBox();
   const mx = box.x + box.width / 2, my = box.y + box.height / 2;
@@ -32,8 +33,11 @@ const target = process.argv[3] || "Building"; // text inside the SecretContent t
   }
 
   const sample = async () => page.evaluate((t) => {
-    const h = [...document.querySelectorAll("h1,p,span")].find((e) => e.textContent.includes(t));
-    const content = h.closest("div[style*='mask-composite']") || h.parentElement.closest("[style]");
+    const all = [...document.querySelectorAll("h1,p,span")].filter((e) => e.textContent.includes(t));
+    const h = all[all.length - 1]; // innermost match
+    let content = h;
+    while (content && !(content.getAttribute("style") || "").includes("mask-composite")) content = content.parentElement;
+    if (!content) throw new Error("no masked ancestor for " + t);
     const outer = content.parentElement;
     const layers = [...outer.children];
     const read = (el) => {

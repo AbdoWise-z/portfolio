@@ -129,7 +129,8 @@ const timelineData: TimelineItemData[] = [
 
 const TimelinePage = () => {
     return (
-        <section id={SECTIONS.timeline} aria-label="Timeline" className="relative z-20">
+        <section id={SECTIONS.timeline} aria-labelledby="timeline-heading" className="relative z-20">
+            <h2 id="timeline-heading" className="sr-only">Timeline</h2>
             <Timeline items={timelineData} coveredBy="projects-stack" />
         </section>
     );
