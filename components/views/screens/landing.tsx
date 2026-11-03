@@ -42,7 +42,7 @@ const Landing = () => {
   }, [px, py]);
 
   return (
-    <section className="sticky top-0 z-0 flex h-[100svh] select-none flex-col items-center justify-center px-6">
+    <section className="sticky top-0 z-0 flex h-screen supports-[height:100dvh]:h-dvh select-none flex-col items-center justify-center px-6">
       <motion.div style={{ opacity, scale, y }} className="flex flex-col items-center">
         <motion.div
           style={{ x: parallaxX, y: parallaxY }}

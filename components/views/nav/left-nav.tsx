@@ -39,7 +39,7 @@ const LeftNav = () => {
 
       <a
         className="fixed left-6 top-6 z-[46] flex aspect-square items-center justify-center rounded-full md:left-8 md:top-8"
-        href="/"
+        href="#main"
         aria-label="Back to top"
       >
         <Image src="/personal_photo.webp" width={45} height={45} alt="Abdelrahman Mahmoud" className="rounded-full" priority />

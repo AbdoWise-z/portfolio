@@ -240,7 +240,7 @@ export default function ProjectsPage() {
                 id={SECTIONS.projects}
                 aria-label="Projects"
                 aria-roledescription="carousel"
-                className="sticky top-0 h-[100svh] w-full overflow-hidden bg-black text-white"
+                className="sticky top-0 h-screen supports-[height:100dvh]:h-dvh w-full overflow-hidden bg-black text-white"
                 style={{ borderRadius, scale, filter, opacity }}
             >
                 <p className="section-gutter absolute left-0 top-24 z-20 text-xs font-semibold uppercase tracking-[0.3em] text-white/60 md:top-8" aria-hidden>
