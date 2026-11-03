@@ -50,6 +50,8 @@ type Palette = {
   shooter: string;
   ripple: string;
   nebulaAlpha: number;
+  /** Colour of the faint diagonal band. */
+  band: string;
   nebula: { x: number; y: number; r: number; c: string }[];
 };
 
@@ -61,6 +63,7 @@ const DARK: Palette = {
   shooter: "255,255,255",
   ripple: "170,230,255",
   nebulaAlpha: 0.26,
+  band: "150,170,230",
   nebula: [
     { x: 0.18, y: 0.28, r: 0.55, c: "120,40,170" },
     { x: 0.82, y: 0.22, r: 0.5, c: "0,110,200" },
@@ -77,6 +80,7 @@ const LIGHT: Palette = {
   shooter: "30,41,59",
   ripple: "37,99,235",
   nebulaAlpha: 0.15,
+  band: "120,140,220",
   nebula: [
     { x: 0.18, y: 0.28, r: 0.55, c: "167,139,250" },
     { x: 0.82, y: 0.22, r: 0.5, c: "96,165,250" },
@@ -146,6 +150,21 @@ const SpaceBackground = () => {
         nctx.fillStyle = g;
         nctx.fillRect(0, 0, nw, nh);
       }
+
+      // A faint diagonal band, like a distant galaxy arm.
+      nctx.save();
+      nctx.translate(nw / 2, nh / 2);
+      nctx.rotate(-0.42);
+      const band = nctx.createLinearGradient(0, -nh * 0.32, 0, nh * 0.32);
+      const bc = palette.band;
+      band.addColorStop(0, `rgba(${bc},0)`);
+      band.addColorStop(0.35, `rgba(${bc},${(palette.nebulaAlpha * 0.5).toFixed(3)})`);
+      band.addColorStop(0.5, `rgba(${bc},${(palette.nebulaAlpha * 0.8).toFixed(3)})`);
+      band.addColorStop(0.65, `rgba(${bc},${(palette.nebulaAlpha * 0.5).toFixed(3)})`);
+      band.addColorStop(1, `rgba(${bc},0)`);
+      nctx.fillStyle = band;
+      nctx.fillRect(-nw, -nh * 0.32, nw * 2, nh * 0.64);
+      nctx.restore();
     };
 
     const build = () => {
@@ -162,17 +181,23 @@ const SpaceBackground = () => {
       const total = Math.min(Math.round(width * height * density), 900);
       const depths = [0.25, 0.55, 1];
       const share = [0.5, 0.3, 0.2];
+      // The band in screen space (same angle as the gradient), with a soft width.
+      const bandY = (x: number) => height / 2 - Math.tan(0.42) * (x - width / 2);
       layers = depths.map((depth, i) => ({
         depth,
-        stars: Array.from({ length: Math.round(total * share[i]) }, () => ({
-          x: Math.random() * width,
-          y: Math.random() * height,
+        stars: Array.from({ length: Math.round(total * share[i]) }, (_, k) => {
+          const x = Math.random() * width;
+          // Every fourth far star hugs the band, giving it a dusty core.
+          const onBand = i === 0 && k % 4 === 0;
+          const y = onBand ? bandY(x) + (Math.random() - 0.5) * height * 0.18 : Math.random() * height;
+          return { x, y,
           r: rand(0.3, 0.8) + depth * rand(0.2, 1.1),
           base: rand(0.35, 1),
           phase: Math.random() * Math.PI * 2,
           speed: rand(0.4, 1.6),
           tint: Math.floor(Math.random() * 4),
-        })),
+          };
+        }),
       }));
 
       buildNebula();

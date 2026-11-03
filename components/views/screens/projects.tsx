@@ -3,7 +3,8 @@
 import {useState, useEffect, useCallback, useRef} from "react";
 import { motion, AnimatePresence, useInView, useScroll, useTransform } from "framer-motion";
 import { useSectionProgress } from "@/hooks/use-section-progress";
-import { Github, Layers, Smartphone, Cpu, ChevronLeft, ChevronRight, Gamepad2, Truck, Type, MessageSquare, Search, Edit3 } from "lucide-react";
+import { Github, Layers, Smartphone, Cpu, ChevronLeft, ChevronRight, Gamepad2, Truck, Type, MessageSquare, Search, Edit3, LayoutGrid } from "lucide-react";
+import { Dialog, DialogContent, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
@@ -193,6 +194,8 @@ export default function ProjectsPage() {
         setPage([index, index > projectIndex ? 1 : -1]);
     };
 
+    const [gridOpen, setGridOpen] = useState(false);
+
     const ref = useRef<HTMLDivElement>(null);
     const wrapRef = useRef<HTMLDivElement>(null);
     const inView = useInView(ref, { amount: 0.5 });
@@ -211,12 +214,14 @@ export default function ProjectsPage() {
     useEffect(() => {
         if (!inView) return;
         const onKeyDown = (event: KeyboardEvent) => {
+            if (event.key === "g" || event.key === "G") setGridOpen((o) => !o);
+            if (gridOpen) return;
             if (event.key === "ArrowRight") paginate(1);
             else if (event.key === "ArrowLeft") paginate(-1);
         };
         window.addEventListener("keydown", onKeyDown);
         return () => window.removeEventListener("keydown", onKeyDown);
-    }, [inView, paginate]);
+    }, [inView, paginate, gridOpen]);
 
     useSwipe(ref, {
         onSwipeLeft: () => paginate(1),
@@ -374,9 +379,50 @@ export default function ProjectsPage() {
                         </Button>
                         </Magnetic>
 
+                        <Dialog open={gridOpen} onOpenChange={setGridOpen}>
+                            <DialogTrigger asChild>
+                                <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    aria-label="Show all projects"
+                                    className="ml-1 h-11 w-11 rounded-full border border-white/10 bg-black/30 text-white/70 hover:border-white/30 hover:bg-white/10 hover:text-white"
+                                >
+                                    <LayoutGrid className="h-5 w-5" />
+                                </Button>
+                            </DialogTrigger>
+                            <DialogContent className="max-h-[85vh] w-[calc(100vw-2rem)] max-w-5xl overflow-y-auto border-white/10 bg-[#05070f]/95 p-4 text-white sm:p-6">
+                                <DialogTitle className="eyebrow mb-2 text-white/60">All projects</DialogTitle>
+                                <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+                                    {projects.map((project, index) => (
+                                        <li key={project.id}>
+                                            <button
+                                                type="button"
+                                                onClick={() => { goTo(index); setGridOpen(false); }}
+                                                aria-current={index === projectIndex ? "true" : undefined}
+                                                className={cn(
+                                                    "group/card block w-full overflow-hidden rounded-xl border text-left transition-colors",
+                                                    index === projectIndex ? "border-white/60" : "border-white/10 hover:border-white/40"
+                                                )}
+                                            >
+                                                <span className="relative block aspect-[16/10] w-full overflow-hidden">
+                                                    <Image src={project.image} alt="" fill sizes="(min-width: 640px) 33vw, 50vw" className="object-cover transition-transform duration-500 group-hover/card:scale-105" />
+                                                    <span className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent" />
+                                                    <span className="absolute left-3 top-3 rounded-lg border border-white/10 bg-white/10 p-1.5 text-white">{project.icon}</span>
+                                                </span>
+                                                <span className="block p-3">
+                                                    <span className="block text-sm font-bold">{project.title}</span>
+                                                    <span className="block text-xs text-white/60">{project.category}</span>
+                                                </span>
+                                            </button>
+                                        </li>
+                                    ))}
+                                </ul>
+                            </DialogContent>
+                        </Dialog>
+
                         <span className="ml-auto flex shrink-0 items-center gap-3 text-xs text-white/50">
                             <span className="md:hidden">Swipe</span>
-                            <span className="hidden md:inline" aria-hidden>← → keys</span>
+                            <span className="hidden md:inline" aria-hidden>← → keys · G grid</span>
                             <span className="whitespace-nowrap tabular-nums" aria-live="polite">{pad(projectIndex + 1)} / {pad(projects.length)}</span>
                         </span>
                     </div>
