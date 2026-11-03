@@ -6,6 +6,7 @@ import React, { useEffect, useRef } from "react";
  * Interactive starfield drawn on a fixed, full-viewport canvas.
  *
  * - Three parallax layers of twinkling stars that shift with the pointer and scroll.
+ * - Stars near the pointer brighten and link up into a small constellation.
  * - Soft nebula tints pre-rendered once per resize.
  * - Shooting stars at random intervals, and one from wherever the user clicks or taps.
  * - Pauses while the tab is hidden; draws a single static frame under reduced motion.
@@ -33,6 +34,8 @@ type Shooter = {
   len: number;
 };
 
+type NearStar = { x: number; y: number; w: number };
+
 const TINTS = ["255,255,255", "190,220,255", "255,236,200", "170,240,255"];
 const NEBULA_BLOBS = [
   { x: 0.18, y: 0.28, r: 0.55, c: "120,40,170" },
@@ -40,6 +43,8 @@ const NEBULA_BLOBS = [
   { x: 0.66, y: 0.82, r: 0.6, c: "200,40,120" },
   { x: 0.14, y: 0.86, r: 0.45, c: "0,170,190" },
 ];
+const CONSTELLATION_RADIUS = 160;
+const CONSTELLATION_LINK = 110;
 
 const rand = (a: number, b: number) => a + Math.random() * (b - a);
 
@@ -63,6 +68,8 @@ const SpaceBackground = () => {
 
     // Pointer offset from the viewport centre, normalised to [-1, 1], smoothed per frame.
     const pointer = { x: 0, y: 0, tx: 0, ty: 0 };
+    // Pointer position in viewport pixels, for the constellation effect.
+    const pointerPx = { x: -1e4, y: -1e4, active: false };
     let scrollTarget = window.scrollY;
     let scroll = scrollTarget;
 
@@ -81,8 +88,8 @@ const SpaceBackground = () => {
       canvas.style.height = `${height}px`;
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
 
-      const density = coarsePointer ? 1 / 9000 : 1 / 6000; // stars per CSS px²
-      const total = Math.min(Math.round(width * height * density), 700);
+      const density = coarsePointer ? 1 / 7000 : 1 / 4500; // stars per CSS px²
+      const total = Math.min(Math.round(width * height * density), 900);
       const depths = [0.25, 0.55, 1];
       const share = [0.5, 0.3, 0.2];
       layers = depths.map((depth, i) => ({
@@ -120,7 +127,9 @@ const SpaceBackground = () => {
 
     const spawnShooter = (x?: number, y?: number) => {
       const fromClick = x !== undefined && y !== undefined;
-      const angle = fromClick ? rand(0, Math.PI * 2) : rand(Math.PI * 0.15, Math.PI * 0.35) * (Math.random() < 0.5 ? 1 : -1) + Math.PI / 2;
+      const angle = fromClick
+        ? rand(0, Math.PI * 2)
+        : rand(Math.PI * 0.15, Math.PI * 0.35) * (Math.random() < 0.5 ? 1 : -1) + Math.PI / 2;
       const speed = rand(700, 1100);
       shooters.push({
         x: fromClick ? x! : rand(0, width),
@@ -153,6 +162,9 @@ const SpaceBackground = () => {
       }
 
       const t = now * 0.001;
+      const constellation = !reducedMotion && pointerPx.active;
+      const near: NearStar[] = [];
+
       for (const layer of layers) {
         const ox = -pointer.x * 28 * layer.depth;
         const oy = -pointer.y * 18 * layer.depth - scroll * 0.22 * layer.depth;
@@ -160,7 +172,19 @@ const SpaceBackground = () => {
           const sx = (((s.x + ox) % width) + width) % width;
           const sy = (((s.y + oy) % height) + height) % height;
           const twinkle = reducedMotion ? 1 : 0.65 + 0.35 * Math.sin(s.phase + t * s.speed * 2.2);
-          const alpha = s.base * twinkle;
+          let alpha = s.base * twinkle;
+
+          if (constellation) {
+            const dx = sx - pointerPx.x;
+            const dy = sy - pointerPx.y;
+            const d = Math.hypot(dx, dy);
+            if (d < CONSTELLATION_RADIUS) {
+              const w = 1 - d / CONSTELLATION_RADIUS;
+              alpha = Math.min(1, alpha + w * 0.7);
+              near.push({ x: sx, y: sy, w });
+            }
+          }
+
           const colour = TINTS[s.tint];
           if (s.r > 1.3) {
             ctx.fillStyle = `rgba(${colour},${(alpha * 0.14).toFixed(3)})`;
@@ -172,6 +196,33 @@ const SpaceBackground = () => {
           ctx.beginPath();
           ctx.arc(sx, sy, s.r, 0, Math.PI * 2);
           ctx.fill();
+        }
+      }
+
+      // Constellation: link nearby stars to the pointer and to each other.
+      if (near.length > 0) {
+        ctx.lineWidth = 0.8;
+        ctx.lineCap = "round";
+        for (const a of near) {
+          ctx.strokeStyle = `rgba(170,230,255,${(a.w * 0.45).toFixed(3)})`;
+          ctx.beginPath();
+          ctx.moveTo(pointerPx.x, pointerPx.y);
+          ctx.lineTo(a.x, a.y);
+          ctx.stroke();
+        }
+        for (let i = 0; i < near.length; i++) {
+          for (let j = i + 1; j < near.length; j++) {
+            const a = near[i];
+            const b = near[j];
+            const d = Math.hypot(a.x - b.x, a.y - b.y);
+            if (d > CONSTELLATION_LINK) continue;
+            const w = (1 - d / CONSTELLATION_LINK) * Math.min(a.w, b.w);
+            ctx.strokeStyle = `rgba(170,230,255,${(w * 0.5).toFixed(3)})`;
+            ctx.beginPath();
+            ctx.moveTo(a.x, a.y);
+            ctx.lineTo(b.x, b.y);
+            ctx.stroke();
+          }
         }
       }
 
@@ -235,16 +286,23 @@ const SpaceBackground = () => {
       if (reducedMotion) draw(performance.now(), 0);
     };
 
-    const onPointerMove = (e: PointerEvent) => {
-      pointer.tx = (e.clientX / width - 0.5) * 2;
-      pointer.ty = (e.clientY / height - 0.5) * 2;
+    const setPointer = (x: number, y: number) => {
+      pointer.tx = (x / width - 0.5) * 2;
+      pointer.ty = (y / height - 0.5) * 2;
+      pointerPx.x = x;
+      pointerPx.y = y;
+      pointerPx.active = true;
     };
+
+    const clearPointer = () => {
+      pointerPx.active = false;
+    };
+
+    const onPointerMove = (e: PointerEvent) => setPointer(e.clientX, e.clientY);
 
     const onTouchMove = (e: TouchEvent) => {
       if (e.touches.length === 0) return;
-      const t = e.touches[0];
-      pointer.tx = (t.clientX / width - 0.5) * 2;
-      pointer.ty = (t.clientY / height - 0.5) * 2;
+      setPointer(e.touches[0].clientX, e.touches[0].clientY);
     };
 
     const onPointerDown = (e: PointerEvent) => {
@@ -271,8 +329,12 @@ const SpaceBackground = () => {
     window.addEventListener("resize", onResize);
     window.addEventListener("pointermove", onPointerMove, { passive: true });
     window.addEventListener("touchmove", onTouchMove, { passive: true });
+    window.addEventListener("touchend", clearPointer, { passive: true });
+    window.addEventListener("touchcancel", clearPointer, { passive: true });
     window.addEventListener("pointerdown", onPointerDown, { passive: true });
     window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("blur", clearPointer);
+    document.addEventListener("mouseleave", clearPointer);
     document.addEventListener("visibilitychange", onVisibility);
 
     return () => {
@@ -280,8 +342,12 @@ const SpaceBackground = () => {
       window.removeEventListener("resize", onResize);
       window.removeEventListener("pointermove", onPointerMove);
       window.removeEventListener("touchmove", onTouchMove);
+      window.removeEventListener("touchend", clearPointer);
+      window.removeEventListener("touchcancel", clearPointer);
       window.removeEventListener("pointerdown", onPointerDown);
       window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("blur", clearPointer);
+      document.removeEventListener("mouseleave", clearPointer);
       document.removeEventListener("visibilitychange", onVisibility);
     };
   }, []);
