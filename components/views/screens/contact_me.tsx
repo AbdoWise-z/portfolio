@@ -10,6 +10,7 @@ import {Button} from "@/components/ui/button";
 import {Textarea} from "@/components/ui/textarea";
 import {ModalType, useModal} from "@/hooks/use-modal";
 import {CV_PATH, SECTIONS, SOCIAL_LINKS} from "@/lib/site";
+import Magnetic from "@/components/views/magnetic";
 
 const FORMSPREE_ENDPOINT = "https://formspree.io/f/xrbzpznw";
 
@@ -134,7 +135,9 @@ const ContactMe = () => {
             />
 
             <div className="pt-2">
-              <Button type="submit" className="rounded-full px-12" disabled={form.formState.isSubmitting}>Send</Button>
+              <Magnetic>
+                <Button type="submit" className="rounded-full px-12" disabled={form.formState.isSubmitting}>Send</Button>
+              </Magnetic>
             </div>
           </form>
         </Form>

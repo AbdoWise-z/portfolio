@@ -9,6 +9,7 @@ import { Separator } from "@/components/ui/separator";
 import { CV_PATH, SECTIONS } from "@/lib/site";
 import { useActiveSection } from "@/hooks/use-active-section";
 import { cn } from "@/lib/utils";
+import Magnetic from "@/components/views/magnetic";
 
 const LINKS = [
   { label: "About", id: SECTIONS.about },
@@ -95,13 +96,15 @@ const RightNav = () => {
         })}
 
         <div className="h-10" />
-        <Button
-          asChild
-          variant="outline"
-          className="rounded-full border-white/60 bg-transparent px-12 text-white hover:bg-white/15 hover:text-white"
-        >
-          <a href={CV_PATH} target="_blank" rel="noopener noreferrer">My CV</a>
-        </Button>
+        <Magnetic>
+          <Button
+            asChild
+            variant="outline"
+            className="rounded-full border-white/60 bg-transparent px-12 text-white hover:bg-white/15 hover:text-white"
+          >
+            <a href={CV_PATH} target="_blank" rel="noopener noreferrer">My CV</a>
+          </Button>
+        </Magnetic>
       </nav>
     </div>
   );

@@ -112,7 +112,7 @@ export function Timeline({ items, coveredBy }: TimelineProps) {
         <div ref={containerRef} className="relative" style={{ height: `calc(100vh + ${contentVh + TAIL_VH}vh)` }}>
             <motion.div
                 ref={stickyRef}
-                className="sticky top-0 flex h-screen w-full flex-col overflow-hidden bg-black text-white"
+                className="sticky top-0 flex h-[100svh] w-full flex-col overflow-hidden bg-black text-white"
                 style={{ clipPath, scale, filter, borderRadius }}
             >
 

@@ -10,6 +10,7 @@ import { cn } from "@/lib/utils";
 import Image, {StaticImageData} from "next/image";
 import {useSwipe} from "@/hooks/use-swipe";
 import {SECTIONS} from "@/lib/site";
+import Magnetic from "@/components/views/magnetic";
 
 import project1 from "@/public/banners/reinforcement_learning_agent_simulation.webp";
 import project2 from "@/public/banners/cpu_architecture_schematic.webp";
@@ -229,7 +230,7 @@ export default function ProjectsPage() {
                 id={SECTIONS.projects}
                 aria-label="Projects"
                 aria-roledescription="carousel"
-                className="sticky top-0 h-screen w-full overflow-hidden bg-black text-white"
+                className="sticky top-0 h-[100svh] w-full overflow-hidden bg-black text-white"
                 style={{ borderRadius, scale, filter, opacity }}
             >
                 <p className="section-gutter absolute left-0 top-24 z-20 text-xs font-semibold uppercase tracking-[0.3em] text-white/60 md:top-8" aria-hidden>
@@ -295,14 +296,16 @@ export default function ProjectsPage() {
 
                                 {currentProject.source && (
                                     <div className="flex gap-4 pt-2">
-                                        <a
-                                            href={currentProject.source}
-                                            target="_blank"
-                                            rel="noopener noreferrer"
-                                            className="flex h-12 select-none items-center rounded-full border border-white/20 px-6 text-white transition-colors hover:bg-white/10"
-                                        >
-                                            <Github className="mr-2 h-5 w-5" /> Source
-                                        </a>
+                                        <Magnetic>
+                                            <a
+                                                href={currentProject.source}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className="flex h-12 select-none items-center rounded-full border border-white/20 px-6 text-white transition-colors hover:bg-white/10"
+                                            >
+                                                <Github className="mr-2 h-5 w-5" /> Source
+                                            </a>
+                                        </Magnetic>
                                     </div>
                                 )}
                             </motion.div>
@@ -313,6 +316,7 @@ export default function ProjectsPage() {
                 {/* Controls: previous, dots, next, counter */}
                 <div className="section-gutter absolute inset-x-0 bottom-6 z-20 md:bottom-10">
                     <div className="mx-auto flex w-full max-w-6xl items-center gap-3">
+                        <Magnetic strength={0.35}>
                         <Button
                             variant="ghost"
                             size="icon"
@@ -322,6 +326,7 @@ export default function ProjectsPage() {
                         >
                             <ChevronLeft className="h-6 w-6" />
                         </Button>
+                        </Magnetic>
 
                         <div className="flex items-center gap-2" role="tablist" aria-label="Choose project">
                             {projects.map((project, index) => {
@@ -357,6 +362,7 @@ export default function ProjectsPage() {
                             })}
                         </div>
 
+                        <Magnetic strength={0.35}>
                         <Button
                             variant="ghost"
                             size="icon"
@@ -366,6 +372,7 @@ export default function ProjectsPage() {
                         >
                             <ChevronRight className="h-6 w-6" />
                         </Button>
+                        </Magnetic>
 
                         <span className="ml-auto flex shrink-0 items-center gap-3 text-xs text-white/50">
                             <span className="md:hidden">Swipe</span>
