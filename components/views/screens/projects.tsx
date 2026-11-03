@@ -155,6 +155,25 @@ const variants = {
     })
 };
 
+/**
+ * Slide image with a slow Ken Burns drift. The drift starts after mount via
+ * state, because the surrounding AnimatePresence (initial={false}) would
+ * otherwise skip a mount animation on the first slide.
+ */
+const DriftImage = ({ image, direction }: { image: StaticImageData; direction: number }) => {
+    const [started, setStarted] = useState(false);
+    useEffect(() => setStarted(true), []);
+    return (
+        <motion.div
+            className="absolute inset-0"
+            animate={started ? { scale: 1.08, x: direction >= 0 ? -16 : 16 } : { scale: 1, x: 0 }}
+            transition={{ duration: 12, ease: "linear" }}
+        >
+            <Image src={image} alt="" fill sizes="100vw" className="object-cover" />
+        </motion.div>
+    );
+};
+
 const pad = (n: number) => String(n).padStart(2, "0");
 
 /** Full-screen project slideshow with arrow keys, swipe, and on-screen controls. */
@@ -234,21 +253,7 @@ export default function ProjectsPage() {
                         aria-label={`${projectIndex + 1} of ${projects.length}: ${currentProject.title}`}
                     >
                         <div className="absolute inset-0 z-0" aria-hidden>
-                            {/* Slow drift so the pinned slide never sits still. */}
-                            <motion.div
-                                className="absolute inset-0"
-                                initial={{ scale: 1 }}
-                                animate={{ scale: 1.08, x: direction >= 0 ? -16 : 16 }}
-                                transition={{ duration: 12, ease: "linear" }}
-                            >
-                                <Image
-                                    src={currentProject.image}
-                                    alt=""
-                                    fill
-                                    sizes="100vw"
-                                    className="object-cover"
-                                />
-                            </motion.div>
+                            <DriftImage image={currentProject.image} direction={direction} />
                             <div className={cn("absolute inset-0 bg-gradient-to-br opacity-60 mix-blend-overlay", currentProject.color)} />
                             <div className="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-black/30" />
                         </div>

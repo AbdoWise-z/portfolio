@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect, useCallback } from "react";
-import { motion, useScroll, useSpring, useTransform } from "framer-motion";
+import { motion, useInView, useScroll, useSpring, useTransform } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { Check } from "lucide-react";
 import Image, { StaticImageData } from "next/image";
@@ -47,6 +47,7 @@ interface TimelineProps {
  */
 export function Timeline({ items, coveredBy }: TimelineProps) {
     const containerRef = useRef<HTMLDivElement>(null);
+    const stickyRef = useRef<HTMLDivElement>(null);
     const [activeIndex, setActiveIndex] = useState(0);
     const last = items.length - 1;
     const contentVh = last * STEP_VH;
@@ -91,9 +92,26 @@ export function Timeline({ items, coveredBy }: TimelineProps) {
         window.scrollTo({ top: top + (index * window.innerHeight * STEP_VH) / 100, behavior: "smooth" });
     }, []);
 
+    // Arrow keys step between items while the timeline is on screen.
+    // Watch the pinned viewport, not the tall wrapper, so the threshold is meaningful.
+    const inView = useInView(stickyRef, { amount: 0.6 });
+    useEffect(() => {
+        if (!inView) return;
+        const onKeyDown = (event: KeyboardEvent) => {
+            if (event.key === "ArrowDown" || event.key === "ArrowRight") {
+                if (activeIndex < last) { event.preventDefault(); jumpTo(activeIndex + 1); }
+            } else if (event.key === "ArrowUp" || event.key === "ArrowLeft") {
+                if (activeIndex > 0) { event.preventDefault(); jumpTo(activeIndex - 1); }
+            }
+        };
+        window.addEventListener("keydown", onKeyDown);
+        return () => window.removeEventListener("keydown", onKeyDown);
+    }, [inView, activeIndex, last, jumpTo]);
+
     return (
         <div ref={containerRef} className="relative" style={{ height: `calc(100vh + ${contentVh + TAIL_VH}vh)` }}>
             <motion.div
+                ref={stickyRef}
                 className="sticky top-0 flex h-screen w-full flex-col overflow-hidden bg-black text-white"
                 style={{ clipPath, scale, filter, borderRadius }}
             >

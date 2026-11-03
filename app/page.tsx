@@ -8,6 +8,7 @@ import RightNav from "@/components/views/nav/right-nav";
 import AboutMe from "@/components/views/screens/about_me";
 import SpaceBackground from "@/components/views/space-background";
 import Grain from "@/components/views/grain";
+import ScrollProgress from "@/components/views/scroll-progress";
 import Projects from "@/components/views/screens/projects";
 import Skills from "@/components/views/screens/skills";
 import ContactMe from "@/components/views/screens/contact_me";
@@ -34,6 +35,7 @@ export default function Home() {
 
             <LeftNav/>
             <RightNav/>
+            <ScrollProgress/>
             <SecretContentIndicator/>
         </>
     );
