@@ -15,7 +15,7 @@
     --secondary: 220 14.3% 95.9%;
     --secondary-foreground: 220.9 39.3% 11%;
     --muted: 220 14.3% 95.9%;
-    --muted-foreground: 220 8.9% 46.1%;
+    --muted-foreground: 220 9% 36%;
     --accent: 220 14.3% 95.9%;
     --accent-foreground: 220.9 39.3% 11%;
     --destructive: 0 84.2% 60.2%;
@@ -75,7 +75,7 @@
     @apply px-6 md:pl-[130px] md:pr-8 lg:pr-[210px];
   }
   .eyebrow {
-    @apply text-xs font-semibold uppercase tracking-[0.3em] text-cyan-700/80 dark:text-cyan-200/70;
+    @apply text-xs font-semibold uppercase tracking-[0.3em] text-cyan-800 dark:text-cyan-200/70;
   }
   /* Colour for "secret" text: the lens inverts it, so it ends up contrasting with the inverted page. */
   .secret-ink {
@@ -83,6 +83,10 @@
   }
   /* Translucent panel over the starfield for text sections. */
   .section-panel {
-    @apply bg-white/75 dark:bg-[#080b14]/80;
+    @apply bg-white/85 dark:bg-[#080b14]/85;
+  }
+  /* A sheet that slides over the previous section: rounded leading edge and a lift shadow. */
+  .sheet {
+    @apply rounded-t-[2.5rem] shadow-[0_-30px_60px_-30px_rgba(0,0,0,0.45)] md:rounded-t-[3rem];
   }
 }

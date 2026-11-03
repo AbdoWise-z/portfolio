@@ -1,7 +1,8 @@
 "use client";
 
 import {useState, useEffect, useCallback, useRef} from "react";
-import { motion, AnimatePresence, useInView } from "framer-motion";
+import { motion, AnimatePresence, useInView, useScroll, useTransform } from "framer-motion";
+import { useSectionProgress } from "@/hooks/use-section-progress";
 import { Github, Layers, Smartphone, Cpu, ChevronLeft, ChevronRight, Gamepad2, Truck, Type, MessageSquare, Search, Edit3 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -173,7 +174,18 @@ export default function ProjectsPage() {
     };
 
     const ref = useRef<HTMLDivElement>(null);
+    const wrapRef = useRef<HTMLDivElement>(null);
     const inView = useInView(ref, { amount: 0.5 });
+
+    // Entry: slides over the timeline with a rounded leading edge that flattens as it pins.
+    const { scrollYProgress: entry } = useScroll({ target: wrapRef, offset: ["start end", "start start"] });
+    // Exit: recedes while the contact sheet covers it.
+    const cover = useSectionProgress(SECTIONS.contact, ["start end", "start start"]);
+    const borderRadius = useTransform([entry, cover], ([e, c]: number[]) => Math.max((1 - e) * 44, c * 32));
+    const scale = useTransform(cover, [0, 1], [1, 0.94]);
+    const filter = useTransform(cover, (c) => `brightness(${(1 - c * 0.7).toFixed(3)})`);
+    // Dissolve as the contact sheet rises, so nothing bleeds through its translucent panel.
+    const opacity = useTransform(cover, [0, 0.15, 0.65], [1, 1, 0]);
 
     // Arrow keys only drive the slideshow while it is on screen.
     useEffect(() => {
@@ -192,14 +204,18 @@ export default function ProjectsPage() {
     });
 
     return (
-        <div className="relative h-[120vh] w-full">
-            <section
+        <div ref={wrapRef} id="projects-stack" className="relative z-30 -mt-[100vh] h-[200vh] w-full">
+            <motion.section
                 ref={ref}
                 id={SECTIONS.projects}
                 aria-label="Projects"
                 aria-roledescription="carousel"
                 className="sticky top-0 h-screen w-full overflow-hidden bg-black text-white"
+                style={{ borderRadius, scale, filter, opacity }}
             >
+                <p className="section-gutter absolute left-0 top-24 z-20 text-xs font-semibold uppercase tracking-[0.3em] text-white/60 md:top-8" aria-hidden>
+                    03 · Projects
+                </p>
                 <AnimatePresence initial={false} custom={direction} mode="popLayout">
                     <motion.div
                         key={page}
@@ -326,7 +342,7 @@ export default function ProjectsPage() {
                         </span>
                     </div>
                 </div>
-            </section>
+            </motion.section>
         </div>
     );
 }

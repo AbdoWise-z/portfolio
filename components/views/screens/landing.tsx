@@ -1,44 +1,77 @@
+"use client";
+
 import SecretContent from "@/components/views/secret-content";
 import React from "react";
+import { motion, useTransform } from "framer-motion";
+import { useSectionProgress } from "@/hooks/use-section-progress";
+import { SECTIONS } from "@/lib/site";
 
 const line = "text-center text-4xl font-bold leading-tight md:text-7xl xl:text-8xl";
 const ink = "text-slate-900 dark:text-cyan-50";
-const accent = "text-cyan-600 dark:text-cyan-400";
+const accent = "text-cyan-700 dark:text-cyan-400";
 
-/** Hero: name plus the tagline that flips inside the lens. */
+const intro = {
+  hidden: { opacity: 0, y: 28 },
+  show: { opacity: 1, y: 0, transition: { duration: 0.8, ease: [0.22, 1, 0.36, 1] } },
+};
+
+/**
+ * Hero. It stays pinned while the About sheet slides over it, receding and
+ * fading as it is covered. The lines rise into place on first load.
+ */
 const Landing = () => {
-  return (
-    <section className="relative flex h-[100svh] select-none flex-col items-center justify-center px-6">
-      <SecretContent
-        focusMaskWidth={420}
-        className="items-center justify-center"
-        secret={
-          <div className="w-full">
-            <p className="eyebrow secret-ink mb-8 text-center">Abdelrahman Mahmoud</p>
-            <p className={`${line} secret-ink`}>Fixing</p>
-            <p className={`${line} secret-ink`}>Bugs That</p>
-            <p className={`${line} secret-ink`}>I Created</p>
-          </div>
-        }
-      >
-        <div className="w-full">
-          <h1 className="eyebrow mb-8 text-center">Abdelrahman Mahmoud</h1>
-          <p className={`${line} ${ink}`}>Building</p>
-          <p className={`${line} ${accent}`}>Applications</p>
-          <p className={`${line} ${accent}`}>& Websites</p>
-        </div>
-      </SecretContent>
-      <p className={`${line} ${ink}`}>Since</p>
-      <p className={`${line} ${ink}`}>2019</p>
+  const cover = useSectionProgress(SECTIONS.about, ["start end", "start 0.25"]);
+  const opacity = useTransform(cover, [0, 1], [1, 0]);
+  const scale = useTransform(cover, [0, 1], [1, 0.9]);
+  const y = useTransform(cover, [0, 1], [0, -60]);
 
-      <a
-        href="#about"
-        className="absolute bottom-8 left-1/2 flex -translate-x-1/2 flex-col items-center gap-2 text-foreground/50 transition-colors hover:text-foreground"
+  return (
+    <section className="sticky top-0 z-0 flex h-[100svh] select-none flex-col items-center justify-center px-6">
+      <motion.div style={{ opacity, scale, y }} className="flex flex-col items-center">
+        <motion.div
+          className="flex flex-col items-center"
+          initial="hidden"
+          animate="show"
+          transition={{ staggerChildren: 0.12, delayChildren: 0.1 }}
+        >
+          <motion.div variants={intro}>
+            <SecretContent
+              focusMaskWidth={420}
+              className="items-center justify-center"
+              secret={
+                <div className="w-full">
+                  <p className="eyebrow secret-ink mb-8 text-center">Abdelrahman Mahmoud</p>
+                  <p className={`${line} secret-ink`}>Fixing</p>
+                  <p className={`${line} secret-ink`}>Bugs That</p>
+                  <p className={`${line} secret-ink`}>I Created</p>
+                </div>
+              }
+            >
+              <div className="w-full">
+                <h1 className="eyebrow mb-8 text-center">Abdelrahman Mahmoud</h1>
+                <p className={`${line} ${ink}`}>Building</p>
+                <p className={`${line} ${accent}`}>Applications</p>
+                <p className={`${line} ${accent}`}>& Websites</p>
+              </div>
+            </SecretContent>
+          </motion.div>
+          <motion.p variants={intro} className={`${line} ${ink}`}>Since</motion.p>
+          <motion.p variants={intro} className={`${line} ${ink}`}>2019</motion.p>
+        </motion.div>
+      </motion.div>
+
+      <motion.a
+        href={`#${SECTIONS.about}`}
+        style={{ opacity }}
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 1.2, duration: 0.8 }}
+        className="absolute bottom-8 left-1/2 flex -translate-x-1/2 flex-col items-center gap-2 text-foreground/60 transition-colors hover:text-foreground"
         aria-label="Scroll to the About section"
       >
         <span className="text-xs uppercase tracking-widest">Scroll</span>
-        <span className="h-8 w-px bg-gradient-to-b from-foreground/50 to-transparent" />
-      </a>
+        <span className="h-8 w-px bg-gradient-to-b from-foreground/60 to-transparent" />
+      </motion.a>
     </section>
   );
 };

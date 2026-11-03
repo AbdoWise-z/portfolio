@@ -7,6 +7,8 @@ import { motion } from "framer-motion";
 import { Menu } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import { CV_PATH, SECTIONS } from "@/lib/site";
+import { useActiveSection } from "@/hooks/use-active-section";
+import { cn } from "@/lib/utils";
 
 const LINKS = [
   { label: "About", id: SECTIONS.about },
@@ -14,6 +16,7 @@ const LINKS = [
   { label: "Projects", id: SECTIONS.projects },
   { label: "Contact", id: SECTIONS.contact },
 ];
+const IDS = LINKS.map((l) => l.id);
 
 /**
  * Section navigation. A sheet menu behind a button below the lg breakpoint,
@@ -21,8 +24,10 @@ const LINKS = [
  * difference blending so it stays readable over any section in either theme.
  */
 const RightNav = () => {
+  const active = useActiveSection(IDS);
+
   return (
-    <div className="pointer-events-none fixed right-0 top-0 z-30 flex h-full flex-col gap-3 p-6 text-white mix-blend-difference md:p-8 lg:w-[210px]">
+    <div className="pointer-events-none fixed right-0 top-0 z-[46] flex h-full flex-col gap-3 p-6 text-white mix-blend-difference md:p-8 lg:w-[210px]">
       {/* Small screens: sheet menu */}
       <div className="pointer-events-auto lg:hidden">
         <Sheet>
@@ -43,8 +48,8 @@ const RightNav = () => {
                 <React.Fragment key={link.id}>
                   {(i === 1 || i === 3) && <Separator className="my-2" />}
                   <SheetClose asChild>
-                    <Button asChild variant="outline" className="rounded-full">
-                      <a href={`#${link.id}`}>{link.label}</a>
+                    <Button asChild variant={active === link.id ? "secondary" : "outline"} className="rounded-full">
+                      <a href={`#${link.id}`} aria-current={active === link.id ? "true" : undefined}>{link.label}</a>
                     </Button>
                   </SheetClose>
                 </React.Fragment>
@@ -67,11 +72,26 @@ const RightNav = () => {
       <nav aria-label="Sections" className="pointer-events-auto mt-auto hidden w-full pb-20 lg:block">
         <p className="eyebrow mb-3 text-white/60">Menu</p>
 
-        {LINKS.map((link) => (
-          <motion.div key={link.id} className="w-fit origin-left" style={{ opacity: 0.8 }} whileHover={{ opacity: 1, scale: 1.12 }}>
-            <a className="text-white" href={`#${link.id}`}>{link.label}</a>
-          </motion.div>
-        ))}
+        {LINKS.map((link) => {
+          const isActive = active === link.id;
+          return (
+            <motion.div
+              key={link.id}
+              className="flex w-fit origin-left items-center gap-2"
+              initial={false}
+              animate={{ opacity: isActive ? 1 : 0.7, x: isActive ? 4 : 0 }}
+              whileHover={{ opacity: 1, scale: 1.1 }}
+            >
+              <span
+                aria-hidden
+                className={cn("h-1.5 w-1.5 rounded-full bg-white transition-opacity duration-300", isActive ? "opacity-100" : "opacity-0")}
+              />
+              <a className="text-white" href={`#${link.id}`} aria-current={isActive ? "true" : undefined}>
+                {link.label}
+              </a>
+            </motion.div>
+          );
+        })}
 
         <div className="h-10" />
         <Button

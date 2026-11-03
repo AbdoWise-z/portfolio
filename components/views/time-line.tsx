@@ -1,10 +1,11 @@
 "use client";
 
 import { useState, useRef, useEffect, useCallback } from "react";
-import { motion, useScroll, useSpring } from "framer-motion";
+import { motion, useScroll, useSpring, useTransform } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { Check } from "lucide-react";
 import Image, { StaticImageData } from "next/image";
+import { useSectionProgress } from "@/hooks/use-section-progress";
 
 export type TimelinePointType = "Major" | "Minor";
 
@@ -23,6 +24,8 @@ export interface TimelineItemData {
 
 /** Scroll distance, as a fraction of the viewport height, that each item occupies. */
 const STEP_VH = 55;
+/** Extra scroll at the end during which the section stays pinned while the next sheet covers it. */
+const TAIL_VH = 100;
 
 const TimelineWidgetDisplay = ({ children }: { children: React.ReactNode }) => (
     <div className="mt-4 w-full max-w-md overflow-hidden rounded-xl border border-border/50 bg-card/80 p-4 shadow-lg">
@@ -32,46 +35,68 @@ const TimelineWidgetDisplay = ({ children }: { children: React.ReactNode }) => (
 
 interface TimelineProps {
     items: TimelineItemData[];
+    /** Id of the element that slides over this section, used to make it recede. */
+    coveredBy: string;
 }
 
 /**
- * Scroll-driven timeline. A sticky viewport shows one item at a time; each item
- * owns a little over half a screen of scroll, and the active item switches at
- * the midpoint so it feels responsive. Points and dates are clickable.
+ * Scroll-driven timeline. It enters as an inset card that expands to full
+ * bleed, then a sticky viewport shows one item at a time (about half a screen
+ * of scroll each, switching at the midpoint). At the end it stays pinned and
+ * recedes while the next section slides over it. Points and dates are clickable.
  */
-export function Timeline({ items }: TimelineProps) {
+export function Timeline({ items, coveredBy }: TimelineProps) {
     const containerRef = useRef<HTMLDivElement>(null);
     const [activeIndex, setActiveIndex] = useState(0);
     const last = items.length - 1;
+    const contentVh = last * STEP_VH;
 
+    // Progress through the whole wrapper; the items occupy the first part, the tail the rest.
     const { scrollYProgress } = useScroll({
         target: containerRef,
         offset: ["start start", "end end"],
     });
-
-    const smoothProgress = useSpring(scrollYProgress, {
-        stiffness: 220,
-        damping: 32,
-        restDelta: 0.001
-    });
+    const contentProgress = useTransform(scrollYProgress, (p) =>
+        Math.min(1, (p * (contentVh + TAIL_VH)) / contentVh),
+    );
+    const smoothProgress = useSpring(contentProgress, { stiffness: 220, damping: 32, restDelta: 0.001 });
 
     useEffect(() => {
-        const unsubscribe = scrollYProgress.on("change", (latest) => {
+        const unsubscribe = contentProgress.on("change", (latest) => {
             setActiveIndex(Math.max(0, Math.min(last, Math.round(latest * last))));
         });
         return () => unsubscribe();
-    }, [scrollYProgress, last]);
+    }, [contentProgress, last]);
+
+    // Entry: an inset, rounded card that grows to fill the screen as it scrolls in.
+    const { scrollYProgress: entry } = useScroll({
+        target: containerRef,
+        offset: ["start end", "start start"],
+    });
+    const clipPath = useTransform(entry, (p) => {
+        const k = 1 - p;
+        return `inset(${(k * 7).toFixed(2)}% ${(k * 4).toFixed(2)}% round ${(k * 36).toFixed(1)}px)`;
+    });
+
+    // Exit: recede while the next sheet covers this one.
+    const cover = useSectionProgress(coveredBy, ["start end", "start start"]);
+    const scale = useTransform(cover, [0, 1], [1, 0.94]);
+    const filter = useTransform(cover, (c) => `brightness(${(1 - c * 0.65).toFixed(3)})`);
+    const borderRadius = useTransform(cover, [0, 1], [0, 32]);
 
     const jumpTo = useCallback((index: number) => {
         const container = containerRef.current;
         if (!container) return;
         const top = container.getBoundingClientRect().top + window.scrollY;
-        window.scrollTo({ top: top + index * (window.innerHeight * STEP_VH) / 100, behavior: "smooth" });
+        window.scrollTo({ top: top + (index * window.innerHeight * STEP_VH) / 100, behavior: "smooth" });
     }, []);
 
     return (
-        <div ref={containerRef} className="relative" style={{ height: `calc(100vh + ${last * STEP_VH}vh)` }}>
-            <div className="sticky top-0 flex h-screen w-full flex-col overflow-hidden bg-black text-white">
+        <div ref={containerRef} className="relative" style={{ height: `calc(100vh + ${contentVh + TAIL_VH}vh)` }}>
+            <motion.div
+                className="sticky top-0 flex h-screen w-full flex-col overflow-hidden bg-black text-white"
+                style={{ clipPath, scale, filter, borderRadius }}
+            >
 
                 {/* Background layer: the current image fades in over the previous one. */}
                 <div className="absolute inset-0" aria-hidden>
@@ -92,6 +117,10 @@ export function Timeline({ items }: TimelineProps) {
                         </motion.div>
                     ))}
                 </div>
+
+                <p className="section-gutter absolute left-0 top-24 z-10 text-xs font-semibold uppercase tracking-[0.3em] text-white/60 md:top-8" aria-hidden>
+                    02 · Timeline
+                </p>
 
                 {/* Content layer */}
                 <div className="section-gutter relative z-10 flex h-full w-full items-center">
@@ -238,7 +267,7 @@ export function Timeline({ items }: TimelineProps) {
                         <div className="h-8 w-px bg-gradient-to-b from-white/50 to-transparent" />
                     </motion.div>
                 </div>
-            </div>
+            </motion.div>
         </div>
     );
 }

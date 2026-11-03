@@ -19,7 +19,7 @@ const formSchema = z.object({
   message: z.string().min(1, "Please write a message.").max(500, "Keep it under 500 characters."),
 })
 
-const directLink = "text-cyan-700 underline-offset-4 transition-colors hover:text-cyan-900 hover:underline dark:text-cyan-300 dark:hover:text-cyan-100";
+const directLink = "text-cyan-800 underline-offset-4 transition-colors hover:text-cyan-950 hover:underline dark:text-cyan-300 dark:hover:text-cyan-100";
 
 const ContactMe = () => {
   const modal = useModal();
@@ -52,11 +52,11 @@ const ContactMe = () => {
   return (
     <section
       id={SECTIONS.contact}
-      className="section-gutter section-panel relative flex min-h-screen scroll-mt-24 flex-col pb-10 pt-24 md:pt-32"
+      className="section-gutter section-panel sheet relative z-40 -mt-[100vh] flex min-h-screen scroll-mt-24 flex-col pb-10 pt-24 md:pt-32"
     >
       <div className="mx-auto grid w-full max-w-5xl flex-1 gap-12 lg:grid-cols-[1fr_1.2fr] lg:gap-20">
         <div>
-          <h2 className="eyebrow mb-6">Contact</h2>
+          <h2 className="eyebrow mb-6">04 · Contact</h2>
           <p className="text-3xl font-bold text-foreground md:text-5xl">{"Let's talk."}</p>
           <p className="mt-4 max-w-md text-muted-foreground">
             Have a project, a question, or just want to say hi? Send a message with the form, or reach me directly.
@@ -64,19 +64,19 @@ const ContactMe = () => {
 
           <dl className="mt-10 space-y-3 text-sm">
             <div className="flex flex-wrap gap-x-4">
-              <dt className="w-20 text-muted-foreground/80">Email</dt>
+              <dt className="w-20 text-muted-foreground">Email</dt>
               <dd><a className={directLink} href={`mailto:${SOCIAL_LINKS.email}`}>{SOCIAL_LINKS.email}</a></dd>
             </div>
             <div className="flex flex-wrap gap-x-4">
-              <dt className="w-20 text-muted-foreground/80">LinkedIn</dt>
+              <dt className="w-20 text-muted-foreground">LinkedIn</dt>
               <dd><a className={directLink} href={SOCIAL_LINKS.linkedin} target="_blank" rel="noopener noreferrer">in/xabdomo</a></dd>
             </div>
             <div className="flex flex-wrap gap-x-4">
-              <dt className="w-20 text-muted-foreground/80">GitHub</dt>
+              <dt className="w-20 text-muted-foreground">GitHub</dt>
               <dd><a className={directLink} href={SOCIAL_LINKS.github} target="_blank" rel="noopener noreferrer">AbdoWise-z</a></dd>
             </div>
             <div className="flex flex-wrap gap-x-4">
-              <dt className="w-20 text-muted-foreground/80">CV</dt>
+              <dt className="w-20 text-muted-foreground">CV</dt>
               <dd><a className={directLink} href={CV_PATH} target="_blank" rel="noopener noreferrer">Download PDF</a></dd>
             </div>
           </dl>

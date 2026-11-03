@@ -70,13 +70,13 @@ const DARK: Palette = {
 };
 
 const LIGHT: Palette = {
-  bg: "#eef2fa",
+  bg: "#f3f5fb",
   tints: ["30,41,59", "37,99,235", "124,58,237", "8,145,178"],
-  alpha: 0.85,
+  alpha: 0.8,
   line: "37,99,235",
   shooter: "30,41,59",
   ripple: "37,99,235",
-  nebulaAlpha: 0.2,
+  nebulaAlpha: 0.15,
   nebula: [
     { x: 0.18, y: 0.28, r: 0.55, c: "167,139,250" },
     { x: 0.82, y: 0.22, r: 0.5, c: "96,165,250" },
@@ -491,7 +491,7 @@ const SpaceBackground = () => {
     <canvas
       ref={canvasRef}
       aria-hidden
-      className="pointer-events-none fixed inset-0 z-[-20] h-full w-full bg-[#eef2fa] dark:bg-[#05070f]"
+      className="pointer-events-none fixed inset-0 z-[-20] h-full w-full bg-[#f3f5fb] dark:bg-[#05070f]"
     />
   );
 };

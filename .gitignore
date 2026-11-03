@@ -39,3 +39,6 @@ next-env.d.ts
 
 # IDE
 /.idea/
+
+# local visual-check scripts and screenshots
+/.checks/

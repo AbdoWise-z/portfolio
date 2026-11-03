@@ -18,7 +18,7 @@ const SecretContentIndicator = () => {
     const Y = useMotionTemplate`${transformedY}px`;
 
     return (
-        <div className="pointer-events-none fixed inset-0 z-40 overflow-hidden" ref={ref} aria-hidden>
+        <div className="pointer-events-none fixed inset-0 z-[48] overflow-hidden" ref={ref} aria-hidden>
             <motion.div
                 style={{
                     position: "absolute",

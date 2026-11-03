@@ -34,11 +34,11 @@ const LeftNav = () => {
       {/* Small screens: a soft backdrop so the bar reads over any section. */}
       <div
         aria-hidden
-        className="pointer-events-none fixed inset-x-0 top-0 z-20 h-24 bg-gradient-to-b from-background/90 via-background/60 to-transparent md:hidden"
+        className="pointer-events-none fixed inset-x-0 top-0 z-[45] h-24 bg-gradient-to-b from-background/90 via-background/60 to-transparent md:hidden"
       />
 
       <a
-        className="fixed left-6 top-6 z-30 flex aspect-square items-center justify-center rounded-full md:left-8 md:top-8"
+        className="fixed left-6 top-6 z-[46] flex aspect-square items-center justify-center rounded-full md:left-8 md:top-8"
         href="/"
         aria-label="Back to top"
       >
@@ -48,7 +48,7 @@ const LeftNav = () => {
       <nav
         aria-label="Social links"
         className={
-          "fixed left-0 top-0 z-30 flex w-full flex-row items-center justify-end gap-0 p-6 pl-20 pr-[76px] text-white mix-blend-difference " +
+          "fixed left-0 top-0 z-[46] flex w-full flex-row items-center justify-end gap-0 p-6 pl-20 pr-[76px] text-white mix-blend-difference " +
           "md:h-full md:w-[120px] md:flex-col md:justify-end md:gap-3 md:p-8 md:pb-[72px]"
         }
       >
