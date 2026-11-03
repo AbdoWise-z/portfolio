@@ -73,6 +73,20 @@
   }
 }
 
+@media print {
+  canvas,
+  nav,
+  [aria-hidden="true"] {
+    display: none !important;
+  }
+  section {
+    position: static !important;
+    transform: none !important;
+    clip-path: none !important;
+    opacity: 1 !important;
+  }
+}
+
 @layer components {
   /* Horizontal gutters that keep content clear of the fixed side navigation. */
   .section-gutter {

@@ -39,7 +39,21 @@ The contact form posts to Formspree; the endpoint is in
 - `components/views/space-background.tsx` – the interactive starfield canvas (theme-aware):
   parallax, pointer gravity + constellation, scroll warp, click ripples and shooting stars.
 - `components/views/magnetic.tsx`, `grain.tsx`, `scroll-progress.tsx` – small decorative pieces.
-- `.checks/` (git-ignored) – Playwright scripts used to screenshot and probe the site locally.
+- `scripts/checks/` – Playwright scripts that screenshot and probe the running site (see below).
 - `components/views/secret-content-indicator.tsx` – the inverting lens that follows the pointer.
 - `components/views/nav/theme-toggle.tsx` – light/dark switch (next-themes, class strategy).
 - `public/banners/` – background images for the timeline and project slides.
+
+## Visual checks
+
+With `npm run dev` running in another terminal:
+
+```bash
+npm run check:shots        # full-page screenshots at 390 / 768 / 1280 / 1920
+npm run check:themes       # light + dark, lens alignment, timeline jump
+npm run check:transitions  # frames through every section boundary (args: width theme)
+npm run check:probe        # mask alignment numbers while hovering (args: label text)
+```
+
+They drive the installed Edge (`BROWSER_CHANNEL=chrome` to use Chrome instead); no browser
+download is needed. Screenshots land in `.checks/shots/`, which is git-ignored.
