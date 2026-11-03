@@ -1,8 +1,8 @@
 "use client";
 
 import SecretContent from "@/components/views/secret-content";
-import React from "react";
-import { motion, useTransform } from "framer-motion";
+import React, { useEffect } from "react";
+import { motion, useMotionValue, useSpring, useTransform } from "framer-motion";
 import { useSectionProgress } from "@/hooks/use-section-progress";
 import { SECTIONS } from "@/lib/site";
 
@@ -26,10 +26,26 @@ const Landing = () => {
   const y = useTransform(cover, [0, 1], [0, -60]);
   const hintOpacity = useTransform(cover, [0, 0.5], [1, 0]);
 
+  // Mild pointer parallax: the headline drifts a few pixels against the mouse.
+  const px = useMotionValue(0);
+  const py = useMotionValue(0);
+  const parallaxX = useSpring(px, { stiffness: 60, damping: 20 });
+  const parallaxY = useSpring(py, { stiffness: 60, damping: 20 });
+  useEffect(() => {
+    if (window.matchMedia("(pointer: coarse)").matches) return;
+    const onMove = (e: PointerEvent) => {
+      px.set((e.clientX / window.innerWidth - 0.5) * -14);
+      py.set((e.clientY / window.innerHeight - 0.5) * -10);
+    };
+    window.addEventListener("pointermove", onMove, { passive: true });
+    return () => window.removeEventListener("pointermove", onMove);
+  }, [px, py]);
+
   return (
     <section className="sticky top-0 z-0 flex h-[100svh] select-none flex-col items-center justify-center px-6">
       <motion.div style={{ opacity, scale, y }} className="flex flex-col items-center">
         <motion.div
+          style={{ x: parallaxX, y: parallaxY }}
           className="flex flex-col items-center"
           initial="hidden"
           animate="show"

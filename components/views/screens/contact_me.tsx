@@ -19,6 +19,7 @@ const formSchema = z.object({
   name: z.string().min(2, "Please enter your name.").max(50),
   email: z.string().email("Please enter a valid email."),
   message: z.string().min(1, "Please write a message.").max(500, "Keep it under 500 characters."),
+  _gotcha: z.string().optional(),
 })
 
 const directLink = "text-cyan-800 underline-offset-4 transition-colors hover:text-cyan-950 hover:underline dark:text-cyan-300 dark:hover:text-cyan-100";
@@ -36,10 +37,12 @@ const ContactMe = () => {
       name: "",
       email: "",
       message: "",
+      _gotcha: "",
     },
   })
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
+    if (values._gotcha) return; // honeypot filled: silently drop
     modal.open(ModalType.LOADING);
     try {
       const res = await fetch(FORMSPREE_ENDPOINT, {
@@ -93,6 +96,8 @@ const ContactMe = () => {
 
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col gap-5" noValidate>
+            {/* Formspree honeypot: bots fill it, people never see it. */}
+            <input type="text" tabIndex={-1} autoComplete="off" aria-hidden className="hidden" {...form.register("_gotcha")} />
             <div className="grid gap-5 sm:grid-cols-2">
               <FormField
                 control={form.control}

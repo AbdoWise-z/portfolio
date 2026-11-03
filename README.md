@@ -36,7 +36,10 @@ The contact form posts to Formspree; the endpoint is in
 - `components/views/secret-content*.tsx` + `hooks/use-mask-position.tsx` – the
   cursor-following "secret content" mask effect.
 - `components/ui/` – shadcn/ui primitives.
-- `components/views/space-background.tsx` – the interactive starfield canvas (theme-aware).
+- `components/views/space-background.tsx` – the interactive starfield canvas (theme-aware):
+  parallax, pointer gravity + constellation, scroll warp, click ripples and shooting stars.
+- `components/views/magnetic.tsx`, `grain.tsx`, `scroll-progress.tsx` – small decorative pieces.
+- `.checks/` (git-ignored) – Playwright scripts used to screenshot and probe the site locally.
 - `components/views/secret-content-indicator.tsx` – the inverting lens that follows the pointer.
 - `components/views/nav/theme-toggle.tsx` – light/dark switch (next-themes, class strategy).
 - `public/banners/` – background images for the timeline and project slides.
