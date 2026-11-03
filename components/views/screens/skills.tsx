@@ -1,7 +1,8 @@
 "use client";
 
 import React from "react";
-import { motion } from "framer-motion";
+import { motion, useTransform } from "framer-motion";
+import { useSectionProgress } from "@/hooks/use-section-progress";
 import { Cpu, Monitor, Server, Sparkles } from "lucide-react";
 import SecretContent from "@/components/views/secret-content";
 import { SECTIONS } from "@/lib/site";
@@ -49,12 +50,17 @@ const card = {
 
 /** Skills sheet: slides over the pinned projects slideshow. */
 const Skills = () => {
+  // Recede slightly while the contact curtain rises over the bottom edge.
+  const cover = useSectionProgress(SECTIONS.contact, ["start end", "start 0.4"]);
+  const scale = useTransform(cover, [0, 1], [1, 0.965]);
+  const opacity = useTransform(cover, [0, 1], [1, 0.55]);
+
   return (
     <section
       id={SECTIONS.skills}
       className="section-gutter section-panel sheet relative z-[35] -mt-[100vh] scroll-mt-24 py-24 md:py-32"
     >
-      <div className="mx-auto w-full max-w-5xl">
+      <motion.div style={{ scale, opacity }} className="mx-auto w-full max-w-5xl origin-top">
         <h2 className="eyebrow mb-4">04 · Skills</h2>
         <p className="mb-12 max-w-2xl text-2xl font-bold text-slate-900 dark:text-cyan-50 md:text-4xl">
           Tools I reach for, from the browser down to the silicon.
@@ -97,7 +103,7 @@ const Skills = () => {
             </motion.li>
           ))}
         </motion.ul>
-      </div>
+      </motion.div>
     </section>
   );
 };

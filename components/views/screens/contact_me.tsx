@@ -1,6 +1,7 @@
 "use client";
 
-import React from 'react';
+import React, {useRef} from 'react';
+import {motion, useScroll, useTransform} from "framer-motion";
 import {z} from "zod"
 import {zodResolver} from "@hookform/resolvers/zod";
 import {useForm} from "react-hook-form";
@@ -24,6 +25,11 @@ const directLink = "text-cyan-800 underline-offset-4 transition-colors hover:tex
 
 const ContactMe = () => {
   const modal = useModal();
+  const ref = useRef<HTMLElement>(null);
+  // Curtain entry: rises a little faster than the page and settles as its top reaches the viewport.
+  const { scrollYProgress: entry } = useScroll({ target: ref, offset: ["start end", "start 0.3"] });
+  const y = useTransform(entry, [0, 1], [96, 0]);
+  const borderRadius = useTransform(entry, [0, 1], [48, 0]);
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -51,9 +57,11 @@ const ContactMe = () => {
   }
 
   return (
-    <section
+    <motion.section
+      ref={ref}
       id={SECTIONS.contact}
-      className="section-gutter section-panel relative z-40 flex min-h-screen scroll-mt-24 flex-col border-t border-foreground/10 pb-10 pt-24 md:pt-32"
+      style={{ y, borderTopLeftRadius: borderRadius, borderTopRightRadius: borderRadius }}
+      className="section-gutter section-panel relative z-40 flex min-h-screen scroll-mt-24 flex-col border-t border-foreground/10 pb-10 pt-24 shadow-[0_-30px_60px_-30px_rgba(0,0,0,0.45)] md:pt-32"
     >
       <div className="mx-auto grid w-full max-w-5xl flex-1 gap-12 lg:grid-cols-[1fr_1.2fr] lg:gap-20">
         <div>
@@ -147,7 +155,7 @@ const ContactMe = () => {
         <span>© {new Date().getFullYear()} Abdelrahman Mahmoud</span>
         <span>Built with Next.js. Click anywhere for a shooting star.</span>
       </footer>
-    </section>
+    </motion.section>
   );
 };
 
