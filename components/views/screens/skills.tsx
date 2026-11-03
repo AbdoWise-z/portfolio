@@ -15,31 +15,31 @@ type SkillGroup = {
   items: string[];
 };
 
-/** Skill groups, taken from the CV in public/my_cv.pdf. */
+/** Skill groups, matching the "Skills" section of the CV in public/my_cv.pdf. */
 const GROUPS: SkillGroup[] = [
   {
     title: "Front-end",
     secret: "Pixel pushing",
     icon: <Monitor className="h-5 w-5" />,
-    items: ["React", "Next.js", "Tailwind", "HTML / CSS", "Flutter", "Android (Java / Kotlin)"],
+    items: ["React", "Next.js", "Tailwind", "HTML", "CSS", "Flutter", "Android (Java / Kotlin)"],
   },
   {
     title: "Back-end",
     secret: "Where bugs live",
     icon: <Server className="h-5 w-5" />,
-    items: ["Spring Boot", "Node.js", "Express", "Prisma", "MySQL", "MongoDB"],
+    items: ["Spring Boot", "Node.js", "Express", "Prisma (MySQL / MongoDB)"],
   },
   {
     title: "Hardware",
     secret: "Smoke & magic",
     icon: <Cpu className="h-5 w-5" />,
-    items: ["Verilog / SystemVerilog", "VHDL", "Logic design", "AVR", "Arduino"],
+    items: ["SystemVerilog / Verilog", "VHDL", "Logic design", "AVR", "Arduino"],
   },
   {
     title: "AI & misc",
     secret: "Everything else",
     icon: <Sparkles className="h-5 w-5" />,
-    items: ["Machine learning", "Reinforcement learning", "OpenCV", "C / C++", "OpenGL", "Git"],
+    items: ["Artificial intelligence", "Machine learning", "Reinforcement learning", "Image processing (OpenCV)", "C / C++", "OpenGL", "Git"],
   },
 ];
 

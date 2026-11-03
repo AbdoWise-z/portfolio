@@ -3,7 +3,7 @@
 import {useState, useEffect, useCallback, useRef} from "react";
 import { motion, AnimatePresence, useInView, useScroll, useTransform } from "framer-motion";
 import { useSectionProgress } from "@/hooks/use-section-progress";
-import { Github, Layers, Smartphone, Cpu, ChevronLeft, ChevronRight, Gamepad2, Truck, Type, MessageSquare, Search, Edit3, LayoutGrid } from "lucide-react";
+import { Github, Layers, Smartphone, Cpu, ChevronLeft, ChevronRight, Gamepad2, Truck, Type, MessageSquare, Search, Edit3, LayoutGrid, ExternalLink } from "lucide-react";
 import { Dialog, DialogContent, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -33,6 +33,8 @@ interface Project {
     tags: string[];
     color: string;
     source?: string;
+    /** Deployed demo, if one is linked from the CV. */
+    demo?: string;
 }
 
 const projects: Project[] = [
@@ -89,7 +91,8 @@ const projects: Project[] = [
         icon: <Type className="h-6 w-6" />,
         tags: ["Python", "OpenCV", "Deep Learning", "Jupyter"],
         color: "from-orange-500/20 to-red-500/20",
-        source: "https://github.com/AbdoWise-z/Arabic-Font-Type-Detector"
+        source: "https://github.com/AbdoWise-z/Arabic-Font-Type-Detector",
+        demo: "http://xabdomo.pythonanywhere.com/"
     },
     {
         id: "discordo",
@@ -100,7 +103,8 @@ const projects: Project[] = [
         icon: <MessageSquare className="h-6 w-6" />,
         tags: ["TypeScript", "Next.js", "Prisma", "MongoDB"],
         color: "from-indigo-500/20 to-blue-500/20",
-        source: "https://github.com/AbdoWise-z/discordo"
+        source: "https://github.com/AbdoWise-z/discordo",
+        demo: "https://discordo-production.up.railway.app/"
     },
     {
         id: "gigachat",
@@ -133,7 +137,8 @@ const projects: Project[] = [
         icon: <Edit3 className="h-6 w-6" />,
         tags: ["JavaScript", "Next.js", "React", "MongoDB"],
         color: "from-violet-500/20 to-purple-500/20",
-        source: "https://github.com/AbdoWise-z/Promptopia"
+        source: "https://github.com/AbdoWise-z/Promptopia",
+        demo: "https://promptopia-eight-black.vercel.app/"
     }
 ];
 
@@ -299,18 +304,32 @@ export default function ProjectsPage() {
                                     ))}
                                 </ul>
 
-                                {currentProject.source && (
-                                    <div className="flex gap-4 pt-2">
-                                        <Magnetic>
-                                            <a
-                                                href={currentProject.source}
-                                                target="_blank"
-                                                rel="noopener noreferrer"
-                                                className="flex h-12 select-none items-center rounded-full border border-white/20 px-6 text-white transition-colors hover:bg-white/10"
-                                            >
-                                                <Github className="mr-2 h-5 w-5" /> Source
-                                            </a>
-                                        </Magnetic>
+                                {(currentProject.source || currentProject.demo) && (
+                                    <div className="flex flex-wrap gap-3 pt-2">
+                                        {currentProject.demo && (
+                                            <Magnetic>
+                                                <a
+                                                    href={currentProject.demo}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    className="flex h-12 select-none items-center rounded-full bg-white px-6 font-semibold text-black transition-colors hover:bg-white/90"
+                                                >
+                                                    <ExternalLink className="mr-2 h-5 w-5" /> Live demo
+                                                </a>
+                                            </Magnetic>
+                                        )}
+                                        {currentProject.source && (
+                                            <Magnetic>
+                                                <a
+                                                    href={currentProject.source}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    className="flex h-12 select-none items-center rounded-full border border-white/20 px-6 text-white transition-colors hover:bg-white/10"
+                                                >
+                                                    <Github className="mr-2 h-5 w-5" /> Source
+                                                </a>
+                                            </Magnetic>
+                                        )}
                                     </div>
                                 )}
                             </motion.div>
