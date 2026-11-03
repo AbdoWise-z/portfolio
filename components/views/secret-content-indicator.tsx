@@ -1,38 +1,32 @@
 "use client";
 
-import React, {useEffect, useRef, useState} from 'react';
-import {motion, useMotionTemplate, useMotionValue, useTransform} from "framer-motion";
-import {useSecretContextValues} from "@/components/providers/secret-content-context-provider";
-import {useWindowSize} from "@/hooks/use-window-size";
-import {className} from "postcss-selector-parser";
+import React, {useRef} from 'react';
+import {motion, useMotionTemplate} from "framer-motion";
 import {useMaskPosition} from "@/hooks/use-mask-position";
-import {useFadeFromEnabled} from "@/hooks/use-fade-from-enabled";
 
+/** The visible circle that follows the pointer and marks the "secret" reveal area. */
 const SecretContentIndicator = (
     {color} : {color?: string}
 ) => {
-
     const ref = useRef<HTMLDivElement>(null);
 
-    const {transformedX , transformedY, contextData} = useMaskPosition(ref);
+    const {transformedX, transformedY, contextData} = useMaskPosition(ref);
     const size = useMotionTemplate`${contextData.MaskSize ?? 50}px`;
     const X = useMotionTemplate`${transformedX}px`;
     const Y = useMotionTemplate`${transformedY}px`;
 
     return (
-        <div className="absolute top-0 left-0 w-[100%] h-[100%] overflow-hidden" ref={ref}>
+        <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none" ref={ref} aria-hidden>
             <motion.div
                 style={{
                     position: "absolute",
                     width: size,
                     height: size,
-                    backgroundColor: `${color ?? "#007af3"}`,
+                    backgroundColor: color ?? "#007af3",
                     borderRadius: "100%",
                     x: X,
                     y: Y,
                 }}
-
-                transition={{ duration: 0.6 }}
             />
         </div>
     );

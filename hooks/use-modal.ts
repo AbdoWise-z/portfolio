@@ -1,13 +1,10 @@
 import {create} from "zustand";
 
-
 export enum ModalType {
   LOADING,
   SUCCESS,
   ERROR,
 }
-
-
 
 interface ModalStore {
   type: ModalType | null;
@@ -20,7 +17,6 @@ export const useModal = create<ModalStore>(
   (set) => ({
     type: null,
     isOpen: false,
-    data: {},
     open(type: ModalType) {
       set({
         isOpen: true, type

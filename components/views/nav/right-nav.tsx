@@ -13,22 +13,14 @@ import SecretContent from "@/components/views/secret-content";
 import {Separator} from "@/components/ui/separator";
 
 const RightNav = () => {
-    const handleAboutClick = () => {
-        document.querySelector("#ABOUT_ME_SECTION")!.scrollIntoView({ behavior: 'smooth' });
-    }
+    const scrollTo = (id: string) => () => {
+        document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
+    };
 
-    const handleTimelineClick = () => {
-        document.querySelector("#TIMELINE_SECTION")!.scrollIntoView({ behavior: 'smooth' });
-    }
-
-
-    const handleProjectsClick = () => {
-        document.querySelector("#PROJECTS_SECTION")!.scrollIntoView({ behavior: 'smooth' });
-    }
-
-    const handleContactClick = () => {
-        document.querySelector("#CONTACT_ME_SECTION")!.scrollIntoView({ behavior: 'smooth' });
-    }
+    const handleAboutClick = scrollTo("ABOUT_ME_SECTION");
+    const handleTimelineClick = scrollTo("TIMELINE_SECTION");
+    const handleProjectsClick = scrollTo("PROJECTS_SECTION");
+    const handleContactClick = scrollTo("CONTACT_ME_SECTION");
 
     return (
         <div className={"flex fixed right-0 top-0 gap-3 p-8 flex-col h-full md:w-[200px]"}>

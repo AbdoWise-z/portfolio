@@ -2,77 +2,47 @@ import { useMotionValue, useSpring } from "framer-motion";
 import React, { useEffect } from "react";
 import { useSecretContextValues } from "@/components/providers/secret-content-context-provider";
 
-export const useMaskPosition = (ref: React.RefObject<any>) => {
+/**
+ * Converts the shared viewport pointer position into coordinates relative to
+ * `ref`, centred on the mask, so it can be used as a CSS mask position.
+ */
+export const useMaskPosition = (ref: React.RefObject<HTMLElement | null>) => {
     const contextData = useSecretContextValues();
+    const { pointerX, pointerY, maskX, maskY, MaskSize } = contextData;
 
-    // Raw mouse/touch position in viewport
-    const vMouseX = useMotionValue(-1000);
-    const vMouseY = useMotionValue(-1000);
-
-    // Smooth spring versions
-    const vMaskX = useSpring(vMouseX, { stiffness: 1800, damping: 150 });
-    const vMaskY = useSpring(vMouseY, { stiffness: 1800, damping: 150 });
+    const targetX = useMotionValue(0);
+    const targetY = useMotionValue(0);
+    const transformedX = useSpring(targetX, { stiffness: 1200, damping: 100 });
+    const transformedY = useSpring(targetY, { stiffness: 1200, damping: 100 });
 
     useEffect(() => {
-        const updatePosition = (x: number, y: number) => {
-            vMouseX.set(x);
-            vMouseY.set(y);
-        };
+        if (!pointerX || !pointerY || !maskX || !maskY || !MaskSize) return;
 
-        const onPointerMove = (e: PointerEvent) => {
-            updatePosition(e.clientX, e.clientY);
-        };
-
-        const onTouchMove = (e: TouchEvent) => {
-            if (e.touches.length === 0) return;
-            const t = e.touches[0];
-            updatePosition(t.clientX, t.clientY);
-        };
-
-        window.addEventListener("pointermove", onPointerMove);
-        window.addEventListener("touchmove", onTouchMove, { passive: true });
-
-        return () => {
-            window.removeEventListener("pointermove", onPointerMove);
-            window.removeEventListener("touchmove", onTouchMove);
-        };
-    }, [vMouseX, vMouseY]);
-
-    //
-    // RETURN SCROLL-AWARE COORDINATES
-    //
-    const transformedX = useSpring(vMaskX, { stiffness: 1200, damping: 100 });
-    const transformedY = useSpring(vMaskY, { stiffness: 1200, damping: 100 });
-
-    useEffect(() => {
         const update = () => {
-            if (!ref.current) return;
+            const node = ref.current;
+            if (!node) return;
 
-            const layoutRect = ref.current.getBoundingClientRect();
+            const rect = node.getBoundingClientRect();
+            const half = MaskSize.get() / 2;
 
-            // Apply scroll offset + center the mask
-            const finalX =
-                vMouseX.get() - layoutRect.left - contextData.MaskSize!.get() / 2;
-
-            const finalY =
-                vMouseY.get() - layoutRect.top - contextData.MaskSize!.get() / 2;
-
-            transformedX.set(finalX);
-            transformedY.set(finalY);
+            targetX.set(pointerX.get() - rect.left - half);
+            targetY.set(pointerY.get() - rect.top - half);
         };
 
-        update(); // run once
+        update();
 
         window.addEventListener("scroll", update, { passive: true });
-        const unsubX = vMaskX.onChange(update);
-        const unsubY = vMaskY.onChange(update);
+        const unsubs = [
+            maskX.on("change", update),
+            maskY.on("change", update),
+            MaskSize.on("change", update),
+        ];
 
         return () => {
             window.removeEventListener("scroll", update);
-            unsubX();
-            unsubY();
+            unsubs.forEach((u) => u());
         };
-    }, [ref, contextData.MaskSize, vMouseX, vMouseY, vMaskX, vMaskY, transformedX, transformedY]);
+    }, [ref, pointerX, pointerY, maskX, maskY, MaskSize, targetX, targetY]);
 
     return {
         transformedX,

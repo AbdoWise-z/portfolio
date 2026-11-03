@@ -1,32 +1,30 @@
 "use client";
-import React, {useEffect, useRef, useState} from 'react';
+import React, {useRef} from 'react';
 import {useSecretContextValues} from "@/components/providers/secret-content-context-provider";
 import {cn} from "@/lib/utils";
 
+/** Hides the secret-content mask while the pointer is over its children. */
 const SecretIndicatorFade = ({children, className} : {children: React.ReactNode , className?: string}) => {
-  const ref = useRef<HTMLDivElement>(null);
-  const contextData = useSecretContextValues();
+  const {innerMaskSize, setMaskSize, setEnabled} = useSecretContextValues();
+  const previousSize = useRef<number>(60);
 
-  const [oldSize, setSize] = useState<number>(0);
+  const onMouseEnter = () => {
+    previousSize.current = innerMaskSize?.get() ?? 60;
+    setMaskSize?.(0);
+    setEnabled?.(false);
+  };
 
-  useEffect(() => {
-    if (!ref.current) return;
-
-    ref.current.onmouseenter = (e) => {
-        setSize(contextData.innerMaskSize!.get());
-        contextData.setMaskSize!(0);
-        contextData.setEnabled!(false);
-    }
-
-    ref.current.onmouseleave = (e) => {
-        contextData.setMaskSize!(oldSize);
-        contextData.setEnabled!(true);
-    }
-  }, [contextData, oldSize]);
-
+  const onMouseLeave = () => {
+    setMaskSize?.(previousSize.current);
+    setEnabled?.(true);
+  };
 
   return (
-    <div ref={ref} className={cn("block w-fit h-fit", className)}>
+    <div
+      className={cn("block w-fit h-fit", className)}
+      onMouseEnter={onMouseEnter}
+      onMouseLeave={onMouseLeave}
+    >
       {children}
     </div>
   );

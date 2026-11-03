@@ -162,8 +162,8 @@ const variants = {
 export default function ProjectsPage() {
     const [[page, direction], setPage] = useState([0, 0]);
 
-    // Ensure positive modulo for infinite wrapping or safe clamping
-    const projectIndex = Math.abs(page % projects.length);
+    // Positive modulo so paging below zero still wraps in the right direction.
+    const projectIndex = ((page % projects.length) + projects.length) % projects.length;
     const currentProject = projects[projectIndex];
 
     const paginate = useCallback((newDirection: number) => {
@@ -175,8 +175,6 @@ export default function ProjectsPage() {
             paginate(1);
         } else if (event.key === "ArrowLeft") {
             paginate(-1);
-        } else if (event.key === "Escape") {
-            // Navigate back or handle escape
         }
     }, [paginate]);
 
@@ -258,7 +256,7 @@ export default function ProjectsPage() {
 
                                 {/* Tags */}
                                 <div className="flex flex-wrap gap-3">
-                                    {currentProject.tags.map((tag, i) => (
+                                    {currentProject.tags.map((tag) => (
                                         <span
                                             key={tag}
                                             className="px-4 py-2 rounded-full text-sm font-medium bg-white/5 border border-white/10 text-white/80 backdrop-blur-sm"

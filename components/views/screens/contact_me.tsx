@@ -1,6 +1,6 @@
 "use client";
 
-import React, {useEffect, useRef} from 'react';
+import React from 'react';
 import SecretContent from "@/components/views/secret-content";
 import {z} from "zod"
 import {zodResolver} from "@hookform/resolvers/zod";
@@ -10,8 +10,9 @@ import {Input} from "@/components/ui/input";
 import {Button} from "@/components/ui/button";
 import {useSecretContextValues} from "@/components/providers/secret-content-context-provider";
 import {Textarea} from "@/components/ui/textarea";
-import axios from "axios";
 import {ModalType, useModal} from "@/hooks/use-modal";
+
+const FORMSPREE_ENDPOINT = "https://formspree.io/f/xrbzpznw";
 
 const formSchema = z.object({
   name: z.string().min(2).max(50),
@@ -19,12 +20,9 @@ const formSchema = z.object({
   message: z.string().min(1).max(500),
 })
 
-function sleep(ms: number): Promise<void> {
-  return new Promise(resolve => setTimeout(resolve, ms));
-}
-
 const ContactMe = () => {
   const modal = useModal();
+  const {setMaskSize} = useSecretContextValues();
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -37,34 +35,28 @@ const ContactMe = () => {
   async function onSubmit(values: z.infer<typeof formSchema>) {
     modal.open(ModalType.LOADING);
     try {
-      await axios.post("https://formspree.io/f/xrbzpznw", values,);
+      const res = await fetch(FORMSPREE_ENDPOINT, {
+        method: "POST",
+        headers: {"Content-Type": "application/json", Accept: "application/json"},
+        body: JSON.stringify(values),
+      });
+      if (!res.ok) throw new Error(`Formspree responded with ${res.status}`);
       modal.open(ModalType.SUCCESS);
       form.reset();
     } catch (e) {
-      console.log(e);
+      console.error(e);
       modal.open(ModalType.ERROR);
     }
   }
-  
-  const maskControl = useSecretContextValues();
-  const ref = useRef<HTMLDivElement>(null);
-  
-  useEffect(() => {
-    if (!ref.current) return;
-    if (!maskControl.MaskSize) return;
-    
-    ref.current.onmouseenter = () => {
-      maskControl.MaskSize!.set(0);
-    }
-    ref.current.onmouseleave = () => {
-      maskControl.MaskSize!.set(60);
-    }
-  } , [maskControl.MaskSize]);
-  
+
   return (
-    <div className="relative flex flex-col contect-start items-center justify-start min-h-[110vh]">
-      <div className="absolute h-[100%] w-[100%] bg-neutral-900 z-[-1]"/>
-      <div className="flex flex-col mb-20 mt-20 w-[65%] h-fit content-start items-start justify-start" ref={ref}>
+    <div className="relative flex flex-col items-center justify-start min-h-[110vh]">
+      <div className="absolute h-full w-full bg-neutral-900 z-[-1]"/>
+      <div
+        className="flex flex-col mb-20 mt-20 w-[65%] h-fit content-start items-start justify-start"
+        onMouseEnter={() => setMaskSize?.(0)}
+        onMouseLeave={() => setMaskSize?.(60)}
+      >
         <h1 className={"text-white font-bold text-center pt-10 text-2xl md:text-4xl"} id={"CONTACT_ME_SECTION"}> {"Let's Talk"} </h1>
         <p className={"text-neutral-400 mb-10 "}>Fill the following form to send me a message</p>
 
@@ -76,7 +68,7 @@ const ContactMe = () => {
               render={({ field }) => (
                 <FormItem className={"w-[60%] max-w-[300px]"}>
                   <FormControl>
-                    <Input placeholder="name" {...field} />
+                    <Input placeholder="name" autoComplete="name" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -89,7 +81,7 @@ const ContactMe = () => {
               render={({ field }) => (
                 <FormItem className={"mt-4 w-[60%] max-w-[300px]"}>
                   <FormControl>
-                    <Input placeholder="email" {...field} />
+                    <Input type="email" placeholder="email" autoComplete="email" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>

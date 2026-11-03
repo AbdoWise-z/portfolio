@@ -1,12 +1,9 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { motion, useScroll, useTransform, useSpring, MotionValue } from "framer-motion";
+import { motion, useScroll, useSpring } from "framer-motion";
 import { cn } from "@/lib/utils";
-import { Check, Circle, Briefcase, GraduationCap, Code, Star } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
+import { Check } from "lucide-react";
 import {StaticImageData} from "next/image";
 
 // --- Types ---
@@ -26,13 +23,6 @@ export interface TimelineItemData {
     certificateUrl?: string; // Link to certificate
 }
 
-// --- Mock Data ---
-// We will use the generated images here.
-// Assuming the tool returns paths like attached_assets/generated_images/...
-// I will use placeholders first and update them if I can, or just use the import alias if I knew the filenames.
-// Since I don't know the filenames yet, I will pass them as props or update this file after generation.
-// For now, I'll assume standard names or use CSS gradients as fallbacks.
-
 // --- Components ---
 
 const TimelineWidgetDisplay = ({ children }: { children: React.ReactNode }) => (
@@ -40,53 +30,6 @@ const TimelineWidgetDisplay = ({ children }: { children: React.ReactNode }) => (
         {children}
     </div>
 );
-
-const ExampleWidget1 = () => (
-    <div className="space-y-2">
-        <div className="flex items-center justify-between">
-            <span className="text-sm font-medium">Skill Proficiency</span>
-            <span className="text-xs text-muted-foreground">85%</span>
-        </div>
-        <div className="h-2 w-full bg-secondary rounded-full overflow-hidden">
-            <motion.div
-                initial={{ width: 0 }}
-                whileInView={{ width: "85%" }}
-                transition={{ duration: 1, delay: 0.2 }}
-                className="h-full bg-primary"
-            />
-        </div>
-        <div className="flex gap-2 mt-2">
-            <Badge variant="outline">React</Badge>
-            <Badge variant="outline">TypeScript</Badge>
-            <Badge variant="outline">Node.js</Badge>
-        </div>
-    </div>
-);
-
-const ExampleWidget2 = () => (
-    <Card className="border-0 shadow-none bg-transparent">
-        <CardHeader className="p-0 pb-2">
-            <CardTitle className="text-sm">Recent Achievement</CardTitle>
-        </CardHeader>
-        <CardContent className="p-0 flex items-center gap-3">
-            <div className="h-10 w-10 rounded-full bg-yellow-500/20 flex items-center justify-center text-yellow-500">
-                <Star className="h-5 w-5" />
-            </div>
-            <div>
-                <p className="text-sm font-medium">Employee of the Month</p>
-                <p className="text-xs text-muted-foreground">March 2024</p>
-            </div>
-        </CardContent>
-    </Card>
-);
-
-const ExampleWidget3 = () => (
-    <div className="grid grid-cols-2 gap-2">
-        <Button variant="outline" size="sm" className="w-full">View Project</Button>
-        <Button size="sm" className="w-full">Github Repo</Button>
-    </div>
-);
-
 
 // --- Main Timeline Component ---
 
@@ -144,7 +87,7 @@ export function Timeline({ items }: TimelineProps) {
                             key={`bg-${item.id}`}
                             className="absolute inset-0 bg-cover bg-center"
                             style={{
-                                backgroundImage: `url(${item.background})`,
+                                backgroundImage: `url(${typeof item.background === "string" ? item.background : item.background.src})`,
                                 zIndex: index
                             }}
                             initial={{ opacity: 0 }}
@@ -203,7 +146,7 @@ export function Timeline({ items }: TimelineProps) {
                                         </div>
 
                                         {/* Label (visible on hover or always?) - Let's keep it clean for now, maybe date? */}
-                                        <div className="absolute right-8 text-right w-32 pr-4 pointer-events-none hidden md:visible">
+                                        <div className="absolute right-8 text-right w-32 pr-4 pointer-events-none hidden md:block">
                         <span className={cn(
                             "text-xs font-mono transition-colors duration-300",
                             isCurrent ? "text-white font-bold" : "text-white/50"
