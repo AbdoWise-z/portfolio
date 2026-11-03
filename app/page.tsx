@@ -9,6 +9,7 @@ import AboutMe from "@/components/views/screens/about_me";
 import SpaceBackground from "@/components/views/space-background";
 import Grain from "@/components/views/grain";
 import Projects from "@/components/views/screens/projects";
+import Skills from "@/components/views/screens/skills";
 import ContactMe from "@/components/views/screens/contact_me";
 import TimelinePage from "@/components/views/screens/timeline-page";
 
@@ -27,6 +28,7 @@ export default function Home() {
                 <AboutMe/>
                 <TimelinePage/>
                 <Projects/>
+                <Skills/>
                 <ContactMe/>
             </main>
 

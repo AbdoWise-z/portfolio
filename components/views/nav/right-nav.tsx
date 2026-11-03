@@ -14,6 +14,7 @@ const LINKS = [
   { label: "About", id: SECTIONS.about },
   { label: "Timeline", id: SECTIONS.timeline },
   { label: "Projects", id: SECTIONS.projects },
+  { label: "Skills", id: SECTIONS.skills },
   { label: "Contact", id: SECTIONS.contact },
 ];
 const IDS = LINKS.map((l) => l.id);
@@ -46,7 +47,7 @@ const RightNav = () => {
             <nav aria-label="Sections" className="mt-8 flex flex-col gap-2">
               {LINKS.map((link, i) => (
                 <React.Fragment key={link.id}>
-                  {(i === 1 || i === 3) && <Separator className="my-2" />}
+                  {(i === 1 || i === 4) && <Separator className="my-2" />}
                   <SheetClose asChild>
                     <Button asChild variant={active === link.id ? "secondary" : "outline"} className="rounded-full">
                       <a href={`#${link.id}`} aria-current={active === link.id ? "true" : undefined}>{link.label}</a>

@@ -24,5 +24,6 @@ export const SECTIONS = {
   about: "about",
   timeline: "timeline",
   projects: "projects",
+  skills: "skills",
   contact: "contact",
 } as const;

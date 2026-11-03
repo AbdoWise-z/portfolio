@@ -179,8 +179,8 @@ export default function ProjectsPage() {
 
     // Entry: slides over the timeline with a rounded leading edge that flattens as it pins.
     const { scrollYProgress: entry } = useScroll({ target: wrapRef, offset: ["start end", "start start"] });
-    // Exit: recedes while the contact sheet covers it.
-    const cover = useSectionProgress(SECTIONS.contact, ["start end", "start start"]);
+    // Exit: recedes while the skills sheet covers it.
+    const cover = useSectionProgress(SECTIONS.skills, ["start end", "start start"]);
     const borderRadius = useTransform([entry, cover], ([e, c]: number[]) => Math.max((1 - e) * 44, c * 32));
     const scale = useTransform(cover, [0, 1], [1, 0.94]);
     const filter = useTransform(cover, (c) => `brightness(${(1 - c * 0.7).toFixed(3)})`);
@@ -234,13 +234,21 @@ export default function ProjectsPage() {
                         aria-label={`${projectIndex + 1} of ${projects.length}: ${currentProject.title}`}
                     >
                         <div className="absolute inset-0 z-0" aria-hidden>
-                            <Image
-                                src={currentProject.image}
-                                alt=""
-                                fill
-                                sizes="100vw"
-                                className="object-cover"
-                            />
+                            {/* Slow drift so the pinned slide never sits still. */}
+                            <motion.div
+                                className="absolute inset-0"
+                                initial={{ scale: 1 }}
+                                animate={{ scale: 1.08, x: direction >= 0 ? -16 : 16 }}
+                                transition={{ duration: 12, ease: "linear" }}
+                            >
+                                <Image
+                                    src={currentProject.image}
+                                    alt=""
+                                    fill
+                                    sizes="100vw"
+                                    className="object-cover"
+                                />
+                            </motion.div>
                             <div className={cn("absolute inset-0 bg-gradient-to-br opacity-60 mix-blend-overlay", currentProject.color)} />
                             <div className="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-black/30" />
                         </div>

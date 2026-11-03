@@ -24,6 +24,7 @@ const Landing = () => {
   const opacity = useTransform(cover, [0, 1], [1, 0]);
   const scale = useTransform(cover, [0, 1], [1, 0.9]);
   const y = useTransform(cover, [0, 1], [0, -60]);
+  const hintOpacity = useTransform(cover, [0, 0.5], [1, 0]);
 
   return (
     <section className="sticky top-0 z-0 flex h-[100svh] select-none flex-col items-center justify-center px-6">
@@ -60,18 +61,24 @@ const Landing = () => {
         </motion.div>
       </motion.div>
 
-      <motion.a
-        href={`#${SECTIONS.about}`}
-        style={{ opacity }}
+      {/* Scroll hint: the outer div fades in on load, the inner one fades out with the hero.
+          They are separate elements so no animated key shares a MotionValue. */}
+      <motion.div
+        className="absolute bottom-8 left-1/2 -translate-x-1/2"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 1.2, duration: 0.8 }}
-        className="absolute bottom-8 left-1/2 flex -translate-x-1/2 flex-col items-center gap-2 text-foreground/60 transition-colors hover:text-foreground"
-        aria-label="Scroll to the About section"
       >
-        <span className="text-xs uppercase tracking-widest">Scroll</span>
-        <span className="h-8 w-px bg-gradient-to-b from-foreground/60 to-transparent" />
-      </motion.a>
+        <motion.a
+          href={`#${SECTIONS.about}`}
+          style={{ opacity: hintOpacity }}
+          className="flex flex-col items-center gap-2 text-foreground/60 transition-colors hover:text-foreground"
+          aria-label="Scroll to the About section"
+        >
+          <span className="text-xs uppercase tracking-widest">Scroll</span>
+          <span className="h-8 w-px bg-gradient-to-b from-foreground/60 to-transparent" />
+        </motion.a>
+      </motion.div>
     </section>
   );
 };

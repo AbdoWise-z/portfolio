@@ -30,7 +30,9 @@ The contact form posts to Formspree; the endpoint is in
 ## Structure
 
 - `app/` – root layout, global styles and the single page.
-- `components/views/screens/` – the page sections (landing, about, timeline, projects, contact).
+- `components/views/screens/` – the page sections (landing, about, timeline, projects, skills, contact).
+  Sections stack like sheets: each slides over the previous one, which stays pinned and recedes
+  (`hooks/use-section-progress.ts` gives a section the scroll progress of its neighbour).
 - `components/views/secret-content*.tsx` + `hooks/use-mask-position.tsx` – the
   cursor-following "secret content" mask effect.
 - `components/ui/` – shadcn/ui primitives.
