@@ -121,9 +121,14 @@ const ContactMe = () => {
                 <FormItem>
                   <FormLabel>Message</FormLabel>
                   <FormControl>
-                    <Textarea placeholder="Type your message here" rows={6} {...field} />
+                    <Textarea placeholder="Type your message here" rows={6} maxLength={500} {...field} />
                   </FormControl>
-                  <FormMessage />
+                  <div className="flex items-start justify-between gap-4">
+                    <FormMessage />
+                    <span className="ml-auto text-xs tabular-nums text-muted-foreground" aria-live="polite">
+                      {field.value.length} / 500
+                    </span>
+                  </div>
                 </FormItem>
               )}
             />

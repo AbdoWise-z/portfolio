@@ -324,20 +324,37 @@ export default function ProjectsPage() {
                         </Button>
 
                         <div className="flex items-center gap-2" role="tablist" aria-label="Choose project">
-                            {projects.map((project, index) => (
-                                <button
-                                    key={project.id}
-                                    type="button"
-                                    role="tab"
-                                    aria-selected={index === projectIndex}
-                                    aria-label={project.title}
-                                    onClick={() => goTo(index)}
-                                    className={cn(
-                                        "h-2.5 rounded-full transition-all duration-300",
-                                        index === projectIndex ? "w-8 bg-white" : "w-2.5 bg-white/20 hover:bg-white/40"
-                                    )}
-                                />
-                            ))}
+                            {projects.map((project, index) => {
+                                const selected = index === projectIndex;
+                                return (
+                                    <button
+                                        key={project.id}
+                                        type="button"
+                                        role="tab"
+                                        aria-selected={selected}
+                                        aria-label={project.title}
+                                        onClick={() => goTo(index)}
+                                        className="group/tab rounded-md"
+                                    >
+                                        {/* Dot on small screens */}
+                                        <span
+                                            className={cn(
+                                                "block h-2.5 rounded-full transition-all duration-300 md:hidden",
+                                                selected ? "w-8 bg-white" : "w-2.5 bg-white/20 group-hover/tab:bg-white/40"
+                                            )}
+                                        />
+                                        {/* Thumbnail from md up */}
+                                        <span
+                                            className={cn(
+                                                "relative hidden h-8 w-12 overflow-hidden rounded-md ring-1 transition-all duration-300 md:block",
+                                                selected ? "opacity-100 ring-white" : "opacity-50 ring-white/20 group-hover/tab:opacity-90"
+                                            )}
+                                        >
+                                            <Image src={project.image} alt="" fill sizes="48px" className="object-cover" />
+                                        </span>
+                                    </button>
+                                );
+                            })}
                         </div>
 
                         <Button
@@ -350,8 +367,10 @@ export default function ProjectsPage() {
                             <ChevronRight className="h-6 w-6" />
                         </Button>
 
-                        <span className="ml-auto text-xs tabular-nums text-white/50" aria-live="polite">
-                            {pad(projectIndex + 1)} / {pad(projects.length)}
+                        <span className="ml-auto flex shrink-0 items-center gap-3 text-xs text-white/50">
+                            <span className="md:hidden">Swipe</span>
+                            <span className="hidden md:inline" aria-hidden>← → keys</span>
+                            <span className="whitespace-nowrap tabular-nums" aria-live="polite">{pad(projectIndex + 1)} / {pad(projects.length)}</span>
                         </span>
                     </div>
                 </div>
