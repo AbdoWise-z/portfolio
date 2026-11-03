@@ -4,9 +4,8 @@ import { useState, useRef, useEffect } from "react";
 import { motion, useScroll, useSpring } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { Check } from "lucide-react";
-import {StaticImageData} from "next/image";
+import Image, { StaticImageData } from "next/image";
 
-// --- Types ---
 export type TimelinePointType = "Major" | "Minor";
 
 export interface TimelineItemData {
@@ -17,107 +16,85 @@ export interface TimelineItemData {
     description: string;
     date: string;
     icon: React.ReactNode;
-    background: string | StaticImageData;
-    color: string; // Hex or tailwind class for accents
-    widget?: React.ReactNode; // The react widget area
-    certificateUrl?: string; // Link to certificate
+    background: StaticImageData;
+    widget?: React.ReactNode;
+    certificateUrl?: string;
 }
 
-// --- Components ---
-
 const TimelineWidgetDisplay = ({ children }: { children: React.ReactNode }) => (
-    <div className="bg-card/80 backdrop-blur-md border border-border/50 rounded-xl p-4 shadow-lg mt-4 w-full max-w-md overflow-hidden">
+    <div className="mt-4 w-full max-w-md overflow-hidden rounded-xl border border-border/50 bg-card/80 p-4 shadow-lg">
         {children}
     </div>
 );
-
-// --- Main Timeline Component ---
 
 interface TimelineProps {
     items: TimelineItemData[];
 }
 
+/**
+ * Scroll-driven timeline. The outer container is N viewports tall; a sticky
+ * viewport inside it shows one item at a time as the user scrolls through.
+ */
 export function Timeline({ items }: TimelineProps) {
     const containerRef = useRef<HTMLDivElement>(null);
     const [activeIndex, setActiveIndex] = useState(0);
 
-    // Track scroll progress of the container
     const { scrollYProgress } = useScroll({
         target: containerRef,
         offset: ["start start", "end end"],
     });
 
-    // Smooth out the progress
     const smoothProgress = useSpring(scrollYProgress, {
         stiffness: 100,
         damping: 30,
         restDelta: 0.001
     });
 
-    // Update active index based on scroll
     useEffect(() => {
         const unsubscribe = scrollYProgress.on("change", (latest) => {
-            // Calculate which item is currently "active" based on scroll percentage
-            // We divide the scroll space (0-1) into N segments
-            const itemsCount = items.length;
-            const step = 1 / itemsCount;
-            const index = Math.min(
-                Math.floor(latest / step),
-                itemsCount - 1
-            );
-            setActiveIndex(index);
+            const step = 1 / items.length;
+            setActiveIndex(Math.min(Math.floor(latest / step), items.length - 1));
         });
         return () => unsubscribe();
     }, [scrollYProgress, items.length]);
 
-    // Derived transformations for background
-    // We can't easily map specific images to a continuous range dynamically with simple output range unless we hardcode.
-    // Instead, we'll fade images in/out based on activeIndex in the render loop.
-
     return (
         <div ref={containerRef} className="relative" style={{ height: `${items.length * 100}vh` }}>
+            <div className="sticky top-0 flex h-screen w-full flex-col overflow-hidden">
 
-            {/* Sticky Viewport */}
-            <div className="sticky top-0 h-screen w-full overflow-hidden flex flex-col">
-
-                {/* Background Layer */}
-                <div className="absolute inset-0">
+                {/* Background layer: the current image fades in over the previous one. */}
+                <div className="absolute inset-0" aria-hidden>
                     {items.map((item, index) => (
                         <motion.div
                             key={`bg-${item.id}`}
-                            className="absolute inset-0 bg-cover bg-center"
-                            style={{
-                                backgroundImage: `url(${typeof item.background === "string" ? item.background : item.background.src})`,
-                                zIndex: index
-                            }}
+                            className="absolute inset-0"
+                            style={{ zIndex: index }}
                             initial={{ opacity: 0 }}
                             animate={{
-                                opacity: (activeIndex - index) <= 1 && (activeIndex - index) >= 0 ? 1 : 0,
+                                opacity: activeIndex - index <= 1 && activeIndex - index >= 0 ? 1 : 0,
                                 scale: activeIndex === index ? 1.05 : 1
                             }}
                             transition={{ duration: 0.8, ease: "easeInOut" }}
                         >
-                            {/* Overlay for readability */}
-                            <div className="absolute inset-0 bg-black/60 backdrop-blur-[2px]" />
+                            <Image src={item.background} alt="" fill sizes="100vw" className="object-cover" />
+                            <div className="absolute inset-0 bg-black/65" />
                         </motion.div>
                     ))}
                 </div>
 
-                {/* Content Layer */}
-                <div className="relative z-10 flex h-full w-full max-w-7xl mx-auto pl-4 pr-6 md:pl-48 md:pr-12 items-center">
+                {/* Content layer */}
+                <div className="section-gutter relative z-10 flex h-full w-full items-center">
+                    <div className="mx-auto flex w-full max-w-6xl items-center">
 
-                    {/* Left: Progress Line & Indicators */}
-                    <div className="relative w-8 md:w-32 flex flex-col items-center justify-center mr-8 md:mr-16 shrink-0" style={{ height: "60vh" }}>
-                        {/* The Line */}
-                        <div className="absolute inset-0 left-1/2 -translate-x-1/2 w-0.5 bg-white/20 rounded-full overflow-hidden">
-                            <motion.div
-                                className="w-full bg-primary origin-top"
-                                style={{ height: "100%", scaleY: smoothProgress }}
-                            />
-                        </div>
+                        {/* Progress line and points */}
+                        <div className="relative mr-5 flex shrink-0 flex-col justify-between py-8 md:mr-12" style={{ height: "60vh" }}>
+                            <div className="absolute bottom-0 right-[15px] top-0 w-0.5 overflow-hidden rounded-full bg-white/20" aria-hidden>
+                                <motion.div
+                                    className="w-full origin-top bg-primary"
+                                    style={{ height: "100%", scaleY: smoothProgress }}
+                                />
+                            </div>
 
-                        {/* The Points */}
-                        <div className="flex flex-col justify-between h-full w-full items-center py-10">
                             {items.map((item, index) => {
                                 const isMajor = item.type === "Major";
                                 const isActive = index <= activeIndex;
@@ -126,124 +103,121 @@ export function Timeline({ items }: TimelineProps) {
                                 return (
                                     <motion.div
                                         key={`point-${item.id}`}
-                                        className="relative flex items-center justify-center z-10"
+                                        className="relative z-10 flex items-center justify-end gap-4"
                                         initial={false}
-                                        animate={{
-                                            scale: isCurrent ? 1.2 : 1,
-                                            opacity: isActive ? 1 : 0.5
-                                        }}
+                                        animate={{ opacity: isActive ? 1 : 0.5 }}
                                     >
-                                        {/* Dot */}
-                                        <div
-                                            className={cn(
-                                                "rounded-full border-2 transition-colors duration-300 flex items-center justify-center",
-                                                isMajor ? "w-6 h-6" : "w-3 h-3",
-                                                isActive ? "border-primary bg-primary" : "border-white/40 bg-transparent",
-                                                isCurrent && "ring-4 ring-primary/20"
-                                            )}
+                                        <span className={cn(
+                                            "hidden whitespace-nowrap text-[11px] transition-colors duration-300 md:inline",
+                                            isCurrent ? "font-bold text-white" : "text-white/50"
+                                        )}>
+                                            {item.date}
+                                        </span>
+
+                                        <motion.div
+                                            className="relative flex w-8 items-center justify-center"
+                                            animate={{ scale: isCurrent ? 1.2 : 1 }}
                                         >
-                                            {isMajor && isActive && <Check className="w-3 h-3 text-primary-foreground" />}
+                                            <div
+                                                className={cn(
+                                                    "flex items-center justify-center rounded-full border-2 transition-colors duration-300",
+                                                    isMajor ? "h-6 w-6" : "h-3 w-3",
+                                                    isActive ? "border-primary bg-primary" : "border-white/40 bg-transparent",
+                                                    isCurrent && "ring-4 ring-primary/20"
+                                                )}
+                                            >
+                                                {isMajor && isActive && <Check className="h-3 w-3 text-primary-foreground" />}
+                                            </div>
+                                            {isCurrent && (
+                                                <div className={cn(
+                                                    "absolute animate-ping rounded-full bg-primary/50 opacity-75",
+                                                    isMajor ? "h-6 w-6" : "h-3 w-3"
+                                                )} />
+                                            )}
+                                        </motion.div>
+                                    </motion.div>
+                                );
+                            })}
+                        </div>
+
+                        {/* Item content */}
+                        <div className="relative h-[60vh] min-w-0 flex-1">
+                            {items.map((item, index) => {
+                                const isCurrent = activeIndex === index;
+                                return (
+                                    <motion.div
+                                        key={`content-${item.id}`}
+                                        className="absolute inset-0 flex flex-col justify-center"
+                                        initial={{ opacity: 0, y: 50 }}
+                                        animate={{
+                                            opacity: isCurrent ? 1 : 0,
+                                            y: isCurrent ? 0 : activeIndex > index ? -50 : 50,
+                                            pointerEvents: isCurrent ? "auto" : "none"
+                                        }}
+                                        transition={{ duration: 0.6, ease: "circOut" }}
+                                        aria-hidden={!isCurrent}
+                                    >
+                                        <div className="mb-4 flex items-start gap-4">
+                                            <div className="shrink-0 rounded-xl border border-white/20 bg-white/10 p-3 text-white">
+                                                {item.icon}
+                                            </div>
+                                            <div className="min-w-0">
+                                                <h3 className={cn(
+                                                    "break-words font-bold leading-tight text-white",
+                                                    item.type === "Major" ? "text-2xl md:text-4xl lg:text-5xl" : "text-xl md:text-2xl lg:text-3xl"
+                                                )}>
+                                                    {item.title}
+                                                </h3>
+                                                {item.subtitle && (
+                                                    <p className="mt-1 text-base font-medium text-cyan-300 md:text-xl">{item.subtitle}</p>
+                                                )}
+                                                <p className="mt-1 text-xs text-white/60 md:hidden">{item.date}</p>
+                                            </div>
                                         </div>
 
-                                        {/* Label (visible on hover or always?) - Let's keep it clean for now, maybe date? */}
-                                        <div className="absolute right-8 text-right w-32 pr-4 pointer-events-none hidden md:block">
-                        <span className={cn(
-                            "text-xs font-mono transition-colors duration-300",
-                            isCurrent ? "text-white font-bold" : "text-white/50"
-                        )}>
-                          {item.date}
-                        </span>
-                                        </div>
+                                        <p className="mb-6 max-w-2xl text-base leading-relaxed text-white/80 md:text-lg">
+                                            {item.description}
+                                        </p>
 
-                                        {/* Pulsing Effect for Current */}
-                                        {isCurrent && (
-                                            <div className="absolute inset-0 rounded-full animate-ping bg-primary/50 opacity-75" />
+                                        {(item.widget || item.certificateUrl) && (
+                                            <motion.div
+                                                initial={{ opacity: 0, scale: 0.9 }}
+                                                animate={{ opacity: isCurrent ? 1 : 0, scale: isCurrent ? 1 : 0.9 }}
+                                                transition={{ delay: 0.2, duration: 0.4 }}
+                                            >
+                                                <TimelineWidgetDisplay>
+                                                    {item.widget}
+                                                    {item.certificateUrl && (
+                                                        <div className={cn("flex items-center gap-2", item.widget && "mt-3 border-t border-border/30 pt-3")}>
+                                                            <span className="text-xs text-muted-foreground">Certificate:</span>
+                                                            <a
+                                                                href={item.certificateUrl}
+                                                                target="_blank"
+                                                                rel="noopener noreferrer"
+                                                                className="text-xs text-primary transition-colors hover:text-primary/80 hover:underline"
+                                                            >
+                                                                View →
+                                                            </a>
+                                                        </div>
+                                                    )}
+                                                </TimelineWidgetDisplay>
+                                            </motion.div>
                                         )}
                                     </motion.div>
-                                )
+                                );
                             })}
                         </div>
                     </div>
-
-                    {/* Right: Content Area */}
-                    <div className="flex-1 h-[60vh] relative perspective-[1000px]">
-                        {items.map((item, index) => (
-                            <motion.div
-                                key={`content-${item.id}`}
-                                className="absolute inset-0 flex flex-col justify-center"
-                                initial={{ opacity: 0, y: 50, rotateX: -10 }}
-                                animate={{
-                                    opacity: activeIndex === index ? 1 : 0,
-                                    y: activeIndex === index ? 0 : activeIndex > index ? -50 : 50,
-                                    rotateX: activeIndex === index ? 0 : activeIndex > index ? 10 : -10,
-                                    pointerEvents: activeIndex === index ? "auto" : "none"
-                                }}
-                                transition={{ duration: 0.6, ease: "circOut" }}
-                            >
-                                <div className="flex items-center gap-4 mb-4">
-                                    <div className={cn("p-3 rounded-xl bg-white/10 backdrop-blur-md border border-white/20 text-white")}>
-                                        {item.icon}
-                                    </div>
-                                    <div>
-                                        <h2 className={cn(
-                                            "font-bold text-white leading-tight break-words hyphens-auto",
-                                            item.type === "Major" ? "text-4xl md:text-5xl" : "text-2xl md:text-3xl"
-                                        )}>
-                                            {item.title}
-                                        </h2>
-                                        {item.subtitle && (
-                                            <h3 className="text-xl text-primary font-medium mt-1">{item.subtitle}</h3>
-                                        )}
-                                    </div>
-                                </div>
-
-                                <p className="text-lg text-white/80 max-w-2xl leading-relaxed mb-8">
-                                    {item.description}
-                                </p>
-
-                                {/* Widget Area */}
-                                {(item.widget || item.certificateUrl) && (
-                                    <motion.div
-                                        initial={{ opacity: 0, scale: 0.9 }}
-                                        animate={{
-                                            opacity: activeIndex === index ? 1 : 0,
-                                            scale: activeIndex === index ? 1 : 0.9
-                                        }}
-                                        transition={{ delay: 0.2, duration: 0.4 }}
-                                    >
-                                        <TimelineWidgetDisplay>
-                                            {item.widget}
-                                            {item.certificateUrl && (
-                                                <div className="flex items-center gap-2 pt-3 border-t border-border/30">
-                                                    <span className="text-xs text-muted-foreground">Certificate:</span>
-                                                    <a
-                                                        href={item.certificateUrl}
-                                                        target="_blank"
-                                                        rel="noopener noreferrer"
-                                                        className="text-xs text-primary hover:underline hover:text-primary/80 transition-colors"
-                                                    >
-                                                        View →
-                                                    </a>
-                                                </div>
-                                            )}
-                                        </TimelineWidgetDisplay>
-                                    </motion.div>
-                                )}
-                            </motion.div>
-                        ))}
-                    </div>
-
                 </div>
 
-                {/* Scroll Hint */}
                 <motion.div
-                    className="absolute bottom-8 left-1/2 -translate-x-1/2 text-white/50 flex flex-col items-center gap-2"
+                    className="absolute bottom-8 left-1/2 flex -translate-x-1/2 flex-col items-center gap-2 text-white/50"
                     animate={{ opacity: activeIndex === items.length - 1 ? 0 : 1 }}
+                    aria-hidden
                 >
                     <span className="text-xs uppercase tracking-widest">Scroll</span>
-                    <div className="w-px h-8 bg-gradient-to-b from-white/50 to-transparent" />
+                    <div className="h-8 w-px bg-gradient-to-b from-white/50 to-transparent" />
                 </motion.div>
-
             </div>
         </div>
     );

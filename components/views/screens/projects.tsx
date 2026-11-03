@@ -1,33 +1,32 @@
 "use client";
 
 import {useState, useEffect, useCallback, useRef} from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, useInView } from "framer-motion";
 import { Github, Layers, Smartphone, Cpu, ChevronLeft, ChevronRight, Gamepad2, Truck, Type, MessageSquare, Search, Edit3 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
-
-import project1 from "@/public/banners/reinforcement_learning_agent_simulation.png";
-import project2 from "@/public/banners/cpu_architecture_schematic.png";
-import project3 from "@/public/banners/3d_platformer_game_level.png";
-import project4 from "@/public/banners/robotics_maze_solver.png";
-import project5 from "@/public/banners/arabic_calligraphy_ai_detection.png";
-import project6 from "@/public/banners/discord_interface_clone.png";
-import project7 from "@/public/banners/cross_platform_mobile_app_dev.png";
-import project8 from "@/public/banners/search_engine_architecture.png";
-import project9 from "@/public/banners/creative_writing_platform.png";
-
 import Image, {StaticImageData} from "next/image";
 import SecretIndicatorFade from "@/components/views/secret-indicator-fade";
 import {useSwipe} from "@/hooks/use-swipe";
+import {SECTIONS} from "@/lib/site";
 
+import project1 from "@/public/banners/reinforcement_learning_agent_simulation.webp";
+import project2 from "@/public/banners/cpu_architecture_schematic.webp";
+import project3 from "@/public/banners/3d_platformer_game_level.webp";
+import project4 from "@/public/banners/robotics_maze_solver.webp";
+import project5 from "@/public/banners/arabic_calligraphy_ai_detection.webp";
+import project6 from "@/public/banners/discord_interface_clone.webp";
+import project7 from "@/public/banners/cross_platform_mobile_app_dev.webp";
+import project8 from "@/public/banners/search_engine_architecture.webp";
+import project9 from "@/public/banners/creative_writing_platform.webp";
 
 interface Project {
     id: string;
     title: string;
     category: string;
     description: string;
-    image: string | StaticImageData;
+    image: StaticImageData;
     icon: React.ReactNode;
     tags: string[];
     color: string;
@@ -41,7 +40,7 @@ const projects: Project[] = [
         category: "AI & Reinforcement Learning",
         description: "A benchmarking framework for evaluating RL agents using explainability methods (SHAP, LIME, LMUT). Built in collaboration with Ericsson to improve trust in autonomous systems.",
         image: project1,
-        icon: <Cpu className="w-6 h-6" />,
+        icon: <Cpu className="h-6 w-6" />,
         tags: ["Python", "C++", "ImGui", "Reinforcement Learning"],
         color: "from-blue-500/20 to-purple-500/20",
         source: "https://github.com/P-E-A-R-L"
@@ -52,7 +51,7 @@ const projects: Project[] = [
         category: "Chip Design",
         description: "Designed a 5-stage pipelined CPU executing 32+ instructions. Created a custom assembly language and compiler to run complex operations on the architecture.",
         image: project2,
-        icon: <Layers className="w-6 h-6" />,
+        icon: <Layers className="h-6 w-6" />,
         tags: ["Verilog", "Java", "Assembly", "ModelSim"],
         color: "from-yellow-500/20 to-amber-500/20",
         source: "https://github.com/AbdoWise-z/the-epic-cpu"
@@ -63,7 +62,7 @@ const projects: Project[] = [
         category: "Game Engine Dev",
         description: "Custom 3D game engine built from scratch with C++ & OpenGL. Features Bloom, Forward Rendering, and illusion-based platforming mechanics.",
         image: project3,
-        icon: <Gamepad2 className="w-6 h-6" />,
+        icon: <Gamepad2 className="h-6 w-6" />,
         tags: ["C++", "OpenGL", "Game Physics", "Graphics Programming"],
         color: "from-pink-500/20 to-rose-500/20",
         source: "https://github.com/AbdoWise-z/Paimon-No-Way-Home"
@@ -74,7 +73,7 @@ const projects: Project[] = [
         category: "Embedded Systems",
         description: "Autonomous maze-solving robot. Won 1st place in departmental maze competition. Features custom vision application and swift motor control algorithms.",
         image: project4,
-        icon: <Truck className="w-6 h-6" />,
+        icon: <Truck className="h-6 w-6" />,
         tags: ["Embedded C", "Java", "Kotlin", "Robotics"],
         color: "from-green-500/20 to-emerald-500/20",
         source: "https://github.com/Truck-chan"
@@ -85,7 +84,7 @@ const projects: Project[] = [
         category: "AI & Computer Vision",
         description: "AI pipeline detecting Arabic font types with 99.8% accuracy. Handles various scales and rotations, securing 1st place in department rankings.",
         image: project5,
-        icon: <Type className="w-6 h-6" />,
+        icon: <Type className="h-6 w-6" />,
         tags: ["Python", "OpenCV", "Deep Learning", "Jupyter"],
         color: "from-orange-500/20 to-red-500/20",
         source: "https://github.com/AbdoWise-z/Arabic-Font-Type-Detector"
@@ -96,7 +95,7 @@ const projects: Project[] = [
         category: "Fullstack Web",
         description: "Complete Discord clone featuring real-time voice/video chat, server management, and live messaging using modern web sockets.",
         image: project6,
-        icon: <MessageSquare className="w-6 h-6" />,
+        icon: <MessageSquare className="h-6 w-6" />,
         tags: ["TypeScript", "Next.js", "Prisma", "MongoDB"],
         color: "from-indigo-500/20 to-blue-500/20",
         source: "https://github.com/AbdoWise-z/discordo"
@@ -107,7 +106,7 @@ const projects: Project[] = [
         category: "Cross-Platform Mobile",
         description: "Twitter (X) clone built with Flutter. Led an Agile team of 5 to deliver real-time feeds, trending topics, and messaging in under 3 months.",
         image: project7,
-        icon: <Smartphone className="w-6 h-6" />,
+        icon: <Smartphone className="h-6 w-6" />,
         tags: ["Flutter", "Restful APIs", "Agile", "Mobile"],
         color: "from-cyan-500/20 to-sky-500/20",
         source: "https://github.com/AbdoWise-z/GigaChat-Cross-platform"
@@ -118,7 +117,7 @@ const projects: Project[] = [
         category: "Search Engine",
         description: "High-performance search engine with sub-50ms response time. Implemented custom crawling, indexing, and ranking algorithms.",
         image: project8,
-        icon: <Search className="w-6 h-6" />,
+        icon: <Search className="h-6 w-6" />,
         tags: ["Java", "Spring Boot", "MongoDB", "Flutter"],
         color: "from-emerald-500/20 to-teal-500/20",
         source: "https://github.com/AbdoWise-z/Irminsul-ui"
@@ -129,7 +128,7 @@ const projects: Project[] = [
         category: "Fullstack Web",
         description: "Platform for sharing and discovering AI prompts. Built in 4 days featuring user profiles, search, and tag management.",
         image: project9,
-        icon: <Edit3 className="w-6 h-6" />,
+        icon: <Edit3 className="h-6 w-6" />,
         tags: ["JavaScript", "Next.js", "React", "MongoDB"],
         color: "from-violet-500/20 to-purple-500/20",
         source: "https://github.com/AbdoWise-z/Promptopia"
@@ -141,24 +140,24 @@ const variants = {
         x: direction > 0 ? 1000 : -1000,
         opacity: 0,
         scale: 1.1,
-        filter: "blur(10px)"
     }),
     center: {
         zIndex: 1,
         x: 0,
         opacity: 1,
         scale: 1,
-        filter: "blur(0px)"
     },
     exit: (direction: number) => ({
         zIndex: 0,
         x: direction < 0 ? 1000 : -1000,
         opacity: 0,
         scale: 0.9,
-        filter: "blur(10px)"
     })
 };
 
+const pad = (n: number) => String(n).padStart(2, "0");
+
+/** Full-screen project slideshow with arrow keys, swipe, and on-screen controls. */
 export default function ProjectsPage() {
     const [[page, direction], setPage] = useState([0, 0]);
 
@@ -167,36 +166,41 @@ export default function ProjectsPage() {
     const currentProject = projects[projectIndex];
 
     const paginate = useCallback((newDirection: number) => {
-        setPage([page + newDirection, newDirection]);
-    }, [page]);
+        setPage(([p]) => [p + newDirection, newDirection]);
+    }, []);
 
-    const handleKeyDown = useCallback((event: KeyboardEvent) => {
-        if (event.key === "ArrowRight") {
-            paginate(1);
-        } else if (event.key === "ArrowLeft") {
-            paginate(-1);
-        }
-    }, [paginate]);
-
-    useEffect(() => {
-        window.addEventListener("keydown", handleKeyDown);
-        return () => window.removeEventListener("keydown", handleKeyDown);
-    }, [handleKeyDown]);
+    const goTo = (index: number) => {
+        setPage([index, index > projectIndex ? 1 : -1]);
+    };
 
     const ref = useRef<HTMLDivElement>(null);
-    useSwipe(
-        ref, {
+    const inView = useInView(ref, { amount: 0.5 });
+
+    // Arrow keys only drive the slideshow while it is on screen.
+    useEffect(() => {
+        if (!inView) return;
+        const onKeyDown = (event: KeyboardEvent) => {
+            if (event.key === "ArrowRight") paginate(1);
+            else if (event.key === "ArrowLeft") paginate(-1);
+        };
+        window.addEventListener("keydown", onKeyDown);
+        return () => window.removeEventListener("keydown", onKeyDown);
+    }, [inView, paginate]);
+
+    useSwipe(ref, {
         onSwipeLeft: () => paginate(1),
         onSwipeRight: () => paginate(-1),
     });
 
-    if (!currentProject) return null;
-
     return (
-        <SecretIndicatorFade className={"relative w-full h-[120vh]"}>
-            <div ref={ref} className="sticky top-0 w-full h-screen overflow-hidden bg-black text-white" id={"PROJECTS_SECTION"}>
-
-                {/* Slideshow */}
+        <SecretIndicatorFade className="relative h-[120vh] w-full">
+            <section
+                ref={ref}
+                id={SECTIONS.projects}
+                aria-label="Projects"
+                aria-roledescription="carousel"
+                className="sticky top-0 h-screen w-full overflow-hidden bg-black text-white"
+            >
                 <AnimatePresence initial={false} custom={direction} mode="popLayout">
                     <motion.div
                         key={page}
@@ -209,135 +213,121 @@ export default function ProjectsPage() {
                             x: { type: "spring", stiffness: 300, damping: 30 },
                             opacity: { duration: 0.4 },
                             scale: { duration: 0.4 },
-                            filter: { duration: 0.4 }
                         }}
-                        className="absolute inset-0 w-full h-full"
+                        className="absolute inset-0 h-full w-full"
+                        aria-roledescription="slide"
+                        aria-label={`${projectIndex + 1} of ${projects.length}: ${currentProject.title}`}
                     >
-                        {/* Background Image */}
-                        <div className="absolute inset-0 z-0">
+                        <div className="absolute inset-0 z-0" aria-hidden>
                             <Image
                                 src={currentProject.image}
-                                alt={currentProject.title}
-                                className="w-full h-full object-cover"
+                                alt=""
+                                fill
+                                sizes="100vw"
+                                className="object-cover"
                             />
-                            {/* Gradient Overlays */}
                             <div className={cn("absolute inset-0 bg-gradient-to-br opacity-60 mix-blend-overlay", currentProject.color)} />
-                            <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-black/30" />
-                            <div className="absolute inset-0 bg-black/20 backdrop-blur-[1px]" />
+                            <div className="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-black/30" />
                         </div>
 
-                        {/* Content Container */}
-                        <div className="absolute inset-0 z-10 flex flex-col justify-center px-12 md:px-32 max-w-7xl mx-auto pointer-events-none">
+                        <div className="section-gutter pointer-events-none absolute inset-0 z-10 flex flex-col justify-center pb-24 pt-24 md:pt-0">
                             <motion.div
-                                initial={{ y: 50, opacity: 0 }}
+                                initial={{ y: 40, opacity: 0 }}
                                 animate={{ y: 0, opacity: 1 }}
                                 transition={{ delay: 0.2, duration: 0.5 }}
-                                className="space-y-8 pointer-events-auto"
+                                className="pointer-events-auto mx-auto w-full max-w-6xl space-y-6 md:space-y-8"
                             >
-                                {/* Category & Icon */}
-                                <div className="flex items-center gap-4">
-                                    <div className="p-4 rounded-2xl bg-white/10 backdrop-blur-xl border border-white/10 text-white shadow-2xl">
+                                <div className="flex flex-wrap items-center gap-4">
+                                    <div className="rounded-2xl border border-white/10 bg-white/10 p-4 text-white shadow-2xl">
                                         {currentProject.icon}
                                     </div>
-                                    <Badge className="bg-white/10 text-white hover:bg-white/20 border-white/10 px-4 py-1.5 text-sm backdrop-blur-md">
+                                    <Badge className="border-white/10 bg-white/10 px-4 py-1.5 text-sm text-white hover:bg-white/20">
                                         {currentProject.category}
                                     </Badge>
                                 </div>
 
-                                {/* Title */}
-                                <h1 className="text-6xl md:text-8xl font-bold tracking-tighter text-transparent bg-clip-text bg-gradient-to-b from-white via-white to-white/50">
+                                <h3 className="bg-gradient-to-b from-white via-white to-white/50 bg-clip-text text-5xl font-bold tracking-tighter text-transparent md:text-7xl lg:text-8xl">
                                     {currentProject.title}
-                                </h1>
+                                </h3>
 
-                                {/* Description */}
-                                <p className="text-xl md:text-2xl text-gray-300 max-w-2xl leading-relaxed">
+                                <p className="max-w-2xl text-base leading-relaxed text-gray-300 md:text-xl">
                                     {currentProject.description}
                                 </p>
 
-                                {/* Tags */}
-                                <div className="flex flex-wrap gap-3">
+                                <ul className="flex flex-wrap gap-2 md:gap-3" aria-label="Technologies">
                                     {currentProject.tags.map((tag) => (
-                                        <span
+                                        <li
                                             key={tag}
-                                            className="px-4 py-2 rounded-full text-sm font-medium bg-white/5 border border-white/10 text-white/80 backdrop-blur-sm"
+                                            className="rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-xs font-medium text-white/80 md:px-4 md:py-2 md:text-sm"
                                         >
-                     {tag}
-                   </span>
+                                            {tag}
+                                        </li>
                                     ))}
-                                </div>
+                                </ul>
 
-                                {/* Actions */}
-                                <div className="flex gap-4 pt-4">
-                                    {/*<Button size="lg" className="bg-white text-black hover:bg-white/90 px-8 rounded-full font-semibold text-base h-12">*/}
-                                    {/*    View Case Study*/}
-                                    {/*</Button>*/}
-                                    {/*<Button size="lg" variant="outline" className="border-white/20 text-white hover:bg-white/10 rounded-full h-12 px-6">*/}
-                                    {/*    <Github className="mr-2 w-5 h-5" /> Source*/}
-                                    {/*</Button>*/}
-
-                                    {
-                                        currentProject.source && <a
+                                {currentProject.source && (
+                                    <div className="flex gap-4 pt-2">
+                                        <a
                                             href={currentProject.source}
                                             target="_blank"
                                             rel="noopener noreferrer"
-                                            className={
-                                                "border border-input bg-background hover:bg-accent hover:text-accent-foreground" +
-                                                "border-white/20 text-white hover:bg-white/10 rounded-full h-12 px-6 flex content-center items-center select-none"
-                                            }
+                                            className="flex h-12 select-none items-center rounded-full border border-white/20 px-6 text-white transition-colors hover:bg-white/10"
                                         >
-                                            <Github className="mr-2 w-5 h-5" /> Source
+                                            <Github className="mr-2 h-5 w-5" /> Source
                                         </a>
-                                    }
-                                </div>
+                                    </div>
+                                )}
                             </motion.div>
                         </div>
-
                     </motion.div>
                 </AnimatePresence>
 
-                {/* Navigation Controls */}
-                <div className="absolute inset-y-0 left-48 w-24 z-40 items-center justify-center group hidden md:flex">
-                    <Button
-                        variant="ghost"
-                        size="icon"
-                        className="w-14 h-14 rounded-full bg-black/20 hover:bg-white/10 backdrop-blur-md text-white/50 hover:text-white border border-transparent hover:border-white/20 transition-all duration-300"
-                        onClick={() => paginate(-1)}
-                    >
-                        <ChevronLeft className="w-8 h-8" />
-                    </Button>
-                </div>
+                {/* Controls: previous, dots, next, counter */}
+                <div className="section-gutter absolute inset-x-0 bottom-6 z-20 md:bottom-10">
+                    <div className="mx-auto flex w-full max-w-6xl items-center gap-3">
+                        <Button
+                            variant="ghost"
+                            size="icon"
+                            aria-label="Previous project"
+                            className="h-11 w-11 rounded-full border border-white/10 bg-black/30 text-white/70 hover:border-white/30 hover:bg-white/10 hover:text-white"
+                            onClick={() => paginate(-1)}
+                        >
+                            <ChevronLeft className="h-6 w-6" />
+                        </Button>
 
-                <div className="absolute inset-y-0 right-48 w-24 z-40 items-center justify-center group hidden md:flex">
-                    <Button
-                        variant="ghost"
-                        size="icon"
-                        className="w-14 h-14 rounded-full bg-black/20 hover:bg-white/10 backdrop-blur-md text-white/50 hover:text-white border border-transparent hover:border-white/20 transition-all duration-300"
-                        onClick={() => paginate(1)}
-                    >
-                        <ChevronRight className="w-8 h-8" />
-                    </Button>
-                </div>
+                        <div className="flex items-center gap-2" role="tablist" aria-label="Choose project">
+                            {projects.map((project, index) => (
+                                <button
+                                    key={project.id}
+                                    type="button"
+                                    role="tab"
+                                    aria-selected={index === projectIndex}
+                                    aria-label={project.title}
+                                    onClick={() => goTo(index)}
+                                    className={cn(
+                                        "h-2.5 rounded-full transition-all duration-300",
+                                        index === projectIndex ? "w-8 bg-white" : "w-2.5 bg-white/20 hover:bg-white/40"
+                                    )}
+                                />
+                            ))}
+                        </div>
 
-                {/* Bottom Progress Indicators */}
-                <div className="absolute bottom-12 left-0 right-0 z-50 flex justify-center gap-3">
-                    {projects.map((_, index) => (
-                        <button
-                            key={index}
-                            onClick={() => {
-                                const newDirection = index > projectIndex ? 1 : -1;
-                                setPage([index, newDirection]);
-                            }}
-                            className={cn(
-                                "w-2.5 h-2.5 rounded-full transition-all duration-300 cursor-pointer",
-                                index === projectIndex
-                                    ? "bg-white w-8"
-                                    : "bg-white/20 hover:bg-white/40"
-                            )}
-                        />
-                    ))}
-                </div>
+                        <Button
+                            variant="ghost"
+                            size="icon"
+                            aria-label="Next project"
+                            className="h-11 w-11 rounded-full border border-white/10 bg-black/30 text-white/70 hover:border-white/30 hover:bg-white/10 hover:text-white"
+                            onClick={() => paginate(1)}
+                        >
+                            <ChevronRight className="h-6 w-6" />
+                        </Button>
 
-            </div>
+                        <span className="ml-auto text-xs tabular-nums text-white/50" aria-live="polite">
+                            {pad(projectIndex + 1)} / {pad(projects.length)}
+                        </span>
+                    </div>
+                </div>
+            </section>
         </SecretIndicatorFade>
     );
 }

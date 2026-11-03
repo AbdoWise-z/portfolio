@@ -6,7 +6,7 @@ import Landing from "@/components/views/screens/landing";
 import LeftNav from "@/components/views/nav/left-nav";
 import RightNav from "@/components/views/nav/right-nav";
 import AboutMe from "@/components/views/screens/about_me";
-import MovingBg from "@/components/views/screens/moving-bg";
+import SpaceBackground from "@/components/views/space-background";
 import Projects from "@/components/views/screens/projects";
 import ContactMe from "@/components/views/screens/contact_me";
 import TimelinePage from "@/components/views/screens/timeline-page";
@@ -14,15 +14,15 @@ import TimelinePage from "@/components/views/screens/timeline-page";
 export default function Home() {
     return (
         <>
-            <div className={"relative"}>
-                <MovingBg/>
+            <SpaceBackground/>
+            <main id="main" className="relative">
                 <SecretContentIndicator/>
                 <Landing/>
                 <AboutMe/>
                 <TimelinePage/>
                 <Projects/>
                 <ContactMe/>
-            </div>
+            </main>
 
             <LeftNav/>
             <RightNav/>

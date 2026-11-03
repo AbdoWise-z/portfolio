@@ -1,28 +1,43 @@
 import SecretContent from "@/components/views/secret-content";
 import React from "react";
 
+const line = "text-center text-4xl font-bold leading-tight md:text-7xl xl:text-8xl";
+
+/** Hero: name plus the tagline that flips inside the secret-content mask. */
 const Landing = () => {
   return (
-    <div className="relative mb-20 h-[100vh] flex flex-col content-center items-center justify-center select-none">
-      <SecretContent focusMaskWidth={420} className={"items-center content-center justify-center"} secret={(
-        <div className={"content-center justify-center items-center w-full"}>
-          <h1 className={"text-black font-bold text-center mb-10"}> Abdelrahman Mahmoud </h1>
-          <h1 className={"text-black font-bold text-center text-4xl md:text-8xl"}> Fixing </h1>
-          <h1 className={"text-black font-bold text-center text-4xl md:text-8xl"}> Bugs That    </h1>
-          <h1 className={"text-black font-bold text-center text-4xl md:text-8xl"}> I Created </h1>
-
-        </div>
-      )}>
-        <div className={"content-center justify-center items-center w-full"}>
-          <h1 className={"text-cyan-100 font-bold text-center mb-10"}> Abdelrahman Mahmoud </h1>
-          <h1 className={"text-cyan-100 font-bold text-center text-4xl md:text-8xl"}> Building </h1>
-          <h1 className={"text-cyan-800 font-bold text-center text-4xl md:text-8xl"}> Application </h1>
-          <h1 className={"text-cyan-800 font-bold text-center text-4xl md:text-8xl"}> & Websites </h1>
+    <section className="relative flex h-[100svh] select-none flex-col items-center justify-center px-6">
+      <SecretContent
+        focusMaskWidth={420}
+        className="items-center justify-center"
+        secret={
+          <div className="w-full">
+            <p className="eyebrow mb-8 text-center text-black/70">Abdelrahman Mahmoud</p>
+            <p className={`${line} text-black`}>Fixing</p>
+            <p className={`${line} text-black`}>Bugs That</p>
+            <p className={`${line} text-black`}>I Created</p>
+          </div>
+        }
+      >
+        <div className="w-full">
+          <h1 className="eyebrow mb-8 text-center">Abdelrahman Mahmoud</h1>
+          <p className={`${line} text-cyan-50`}>Building</p>
+          <p className={`${line} text-cyan-400`}>Applications</p>
+          <p className={`${line} text-cyan-400`}>& Websites</p>
         </div>
       </SecretContent>
-      <h1 className={"text-cyan-100 font-bold text-center text-4xl md:text-8xl"}> Since </h1>
-      <h1 className={"text-cyan-100 font-bold text-center text-4xl md:text-8xl"}> 2019 </h1>
-    </div>
+      <p className={`${line} text-cyan-50`}>Since</p>
+      <p className={`${line} text-cyan-50`}>2019</p>
+
+      <a
+        href="#about"
+        className="absolute bottom-8 left-1/2 flex -translate-x-1/2 flex-col items-center gap-2 text-white/50 transition-colors hover:text-white"
+        aria-label="Scroll to the About section"
+      >
+        <span className="text-xs uppercase tracking-widest">Scroll</span>
+        <span className="h-8 w-px bg-gradient-to-b from-white/50 to-transparent" />
+      </a>
+    </section>
   );
 };
 

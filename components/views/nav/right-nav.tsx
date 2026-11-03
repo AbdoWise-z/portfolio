@@ -1,151 +1,90 @@
 "use client";
 
-import React from 'react';
-import {
-    Sheet, SheetClose,
-    SheetContent,
-    SheetTrigger
-} from "@/components/ui/sheet";
-import {Button} from "@/components/ui/button";
-import {motion} from "framer-motion";
-import {Menu} from "lucide-react";
+import React from "react";
+import { Sheet, SheetClose, SheetContent, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
+import { Button } from "@/components/ui/button";
+import { motion } from "framer-motion";
+import { Menu } from "lucide-react";
 import SecretContent from "@/components/views/secret-content";
-import {Separator} from "@/components/ui/separator";
+import { Separator } from "@/components/ui/separator";
+import { CV_PATH, SECTIONS } from "@/lib/site";
 
+const LINKS = [
+  { label: "About", id: SECTIONS.about },
+  { label: "Timeline", id: SECTIONS.timeline },
+  { label: "Projects", id: SECTIONS.projects },
+  { label: "Contact", id: SECTIONS.contact },
+];
+
+/**
+ * Section navigation. A sheet menu behind a button below the lg breakpoint,
+ * a vertical list in the bottom-right corner from lg up.
+ */
 const RightNav = () => {
-    const scrollTo = (id: string) => () => {
-        document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
-    };
+  return (
+    <div className="pointer-events-none fixed right-0 top-0 flex h-full flex-col gap-3 p-6 md:p-8 lg:w-[210px]">
+      {/* Small screens: sheet menu */}
+      <div className="pointer-events-auto lg:hidden">
+        <Sheet>
+          <SheetTrigger asChild>
+            <Button variant="outline" size="icon" aria-label="Open menu">
+              <Menu />
+            </Button>
+          </SheetTrigger>
+          <SheetContent>
+            <SheetTitle className="sr-only">Menu</SheetTitle>
+            <nav aria-label="Sections" className="mt-8 flex flex-col gap-2">
+              {LINKS.map((link, i) => (
+                <React.Fragment key={link.id}>
+                  {i === 1 && <Separator className="my-2" />}
+                  {i === 3 && <Separator className="my-2" />}
+                  <SheetClose asChild>
+                    <Button asChild variant="outline" className="rounded-full transition-all hover:bg-neutral-700">
+                      <a href={`#${link.id}`}>{link.label}</a>
+                    </Button>
+                  </SheetClose>
+                </React.Fragment>
+              ))}
 
-    const handleAboutClick = scrollTo("ABOUT_ME_SECTION");
-    const handleTimelineClick = scrollTo("TIMELINE_SECTION");
-    const handleProjectsClick = scrollTo("PROJECTS_SECTION");
-    const handleContactClick = scrollTo("CONTACT_ME_SECTION");
+              <div className="h-10" />
+              <div className="flex w-full justify-end">
+                <SheetClose asChild>
+                  <a href={CV_PATH} target="_blank" rel="noopener noreferrer">
+                    <Button variant="default" className="rounded-full px-12">My CV</Button>
+                  </a>
+                </SheetClose>
+              </div>
+            </nav>
+          </SheetContent>
+        </Sheet>
+      </div>
 
-    return (
-        <div className={"flex fixed right-0 top-0 gap-3 p-8 flex-col h-full md:w-[200px]"}>
-            <div className={"md:hidden"}>
-                <Sheet>
-                    <SheetTrigger asChild>
-                        <Button variant="outline" size="icon">
-                            <Menu />
-                        </Button>
-                    </SheetTrigger>
-                    <SheetContent>
-                        <div className={"flex flex-col"}>
-                            <SheetClose asChild className={"mt-8"}>
-                                <Button onClick={handleAboutClick} variant={"outline"} className={"hover:bg-neutral-700 transition-all rounded-full"}>About</Button>
-                            </SheetClose>
+      {/* Large screens: vertical list */}
+      <nav aria-label="Sections" className="pointer-events-auto mt-auto hidden w-full pb-20 lg:block">
+        <SecretContent focusMaskWidth={60} secret={<p className="eyebrow mb-3 text-black/70">Menu</p>}>
+          <p className="eyebrow mb-3">Menu</p>
+        </SecretContent>
 
-                            <Separator className={"my-2"}/>
+        {LINKS.map((link) => (
+          <motion.div key={link.id} className="w-fit origin-left" style={{ opacity: 0.75 }} whileHover={{ opacity: 1, scale: 1.12 }}>
+            <SecretContent
+              focusMaskWidth={0}
+              secret={<a className="text-black" href={`#${link.id}`}>{link.label}</a>}
+            >
+              <a className="text-white" href={`#${link.id}`}>{link.label}</a>
+            </SecretContent>
+          </motion.div>
+        ))}
 
-                            <SheetClose asChild>
-                                <Button onClick={handleTimelineClick} variant={"outline"} className={"hover:bg-neutral-700 transition-all rounded-full"}>Timeline</Button>
-                            </SheetClose>
-
-                            <SheetClose asChild>
-                                <Button onClick={handleProjectsClick} variant={"outline"} className={"hover:bg-neutral-700 transition-all rounded-full"}>Projects</Button>
-                            </SheetClose>
-
-                            <Separator className={"my-2"}/>
-
-                            <SheetClose asChild>
-                                <Button onClick={handleContactClick} variant={"outline"} className={"hover:bg-neutral-700 transition-all rounded-full"}>Contact</Button>
-                            </SheetClose>
-
-                            <div className={"flex h-[40px]"}/>
-                            <div className="flex w-full items-center justify-end content-end">
-                                <a href={"/my_cv.pdf"} target="_blank" rel="noopener noreferrer">
-                                    <SecretContent
-                                        secret={<Button variant={"outline"} className={"px-12 rounded-full"}>My CV</Button>}>
-                                        <Button variant={"default"} className={"px-12 rounded-full"}>My CV</Button>
-                                    </SecretContent>
-                                </a>
-                            </div>
-
-                        </div>
-                    </SheetContent>
-                </Sheet>
-            </div>
-            <div className={"hidden md:block w-[100%] h-full justify-end content-end pb-20"}>
-                <SecretContent focusMaskWidth={60} secret={<p className={"text-black text-2xl mr-20"}>Content</p>}>
-                    <p className={"text-white text-2xl mr-20"}>Content</p>
-                </SecretContent>
-                <motion.div
-                    style={{
-                        opacity: 0.7,
-                        scale: 1,
-                    }}
-                    whileHover={{
-                        opacity: 1,
-                        scale: 1.2,
-                    }}
-                >
-                    <SecretContent focusMaskWidth={0}
-                                   secret={<button className={"text-black"} onClick={handleAboutClick}>About</button>}>
-                        <button className={"text-white"} onClick={handleAboutClick}>About</button>
-                    </SecretContent>
-                </motion.div>
-
-                <motion.div
-                    style={{
-                        opacity: 0.7,
-                        scale: 1,
-                    }}
-                    whileHover={{
-                        opacity: 1,
-                        scale: 1.2,
-                    }}
-                >
-                    <SecretContent focusMaskWidth={0}
-                                   secret={<button className={"text-black"} onClick={handleTimelineClick}>Timeline</button>}>
-                        <button className={"text-white"} onClick={handleTimelineClick}>Timeline</button>
-                    </SecretContent>
-                </motion.div>
-
-                <motion.div
-                    style={{
-                        opacity: 0.7,
-                        scale: 1,
-                    }}
-                    whileHover={{
-                        opacity: 1,
-                        scale: 1.2,
-                    }}
-                >
-                    <SecretContent focusMaskWidth={0}
-                                   secret={<button className={"text-black"} onClick={handleProjectsClick}>Projects</button>}>
-                        <button className={"text-white"} onClick={handleProjectsClick}>Projects</button>
-                    </SecretContent>
-                </motion.div>
-
-                <motion.div
-                    style={{
-                        opacity: 0.7,
-                        scale: 1,
-                    }}
-                    whileHover={{
-                        opacity: 1,
-                        scale: 1.2,
-                    }}
-                >
-                    <SecretContent focusMaskWidth={0}
-                                   secret={<button className={"text-black"} onClick={handleContactClick}>Contact</button>}>
-                        <button className={"text-white"} onClick={handleContactClick}>Contact</button>
-                    </SecretContent>
-                </motion.div>
-
-                <div className={"h-[40px]"}/>
-                <a href={"/my_cv.pdf"} target="_blank" rel="noopener noreferrer">
-                    <SecretContent
-                        secret={<Button variant={"default"} className={"px-12 rounded-full"}>My CV</Button>}>
-                        <Button variant={"outline"} className={"px-12 rounded-full"}>My CV</Button>
-                    </SecretContent>
-                </a>
-            </div>
-        </div>
-    )
+        <div className="h-10" />
+        <a href={CV_PATH} target="_blank" rel="noopener noreferrer" className="inline-block">
+          <SecretContent secret={<Button variant="default" className="rounded-full px-12" tabIndex={-1}>My CV</Button>}>
+            <Button variant="outline" className="rounded-full px-12" tabIndex={-1}>My CV</Button>
+          </SecretContent>
+        </a>
+      </nav>
+    </div>
+  );
 };
-
 
 export default RightNav;

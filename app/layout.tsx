@@ -2,17 +2,32 @@ import type { Metadata } from "next";
 import { JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import React from "react";
-import SecretContentContextProvider from "@/components/providers/secret-content-context-provider";
-import { TooltipProvider } from "@/components/ui/tooltip";
 import GoogleAnalytics from "@/components/GoogleAnalytics";
-import ModelProvider from "@/components/providers/model-provider";
+import AppProviders from "@/components/providers/app-providers";
+import { SITE_DESCRIPTION, SITE_NAME, SITE_URL } from "@/lib/site";
 
-const JetBrainsMono = JetBrains_Mono({ subsets: ["latin"] });
+const JetBrainsMono = JetBrains_Mono({ subsets: ["latin"], display: "swap" });
 
 export const metadata: Metadata = {
-  title: "Abdelrahman Mahmoud",
-  description:
-    "Portfolio of Abdelrahman Mahmoud, a computer engineer and AI master's student. Projects in AI, game engines, chip design, robotics, and full-stack web.",
+  metadataBase: new URL(SITE_URL),
+  title: {
+    default: `${SITE_NAME} – Portfolio`,
+    template: `%s – ${SITE_NAME}`,
+  },
+  description: SITE_DESCRIPTION,
+  openGraph: {
+    type: "website",
+    siteName: SITE_NAME,
+    title: `${SITE_NAME} – Portfolio`,
+    description: SITE_DESCRIPTION,
+    url: "/",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: `${SITE_NAME} – Portfolio`,
+    description: SITE_DESCRIPTION,
+  },
+  robots: { index: true, follow: true },
 };
 
 export default function RootLayout({
@@ -23,12 +38,13 @@ export default function RootLayout({
   return (
     <html lang="en" className="dark" style={{ colorScheme: "dark" }}>
       <body className={JetBrainsMono.className}>
-        <TooltipProvider>
-          <SecretContentContextProvider>
-            <ModelProvider />
-            {children}
-          </SecretContentContextProvider>
-        </TooltipProvider>
+        <a
+          href="#main"
+          className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[100] focus:rounded-md focus:bg-background focus:px-4 focus:py-2 focus:text-foreground"
+        >
+          Skip to content
+        </a>
+        <AppProviders>{children}</AppProviders>
         <GoogleAnalytics />
       </body>
     </html>
