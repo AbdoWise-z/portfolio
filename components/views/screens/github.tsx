@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useRef } from "react";
+import React, { useMemo, useRef, useState } from "react";
 import Image from "next/image";
 import { motion, useScroll, useTransform } from "framer-motion";
 import { Activity, BookMarked, ExternalLink, GitFork, Star, Users } from "lucide-react";
@@ -45,23 +45,92 @@ const Stat = ({ icon, label, value }: { icon: React.ReactNode; label: React.Reac
   </motion.div>
 );
 
-const Calendar = ({ weeks }: { weeks: GithubDay[][] }) => (
-  <div className="overflow-x-auto pb-1">
-    <div className="flex w-max gap-[3px]">
-      {weeks.map((week, wi) => (
-        <div key={wi} className="flex flex-col gap-[3px]">
-          {week.map((d, di) => (
-            <span
-              key={d.date || `pad-${wi}-${di}`}
-              title={d.date ? `${d.count} on ${d.date}` : undefined}
-              className={cn("h-[11px] w-[11px] rounded-[2px]", d.date ? LEVEL_CLASS[d.level] : "invisible")}
-            />
+const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+const DAY_LABELS: Record<number, string> = { 1: "Mon", 3: "Wed", 5: "Fri" };
+/** "YYYY-MM" of a cell, or "" for padding. */
+const monthOf = (d?: GithubDay) => (d?.date ? d.date.slice(0, 7) : "");
+
+/** A month label above the first column of each month, unless the next label would run into it. */
+function monthLabels(weeks: GithubDay[][]): ({ text: string; key: string } | null)[] {
+  const labels: ({ text: string; key: string } | null)[] = weeks.map(() => null);
+  let prev = "";
+  weeks.forEach((week, wi) => {
+    const key = monthOf(week.find((d) => d.date));
+    if (key && key !== prev) {
+      labels[wi] = { text: MONTHS[Number(key.slice(5)) - 1], key };
+      prev = key;
+    }
+  });
+  const at = labels.map((l, i) => (l ? i : -1)).filter((i) => i >= 0);
+  for (let k = 0; k < at.length - 1; k++) if (at[k + 1] - at[k] < 3) labels[at[k]] = null;
+  return labels;
+}
+
+/**
+ * Contribution calendar with day and month labels. Hovering a cell outlines
+ * its whole month: every cell of that month draws a line on each side whose
+ * neighbour belongs to another month, extended into the gap so the pieces join.
+ */
+const Calendar = ({ weeks }: { weeks: GithubDay[][] }) => {
+  const [hover, setHover] = useState<string | null>(null);
+  const labels = useMemo(() => monthLabels(weeks), [weeks]);
+  const month = (wi: number, di: number) => monthOf(weeks[wi]?.[di]);
+  const line = "absolute bg-foreground/70";
+  return (
+    <div className="overflow-x-auto pb-1">
+      <div className="flex w-max gap-2 text-[10px] leading-none text-muted-foreground">
+        <div className="flex flex-col gap-[3px] pt-[14px]" aria-hidden>
+          {Array.from({ length: 7 }, (_, di) => (
+            <span key={di} className="h-[11px] w-7 leading-[11px]">{DAY_LABELS[di] ?? ""}</span>
           ))}
         </div>
-      ))}
+        <div onMouseLeave={() => setHover(null)}>
+          <div className="mb-1 flex h-[10px] gap-[3px]" aria-hidden>
+            {labels.map((l, wi) => (
+              <span
+                key={wi}
+                className={cn("w-[11px] shrink-0 whitespace-nowrap transition-colors", l && l.key === hover && "font-semibold text-foreground")}
+              >
+                {l?.text ?? ""}
+              </span>
+            ))}
+          </div>
+          <div className="flex gap-[3px]">
+            {weeks.map((week, wi) => (
+              <div key={wi} className="flex flex-col gap-[3px]">
+                {week.map((d, di) => {
+                  const m = monthOf(d);
+                  const on = !!hover && m === hover;
+                  return (
+                    <span
+                      key={d.date || `pad-${wi}-${di}`}
+                      title={d.date ? `${d.count} on ${d.date}` : undefined}
+                      onMouseEnter={d.date ? () => setHover(m) : undefined}
+                      className={cn(
+                        "relative block h-[11px] w-[11px] rounded-[2px] transition-opacity",
+                        d.date ? LEVEL_CLASS[d.level] : "invisible",
+                        hover && !on && "opacity-40",
+                      )}
+                    >
+                      {on && (
+                        <>
+                          {month(wi, di - 1) !== m && <i className={cn(line, "-left-[2px] -right-[2px] -top-[2px] h-px")} />}
+                          {month(wi, di + 1) !== m && <i className={cn(line, "-bottom-[2px] -left-[2px] -right-[2px] h-px")} />}
+                          {month(wi - 1, di) !== m && <i className={cn(line, "-bottom-[2px] -left-[2px] -top-[2px] w-px")} />}
+                          {month(wi + 1, di) !== m && <i className={cn(line, "-bottom-[2px] -right-[2px] -top-[2px] w-px")} />}
+                        </>
+                      )}
+                    </span>
+                  );
+                })}
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
     </div>
-  </div>
-);
+  );
+};
 
 /**
  * GitHub sheet: profile summary, activity calendar, languages and the most
