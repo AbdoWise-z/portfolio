@@ -33,7 +33,7 @@ const card = {
 
 const panel = "rounded-2xl border border-foreground/10 bg-background/40 p-5 md:p-6";
 
-const Stat = ({ icon, label, value }: { icon: React.ReactNode; label: string; value: string | number }) => (
+const Stat = ({ icon, label, value }: { icon: React.ReactNode; label: React.ReactNode; value: string | number }) => (
   <motion.div variants={card} className={cn(panel, "flex items-center gap-4 p-4 md:p-5")}>
     <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-foreground/10 bg-foreground/5 text-cyan-700 dark:text-cyan-300">
       {icon}
@@ -142,7 +142,11 @@ const Github = ({ data }: { data: GithubData | null }) => {
 
             {/* Stats */}
             <div className="grid grid-cols-2 gap-3 md:grid-cols-4 md:gap-4">
-              <Stat icon={<BookMarked className="h-5 w-5" />} label="Repositories" value={data.user.publicRepos} />
+              <Stat
+                icon={<BookMarked className="h-5 w-5" />}
+                label={<><span className="sm:hidden">Repos</span><span className="hidden sm:inline">Repositories</span></>}
+                value={data.user.publicRepos}
+              />
               <Stat icon={<Star className="h-5 w-5" />} label="Stars earned" value={data.totals.stars} />
               <Stat icon={<Users className="h-5 w-5" />} label="Followers" value={data.user.followers} />
               <Stat
