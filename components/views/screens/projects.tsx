@@ -295,7 +295,7 @@ const HiddenMessage = () => {
                     style={{ left: box.left, top: box.top, width: box.width, height: box.height, fontSize: box.font }}
                 >
                     <SecretContent
-                        focusMaskWidth={Math.round(box.width * 1.15)}
+                        focusMaskWidth={Math.round(Math.min(220, Math.max(140, box.width * 0.5)))}
                         secret={
                             <div className="flex h-full w-full items-center whitespace-nowrap rounded-[0.3em] bg-[#0f172a] pl-[0.3em] font-medium text-white">
                                 Click 5-times quickly for a surprise
