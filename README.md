@@ -6,6 +6,8 @@ Personal portfolio of Abdelrahman Mahmoud. A single-page site built with
 
 ## Development
 
+Node 22 or newer (`engines` in package.json; Vercel builds on the newest release that satisfies it).
+
 ```bash
 npm install
 npm run dev      # http://localhost:3000
