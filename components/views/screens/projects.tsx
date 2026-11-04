@@ -209,12 +209,14 @@ const makeEdgeVariants = (reduce: boolean, w: number) => reduce
                 ? `polygon(${100 - w}% 0%, ${100 + w}% 0%, ${120 + w}% 100%, ${120 - w}% 100%)`
                 : `polygon(${-w}% 0%, ${w}% 0%, ${-20 + w}% 100%, ${-20 - w}% 100%)`,
         }),
+        // Fades out as the wipe completes: at rest the edge runs through a
+        // corner of the slide, and the strip's inner half would show there.
         center: (direction: number) => ({
-            opacity: 1,
+            opacity: 0,
             clipPath: direction > 0
                 ? `polygon(${-20 - w}% 0%, ${-20 + w}% 0%, ${w}% 100%, ${-w}% 100%)`
                 : `polygon(${120 - w}% 0%, ${120 + w}% 0%, ${100 + w}% 100%, ${100 - w}% 100%)`,
-            transition: { clipPath: WIPE, opacity: { duration: 0.2 } },
+            transition: { clipPath: WIPE, opacity: { delay: 0.6, duration: 0.2 } },
         }),
         exit: { opacity: 0, transition: { duration: 0.25 } },
     };
@@ -343,7 +345,8 @@ export default function ProjectsPage() {
                         aria-label={`${projectIndex + 1} of ${projects.length}: ${currentProject.title}`}
                     >
                         <div className="absolute inset-0 z-0 overflow-hidden" aria-hidden>
-                            <motion.div variants={imageVariants} className="absolute inset-0">
+                            {/* Children resolve `custom` from their own props, so the direction is passed again. */}
+                            <motion.div variants={imageVariants} custom={direction} className="absolute inset-0">
                                 <DriftImage image={currentProject.image} direction={direction} />
                             </motion.div>
                             <div className={cn("absolute inset-0 bg-gradient-to-br opacity-60 mix-blend-overlay", currentProject.color)} />
@@ -352,8 +355,8 @@ export default function ProjectsPage() {
                         </div>
 
                         {/* Leading edge of the wipe: halo, then the line. */}
-                        <motion.div variants={edgeHalo} className="pointer-events-none absolute inset-0 z-20 bg-white/25" aria-hidden />
-                        <motion.div variants={edgeLine} className="pointer-events-none absolute inset-0 z-20 bg-white/90" aria-hidden />
+                        <motion.div variants={edgeHalo} custom={direction} className="pointer-events-none absolute inset-0 z-20 bg-white/25" aria-hidden />
+                        <motion.div variants={edgeLine} custom={direction} className="pointer-events-none absolute inset-0 z-20 bg-white/90" aria-hidden />
 
                         <div className="section-gutter pointer-events-none absolute inset-0 z-10 flex flex-col justify-center pb-24 pt-24 md:pt-0">
                             <motion.div
