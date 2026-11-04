@@ -13,6 +13,7 @@ import Projects from "@/components/views/screens/projects";
 import Skills from "@/components/views/screens/skills";
 import ContactMe from "@/components/views/screens/contact_me";
 import TimelinePage from "@/components/views/screens/timeline-page";
+import EasterEgg from "@/components/views/easter-egg";
 
 /**
  * The sections stack like sheets: each one slides over the previous, which
@@ -37,6 +38,7 @@ export default function Home() {
             <RightNav/>
             <ScrollProgress/>
             <SecretContentIndicator/>
+            <EasterEgg/>
         </>
     );
 }
