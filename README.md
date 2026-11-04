@@ -25,7 +25,9 @@ NEXT_PUBLIC_SITE_URL=https://your-domain  # used for metadata, sitemap, robots
 GITHUB_TOKEN=                             # optional, no scopes: real contributions calendar in the GitHub section
 ```
 
-See `.env.example`. To regenerate the WebP banners from new PNG/JPG sources run `npm run images`.
+See `.env.example`. The project and timeline backgrounds are drawn as vector art by
+`scripts/generate-banners.mjs` and rendered to `public/banners` with `npm run banners`;
+`npm run images` converts any PNG/JPG sources dropped in there to WebP.
 
 The contact form posts to Formspree; the endpoint is in
 `components/views/screens/contact_me.tsx`.

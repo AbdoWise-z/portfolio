@@ -11,6 +11,7 @@
     "start": "next start",
     "lint": "next lint",
     "images": "node scripts/optimize-images.mjs",
+    "banners": "node scripts/generate-banners.mjs",
     "check:shots": "node scripts/checks/shots.js",
     "check:themes": "node scripts/checks/themes.js",
     "check:transitions": "node scripts/checks/transitions.js",
