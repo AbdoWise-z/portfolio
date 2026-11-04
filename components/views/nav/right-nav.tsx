@@ -1,12 +1,13 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import { Sheet, SheetClose, SheetContent, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
 import { Menu } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import { CV_PATH, SECTIONS } from "@/lib/site";
+import { scrollToSection } from "@/lib/scroll-to-section";
 import { useActiveSection } from "@/hooks/use-active-section";
 import { cn } from "@/lib/utils";
 import Magnetic from "@/components/views/magnetic";
@@ -20,6 +21,12 @@ const LINKS = [
 ];
 const IDS = LINKS.map((l) => l.id);
 
+/** Section links scroll by layout position; see scrollToSection for why a plain anchor is not enough. */
+const onSectionClick = (event: React.MouseEvent<HTMLAnchorElement>) => {
+  event.preventDefault();
+  scrollToSection(event.currentTarget.getAttribute("href")!.slice(1));
+};
+
 /**
  * Section navigation. A sheet menu behind a button below the lg breakpoint,
  * a vertical list in the bottom-right corner from lg up. Drawn white with
@@ -27,12 +34,15 @@ const IDS = LINKS.map((l) => l.id);
  */
 const RightNav = () => {
   const active = useActiveSection(IDS);
+  // The sheet is controlled: section links call preventDefault (see onSectionClick),
+  // which would stop Radix's own SheetClose handler from running.
+  const [menuOpen, setMenuOpen] = useState(false);
 
   return (
     <div className="pointer-events-none fixed right-0 top-0 z-[46] flex h-full flex-col gap-3 p-6 text-white mix-blend-difference md:p-8 lg:w-[210px]">
       {/* Small screens: sheet menu */}
       <div className="pointer-events-auto lg:hidden">
-        <Sheet>
+        <Sheet open={menuOpen} onOpenChange={setMenuOpen}>
           <SheetTrigger asChild>
             <Button
               variant="outline"
@@ -49,11 +59,15 @@ const RightNav = () => {
               {LINKS.map((link, i) => (
                 <React.Fragment key={link.id}>
                   {(i === 1 || i === 4) && <Separator className="my-2" />}
-                  <SheetClose asChild>
-                    <Button asChild variant={active === link.id ? "secondary" : "outline"} className="rounded-full">
-                      <a href={`#${link.id}`} aria-current={active === link.id ? "true" : undefined}>{link.label}</a>
-                    </Button>
-                  </SheetClose>
+                  <Button asChild variant={active === link.id ? "secondary" : "outline"} className="rounded-full">
+                    <a
+                      href={`#${link.id}`}
+                      onClick={(e) => { onSectionClick(e); setMenuOpen(false); }}
+                      aria-current={active === link.id ? "true" : undefined}
+                    >
+                      {link.label}
+                    </a>
+                  </Button>
                 </React.Fragment>
               ))}
 
@@ -88,7 +102,7 @@ const RightNav = () => {
                 aria-hidden
                 className={cn("h-1.5 w-1.5 rounded-full bg-white transition-opacity duration-300", isActive ? "opacity-100" : "opacity-0")}
               />
-              <a className="text-white" href={`#${link.id}`} aria-current={isActive ? "true" : undefined}>
+              <a className="text-white" href={`#${link.id}`} onClick={onSectionClick} aria-current={isActive ? "true" : undefined}>
                 {link.label}
               </a>
             </motion.div>

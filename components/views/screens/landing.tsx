@@ -5,6 +5,7 @@ import React, { useEffect, useRef } from "react";
 import { motion, useMotionValue, useScroll, useSpring, useTransform } from "framer-motion";
 import { useSectionProgress } from "@/hooks/use-section-progress";
 import { SECTIONS } from "@/lib/site";
+import { scrollToSection } from "@/lib/scroll-to-section";
 
 const line = "text-center text-4xl font-bold leading-tight md:text-7xl xl:text-8xl";
 const ink = "text-slate-900 dark:text-cyan-50";
@@ -93,6 +94,7 @@ const Landing = () => {
       >
         <motion.a
           href={`#${SECTIONS.about}`}
+          onClick={(e) => { e.preventDefault(); scrollToSection(SECTIONS.about); }}
           style={{ opacity: hintOpacity }}
           className="flex flex-col items-center gap-2 text-foreground/60 transition-colors hover:text-foreground"
           aria-label="Scroll to the About section"
