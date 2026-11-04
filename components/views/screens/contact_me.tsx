@@ -158,7 +158,7 @@ const ContactMe = () => {
 
       <footer className="mx-auto mt-20 flex w-full max-w-5xl flex-wrap items-center justify-between gap-2 border-t border-foreground/10 pt-6 text-xs text-muted-foreground">
         <span>© {new Date().getFullYear()} Abdelrahman Mahmoud</span>
-        <span>Built with Next.js. Click anywhere for a shooting star, five times fast for a game.</span>
+        <span>Built with Next.js. Click anywhere for a shooting star, maybe shoot too many stars?</span>
       </footer>
     </motion.section>
   );
