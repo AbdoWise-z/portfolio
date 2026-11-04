@@ -1,7 +1,7 @@
 "use client";
 
 import React, {useRef} from 'react';
-import {MotionValue, useMotionTemplate, motion} from "framer-motion";
+import {MotionValue, useMotionTemplate, useTransform, motion} from "framer-motion";
 import {cn} from "@/lib/utils";
 import {useMaskPosition} from "@/hooks/use-mask-position";
 import {DEFAULT_MASK_SIZE, useSecretContextValues} from "@/components/providers/secret-content-context-provider";
@@ -38,11 +38,13 @@ const SecretContent = (
   const contentRef = useRef<HTMLDivElement>(null);
 
   const {setMaskSize} = useSecretContextValues();
-  const {transformedX, transformedY, contextData} = useMaskPosition(contentRef);
+  const {transformedX, transformedY, scale, contextData} = useMaskPosition(contentRef);
 
   const size = maskSize ?? contextData.MaskSize ?? 50;
+  // The lens is a screen size; the mask is drawn before ancestor transforms scale this element.
+  const localSize = useTransform(() => (typeof size === "number" ? size : size.get()) / scale.get());
   const maskPosition = useMotionTemplate`center, ${transformedX}px ${transformedY}px`;
-  const maskSizeT = useMotionTemplate`contain, ${size}px ${size}px`;
+  const maskSizeT = useMotionTemplate`contain, ${localSize}px ${localSize}px`;
 
   return (
     <div
