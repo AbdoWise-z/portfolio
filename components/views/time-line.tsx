@@ -19,12 +19,17 @@ export interface TimelineItemData {
     icon: React.ReactNode;
     background: StaticImageData;
     widget?: React.ReactNode;
-    certificateUrl?: string;
+    /** Certificate, transcript and similar documents. */
+    links?: { label: string; href: string }[];
 }
 
 /** Scroll distance, as a fraction of the viewport height, that each item occupies. */
 const STEP_VH = 55;
-/** Extra scroll at the end during which the section stays pinned while the next sheet covers it. */
+/** Pause after the section pins, before the first item advances. */
+const LEAD_VH = 30;
+/** Pause on the last item, with nothing moving, before the next sheet starts to cover the section. */
+const HOLD_VH = 60;
+/** Scroll during which the section stays pinned while the next sheet slides over it. */
 const TAIL_VH = 100;
 
 const TimelineWidgetDisplay = ({ children }: { children: React.ReactNode }) => (
@@ -42,8 +47,9 @@ interface TimelineProps {
 /**
  * Scroll-driven timeline. It enters as an inset card that expands to full
  * bleed, then a sticky viewport shows one item at a time (about half a screen
- * of scroll each, switching at the midpoint). At the end it stays pinned and
- * recedes while the next section slides over it. Points and dates are clickable.
+ * of scroll each, switching at the midpoint). It pauses on the first and last
+ * items, then stays pinned and recedes while the next section slides over it.
+ * Points and dates are clickable.
  */
 export function Timeline({ items, coveredBy }: TimelineProps) {
     const containerRef = useRef<HTMLDivElement>(null);
@@ -51,14 +57,15 @@ export function Timeline({ items, coveredBy }: TimelineProps) {
     const [activeIndex, setActiveIndex] = useState(0);
     const last = items.length - 1;
     const contentVh = last * STEP_VH;
+    const totalVh = LEAD_VH + contentVh + HOLD_VH + TAIL_VH;
 
-    // Progress through the whole wrapper; the items occupy the first part, the tail the rest.
+    // Progress through the whole wrapper: lead-in, items, hold, then the tail.
     const { scrollYProgress } = useScroll({
         target: containerRef,
         offset: ["start start", "end end"],
     });
     const contentProgress = useTransform(scrollYProgress, (p) =>
-        Math.min(1, (p * (contentVh + TAIL_VH)) / contentVh),
+        Math.max(0, Math.min(1, (p * totalVh - LEAD_VH) / contentVh)),
     );
     const smoothProgress = useSpring(contentProgress, { stiffness: 220, damping: 32, restDelta: 0.001 });
 
@@ -89,7 +96,7 @@ export function Timeline({ items, coveredBy }: TimelineProps) {
         const container = containerRef.current;
         if (!container) return;
         const top = container.getBoundingClientRect().top + window.scrollY;
-        window.scrollTo({ top: top + (index * window.innerHeight * STEP_VH) / 100, behavior: "smooth" });
+        window.scrollTo({ top: top + ((LEAD_VH + index * STEP_VH) * window.innerHeight) / 100, behavior: "smooth" });
     }, []);
 
     // Arrow keys step between items while the timeline is on screen.
@@ -109,7 +116,7 @@ export function Timeline({ items, coveredBy }: TimelineProps) {
     }, [inView, activeIndex, last, jumpTo]);
 
     return (
-        <div ref={containerRef} className="relative" style={{ height: `calc(100vh + ${contentVh + TAIL_VH}vh)` }}>
+        <div ref={containerRef} className="relative" style={{ height: `calc(100vh + ${totalVh}vh)` }}>
             <motion.div
                 ref={stickyRef}
                 className="sticky top-0 flex h-screen supports-[height:100dvh]:h-dvh w-full flex-col overflow-hidden bg-black text-white"
@@ -243,7 +250,7 @@ export function Timeline({ items, coveredBy }: TimelineProps) {
                                             {item.description}
                                         </p>
 
-                                        {(item.widget || item.certificateUrl) && (
+                                        {(item.widget || item.links) && (
                                             <motion.div
                                                 initial={false}
                                                 animate={{ opacity: isCurrent ? 1 : 0, scale: isCurrent ? 1 : 0.95 }}
@@ -251,18 +258,20 @@ export function Timeline({ items, coveredBy }: TimelineProps) {
                                             >
                                                 <TimelineWidgetDisplay>
                                                     {item.widget}
-                                                    {item.certificateUrl && (
-                                                        <div className={cn("flex items-center gap-2", item.widget && "mt-3 border-t border-border/30 pt-3")}>
-                                                            <span className="text-xs text-muted-foreground">Certificate:</span>
-                                                            <a
-                                                                href={item.certificateUrl}
-                                                                target="_blank"
-                                                                rel="noopener noreferrer"
-                                                                tabIndex={isCurrent ? 0 : -1}
-                                                                className="text-xs text-primary transition-colors hover:text-primary/80 hover:underline"
-                                                            >
-                                                                View →
-                                                            </a>
+                                                    {item.links && item.links.length > 0 && (
+                                                        <div className={cn("flex flex-wrap items-center gap-x-4 gap-y-1", item.widget && "mt-3 border-t border-border/30 pt-3")}>
+                                                            {item.links.map((link) => (
+                                                                <a
+                                                                    key={link.href}
+                                                                    href={link.href}
+                                                                    target="_blank"
+                                                                    rel="noopener noreferrer"
+                                                                    tabIndex={isCurrent ? 0 : -1}
+                                                                    className="text-xs text-primary transition-colors hover:text-primary/80 hover:underline"
+                                                                >
+                                                                    {link.label} →
+                                                                </a>
+                                                            ))}
                                                         </div>
                                                     )}
                                                 </TimelineWidgetDisplay>

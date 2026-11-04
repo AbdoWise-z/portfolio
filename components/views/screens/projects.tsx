@@ -32,7 +32,8 @@ interface Project {
     icon: React.ReactNode;
     tags: string[];
     color: string;
-    source?: string;
+    /** Repositories linked from the CV. The label defaults to "Source". */
+    sources?: { href: string; label?: string }[];
     /** Deployed demo, if one is linked from the CV. */
     demo?: string;
 }
@@ -47,7 +48,7 @@ const projects: Project[] = [
         icon: <Cpu className="h-6 w-6" />,
         tags: ["Python", "C++", "ImGui", "Reinforcement Learning"],
         color: "from-blue-500/20 to-purple-500/20",
-        source: "https://github.com/P-E-A-R-L"
+        sources: [{ href: "https://github.com/P-E-A-R-L" }]
     },
     {
         id: "epic",
@@ -58,7 +59,7 @@ const projects: Project[] = [
         icon: <Layers className="h-6 w-6" />,
         tags: ["Verilog", "Java", "Assembly", "ModelSim"],
         color: "from-yellow-500/20 to-amber-500/20",
-        source: "https://github.com/AbdoWise-z/the-epic-cpu"
+        sources: [{ href: "https://github.com/AbdoWise-z/the-epic-cpu" }]
     },
     {
         id: "paimon",
@@ -69,7 +70,7 @@ const projects: Project[] = [
         icon: <Gamepad2 className="h-6 w-6" />,
         tags: ["C++", "OpenGL", "Game Physics", "Graphics Programming"],
         color: "from-pink-500/20 to-rose-500/20",
-        source: "https://github.com/AbdoWise-z/Paimon-No-Way-Home"
+        sources: [{ href: "https://github.com/AbdoWise-z/Paimon-No-Way-Home" }]
     },
     {
         id: "truck-chan",
@@ -80,7 +81,7 @@ const projects: Project[] = [
         icon: <Truck className="h-6 w-6" />,
         tags: ["Embedded C", "Java", "Kotlin", "Robotics"],
         color: "from-green-500/20 to-emerald-500/20",
-        source: "https://github.com/Truck-chan"
+        sources: [{ href: "https://github.com/Truck-chan" }]
     },
     {
         id: "arabic-font",
@@ -91,7 +92,7 @@ const projects: Project[] = [
         icon: <Type className="h-6 w-6" />,
         tags: ["Python", "OpenCV", "Deep Learning", "Jupyter"],
         color: "from-orange-500/20 to-red-500/20",
-        source: "https://github.com/AbdoWise-z/Arabic-Font-Type-Detector",
+        sources: [{ href: "https://github.com/AbdoWise-z/Arabic-Font-Type-Detector" }],
         demo: "http://xabdomo.pythonanywhere.com/"
     },
     {
@@ -103,7 +104,7 @@ const projects: Project[] = [
         icon: <MessageSquare className="h-6 w-6" />,
         tags: ["TypeScript", "Next.js", "Prisma", "MongoDB"],
         color: "from-indigo-500/20 to-blue-500/20",
-        source: "https://github.com/AbdoWise-z/discordo",
+        sources: [{ href: "https://github.com/AbdoWise-z/discordo" }],
         demo: "https://discordo-production.up.railway.app/"
     },
     {
@@ -115,7 +116,7 @@ const projects: Project[] = [
         icon: <Smartphone className="h-6 w-6" />,
         tags: ["Flutter", "Restful APIs", "Agile", "Mobile"],
         color: "from-cyan-500/20 to-sky-500/20",
-        source: "https://github.com/AbdoWise-z/GigaChat-Cross-platform"
+        sources: [{ href: "https://github.com/AbdoWise-z/GigaChat-Cross-platform" }]
     },
     {
         id: "irminsul",
@@ -126,7 +127,10 @@ const projects: Project[] = [
         icon: <Search className="h-6 w-6" />,
         tags: ["Java", "Spring Boot", "MongoDB", "Flutter"],
         color: "from-emerald-500/20 to-teal-500/20",
-        source: "https://github.com/AbdoWise-z/Irminsul-ui"
+        sources: [
+            { href: "https://github.com/AbdoWise-z/Irminsul-ui", label: "Frontend" },
+            { href: "https://github.com/AbdoWise-z/Irminsul-backend", label: "Backend" },
+        ]
     },
     {
         id: "promptopia",
@@ -137,7 +141,7 @@ const projects: Project[] = [
         icon: <Edit3 className="h-6 w-6" />,
         tags: ["JavaScript", "Next.js", "React", "MongoDB"],
         color: "from-violet-500/20 to-purple-500/20",
-        source: "https://github.com/AbdoWise-z/Promptopia",
+        sources: [{ href: "https://github.com/AbdoWise-z/Promptopia" }],
         demo: "https://promptopia-eight-black.vercel.app/"
     }
 ];
@@ -233,8 +237,9 @@ export default function ProjectsPage() {
         onSwipeRight: () => paginate(-1),
     });
 
+    // 100vh sliding over the timeline, a 70vh hold with nothing moving, then 100vh while Skills covers it.
     return (
-        <div ref={wrapRef} id="projects-stack" className="relative z-30 -mt-[100vh] h-[200vh] w-full">
+        <div ref={wrapRef} id="projects-stack" className="relative z-30 -mt-[100vh] h-[270vh] w-full">
             <motion.section
                 ref={ref}
                 id={SECTIONS.projects}
@@ -305,7 +310,7 @@ export default function ProjectsPage() {
                                     ))}
                                 </ul>
 
-                                {(currentProject.source || currentProject.demo) && (
+                                {(currentProject.sources || currentProject.demo) && (
                                     <div className="flex flex-wrap gap-3 pt-2">
                                         {currentProject.demo && (
                                             <Magnetic>
@@ -319,18 +324,18 @@ export default function ProjectsPage() {
                                                 </a>
                                             </Magnetic>
                                         )}
-                                        {currentProject.source && (
-                                            <Magnetic>
+                                        {currentProject.sources?.map((repo) => (
+                                            <Magnetic key={repo.href}>
                                                 <a
-                                                    href={currentProject.source}
+                                                    href={repo.href}
                                                     target="_blank"
                                                     rel="noopener noreferrer"
                                                     className="flex h-12 select-none items-center rounded-full border border-white/20 px-6 text-white transition-colors hover:bg-white/10"
                                                 >
-                                                    <Github className="mr-2 h-5 w-5" /> Source
+                                                    <Github className="mr-2 h-5 w-5" /> {repo.label ?? "Source"}
                                                 </a>
                                             </Magnetic>
-                                        )}
+                                        ))}
                                     </div>
                                 )}
                             </motion.div>

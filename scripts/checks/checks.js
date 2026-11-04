@@ -24,7 +24,7 @@ fs.mkdirSync(out, { recursive: true });
     const page = await browser.newPage({ viewport: { width: w, height: h } });
     const errors = [];
     page.on("pageerror", (e) => errors.push(String(e)));
-    page.on("console", (m) => { if (m.type() === "error") errors.push(m.text()); });
+    page.on("console", (m) => { if (m.type() === "error" && !m.text().includes("status of 404")) errors.push(m.text()); }); // the missing-route probe below logs a 404
     await page.goto("http://localhost:3000/#projects", { waitUntil: "networkidle" });
     await page.mouse.move(-10, -10);
     await page.waitForTimeout(1200);
@@ -35,7 +35,7 @@ fs.mkdirSync(out, { recursive: true });
     await page.waitForTimeout(900);
     await page.keyboard.press("ArrowRight");
     await page.waitForTimeout(900);
-    const counter = await page.locator('[aria-live="polite"]').textContent();
+    const counter = await page.locator('#projects [aria-live="polite"]').textContent();
     console.log(`w=${w} projects counter after next+arrow: ${counter.trim()}`);
 
     if (w === 390) {

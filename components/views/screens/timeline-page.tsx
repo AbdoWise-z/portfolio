@@ -38,7 +38,10 @@ const timelineData: TimelineItemData[] = [
         date: "Oct 2020 – July 2025",
         icon: <GraduationCap className="h-6 w-6" />,
         background: bgOffice,
-        certificateUrl: "https://drive.google.com/file/d/1oG5ux8oD1ZkFj_x35hcfE2rLuEcc3RKx/view?usp=sharing",
+        links: [
+            { label: "Certificate", href: "https://drive.google.com/file/d/1oG5ux8oD1ZkFj_x35hcfE2rLuEcc3RKx/view?usp=sharing" },
+            { label: "Transcript", href: "https://drive.google.com/file/d/10Jfk2LLChoNP_k_rxb66e33UcWqS1LiC/view?usp=drive_link" },
+        ],
         widget: (
             <div className="flex items-center gap-3">
                 <div className="flex h-12 w-12 items-center justify-center rounded-full bg-yellow-500/20 text-yellow-500">
@@ -60,7 +63,7 @@ const timelineData: TimelineItemData[] = [
         date: "Sep 2024 – Dec 2024",
         icon: <Briefcase className="h-6 w-6" />,
         background: bgCircuit,
-        certificateUrl: "https://drive.google.com/file/d/1YaMegP1iBODK0qmDokjOPm_8blHV414V/view?usp=sharing",
+        links: [{ label: "Certificate", href: "https://drive.google.com/file/d/1YaMegP1iBODK0qmDokjOPm_8blHV414V/view?usp=sharing" }],
         widget: (
             <div className="flex flex-wrap gap-2">
                 <Tag>R&D</Tag>
@@ -78,7 +81,7 @@ const timelineData: TimelineItemData[] = [
         date: "May 2024",
         icon: <Trophy className="h-6 w-6" />,
         background: bgFluid,
-        certificateUrl: "https://drive.google.com/file/d/1IugZwRHJt7UMvncCf4AXls_BDQ4ftINv/view?usp=sharing",
+        links: [{ label: "Certificate", href: "https://drive.google.com/file/d/1IugZwRHJt7UMvncCf4AXls_BDQ4ftINv/view?usp=sharing" }],
         widget: (
             <div className="flex items-center gap-4 p-2">
                 <div className="text-center">
@@ -102,7 +105,7 @@ const timelineData: TimelineItemData[] = [
         date: "July 2023",
         icon: <Laptop className="h-6 w-6" />,
         background: bgOffice,
-        certificateUrl: "https://drive.google.com/file/d/1IuKFmnVtWqV0gP1PFSP6b9ZBz3zR6Ggf/view?usp=sharing"
+        links: [{ label: "Certificate", href: "https://drive.google.com/file/d/1IuKFmnVtWqV0gP1PFSP6b9ZBz3zR6Ggf/view?usp=sharing" }],
     },
     {
         id: "course-cybersec",
@@ -113,7 +116,7 @@ const timelineData: TimelineItemData[] = [
         date: "July 2023 – Sep 2023",
         icon: <Shield className="h-6 w-6" />,
         background: bgCyber,
-        certificateUrl: "https://drive.google.com/file/d/1IqPiM7XrMclm1gA1NuW77hna6EOZv94s/view?usp=sharing",
+        links: [{ label: "Certificate", href: "https://drive.google.com/file/d/1IqPiM7XrMclm1gA1NuW77hna6EOZv94s/view?usp=sharing" }],
     },
     {
         id: "course-embedded",

@@ -57,7 +57,7 @@ const AboutMe = () => {
   return (
     <section
       id={SECTIONS.about}
-      className="section-gutter section-panel sheet relative z-10 scroll-mt-24 py-24 md:py-32"
+      className="section-gutter section-panel sheet relative z-10 scroll-mt-24 pb-32 pt-24 md:pb-44 md:pt-32"
     >
       <div className="mx-auto w-full max-w-5xl select-none">
         <h2 className="eyebrow mb-8">01 · About Me</h2>

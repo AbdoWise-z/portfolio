@@ -1,8 +1,8 @@
 "use client";
 
 import SecretContent from "@/components/views/secret-content";
-import React, { useEffect } from "react";
-import { motion, useMotionValue, useSpring, useTransform } from "framer-motion";
+import React, { useEffect, useRef } from "react";
+import { motion, useMotionValue, useScroll, useSpring, useTransform } from "framer-motion";
 import { useSectionProgress } from "@/hooks/use-section-progress";
 import { SECTIONS } from "@/lib/site";
 
@@ -16,15 +16,20 @@ const intro = {
 };
 
 /**
- * Hero. It stays pinned while the About sheet slides over it, receding and
- * fading as it is covered. The lines rise into place on first load.
+ * Hero. It stays pinned and still for a beat (the hold spacer below it), then
+ * recedes and fades while the About sheet slides over it. The lines rise into
+ * place on first load.
  */
 const Landing = () => {
+  const holdRef = useRef<HTMLDivElement>(null);
+  // Hold: only the scroll hint fades and the headline lifts a few pixels, so the
+  // page answers the scroll without taking the hero away yet.
+  const { scrollYProgress: hold } = useScroll({ target: holdRef, offset: ["start end", "end end"] });
   const cover = useSectionProgress(SECTIONS.about, ["start end", "start 0.25"]);
   const opacity = useTransform(cover, [0, 1], [1, 0]);
   const scale = useTransform(cover, [0, 1], [1, 0.9]);
-  const y = useTransform(cover, [0, 1], [0, -60]);
-  const hintOpacity = useTransform(cover, [0, 0.5], [1, 0]);
+  const y = useTransform([hold, cover], ([h, c]: number[]) => h * -14 + c * -60);
+  const hintOpacity = useTransform(hold, [0, 0.5], [1, 0]);
 
   // Mild pointer parallax: the headline drifts a few pixels against the mouse.
   const px = useMotionValue(0);
@@ -42,6 +47,7 @@ const Landing = () => {
   }, [px, py]);
 
   return (
+    <>
     <section className="sticky top-0 z-0 flex h-screen supports-[height:100dvh]:h-dvh select-none flex-col items-center justify-center px-6">
       <motion.div style={{ opacity, scale, y }} className="flex flex-col items-center">
         <motion.div
@@ -96,6 +102,8 @@ const Landing = () => {
         </motion.a>
       </motion.div>
     </section>
+    <div ref={holdRef} className="h-[45vh]" aria-hidden />
+    </>
   );
 };
 

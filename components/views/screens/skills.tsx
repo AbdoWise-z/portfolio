@@ -5,7 +5,7 @@ import { motion, useTransform } from "framer-motion";
 import { useSectionProgress } from "@/hooks/use-section-progress";
 import { Cpu, Monitor, Server, Sparkles } from "lucide-react";
 import SecretContent from "@/components/views/secret-content";
-import { SECTIONS } from "@/lib/site";
+import { CV_PATH, SECTIONS } from "@/lib/site";
 
 type SkillGroup = {
   title: string;
@@ -50,15 +50,15 @@ const card = {
 
 /** Skills sheet: slides over the pinned projects slideshow. */
 const Skills = () => {
-  // Recede slightly while the contact curtain rises over the bottom edge.
-  const cover = useSectionProgress(SECTIONS.contact, ["start end", "start 0.4"]);
+  // Recede slightly once the contact curtain is well over the bottom edge.
+  const cover = useSectionProgress(SECTIONS.contact, ["start 0.8", "start 0.25"]);
   const scale = useTransform(cover, [0, 1], [1, 0.965]);
   const opacity = useTransform(cover, [0, 1], [1, 0.55]);
 
   return (
     <section
       id={SECTIONS.skills}
-      className="section-gutter section-panel sheet relative z-[35] -mt-[100vh] scroll-mt-24 py-24 md:py-32"
+      className="section-gutter section-panel sheet relative z-[35] -mt-[100vh] scroll-mt-24 pb-32 pt-24 md:pb-44 md:pt-32"
     >
       <motion.div style={{ scale, opacity }} className="mx-auto w-full max-w-5xl origin-top">
         <h2 className="eyebrow mb-4">04 · Skills</h2>
@@ -103,6 +103,19 @@ const Skills = () => {
             </motion.li>
           ))}
         </motion.ul>
+
+        <p className="mt-16 text-sm text-muted-foreground">
+          The full list, with the projects each one was used on, is in my{" "}
+          <a
+            href={CV_PATH}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-cyan-800 underline-offset-4 transition-colors hover:text-cyan-950 hover:underline dark:text-cyan-300 dark:hover:text-cyan-100"
+          >
+            CV
+          </a>
+          .
+        </p>
       </motion.div>
     </section>
   );
