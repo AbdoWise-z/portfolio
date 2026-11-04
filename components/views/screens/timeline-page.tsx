@@ -5,8 +5,11 @@ import {SECTIONS} from "@/lib/site";
 
 import bgCyber from "@/public/banners/abstract_geometric_cyber_aesthetic_background.webp";
 import bgOffice from "@/public/banners/modern_minimal_office_workspace_background.webp";
-import bgFluid from "@/public/banners/creative_fluid_gradient_background.webp";
 import bgCircuit from "@/public/banners/futuristic_circuit_board_background.webp";
+import bgNeural from "@/public/banners/neural_network_background.webp";
+import bgCampus from "@/public/banners/campus_blueprint_background.webp";
+import bgProfiler from "@/public/banners/profiler_traces_background.webp";
+import bgPodium from "@/public/banners/podium_background.webp";
 
 const Tag = ({children}: {children: React.ReactNode}) => (
     <span className="rounded border border-cyan-500/20 bg-cyan-500/10 px-2 py-1 text-xs text-cyan-400">{children}</span>
@@ -21,7 +24,7 @@ const timelineData: TimelineItemData[] = [
         description: "Specializing in Artificial Intelligence for Science and Technology. Focusing on advanced machine learning architectures and their application in scientific domains.",
         date: "Oct 2025 – Present",
         icon: <GraduationCap className="h-6 w-6" />,
-        background: bgCyber,
+        background: bgNeural,
         widget: (
             <div className="flex items-center gap-2 text-sm text-white/80">
                 <span className="font-semibold">Status:</span>
@@ -37,7 +40,7 @@ const timelineData: TimelineItemData[] = [
         description: "Graduated with Excellence (GPA 3.9). Built a strong foundation in software engineering, embedded systems, and computer architecture.",
         date: "Oct 2020 – July 2025",
         icon: <GraduationCap className="h-6 w-6" />,
-        background: bgOffice,
+        background: bgCampus,
         links: [
             { label: "Certificate", href: "https://drive.google.com/file/d/1oG5ux8oD1ZkFj_x35hcfE2rLuEcc3RKx/view?usp=sharing" },
             { label: "Transcript", href: "https://drive.google.com/file/d/10Jfk2LLChoNP_k_rxb66e33UcWqS1LiC/view?usp=drive_link" },
@@ -62,7 +65,7 @@ const timelineData: TimelineItemData[] = [
         description: "Worked in the HAV team developing critical debugging and profiling tools for threading and ethernet communications. Enhanced system reliability and diagnostic capabilities.",
         date: "Sep 2024 – Dec 2024",
         icon: <Briefcase className="h-6 w-6" />,
-        background: bgCircuit,
+        background: bgProfiler,
         links: [{ label: "Certificate", href: "https://drive.google.com/file/d/1YaMegP1iBODK0qmDokjOPm_8blHV414V/view?usp=sharing" }],
         widget: (
             <div className="flex flex-wrap gap-2">
@@ -80,7 +83,7 @@ const timelineData: TimelineItemData[] = [
         description: "Led a team of 11 to victory in the Micro-Mouse maze solving competition. Also secured 3rd place in the line follower category.",
         date: "May 2024",
         icon: <Trophy className="h-6 w-6" />,
-        background: bgFluid,
+        background: bgPodium,
         links: [{ label: "Certificate", href: "https://drive.google.com/file/d/1IugZwRHJt7UMvncCf4AXls_BDQ4ftINv/view?usp=sharing" }],
         widget: (
             <div className="flex items-center gap-4 p-2">

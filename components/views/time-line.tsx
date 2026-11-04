@@ -99,12 +99,16 @@ export function Timeline({ items, coveredBy }: TimelineProps) {
         window.scrollTo({ top: top + ((LEAD_VH + index * STEP_VH) * window.innerHeight) / 100, behavior: "smooth" });
     }, []);
 
-    // Arrow keys step between items while the timeline is on screen.
+    // Arrow keys step between items while the timeline is on screen and not
+    // yet half covered by the next sheet. The pinned viewport still intersects
+    // the screen under that sheet, so the intersection check alone would let
+    // Left/Up scroll back here from the Projects slideshow.
     // Watch the pinned viewport, not the tall wrapper, so the threshold is meaningful.
     const inView = useInView(stickyRef, { amount: 0.6 });
     useEffect(() => {
         if (!inView) return;
         const onKeyDown = (event: KeyboardEvent) => {
+            if (cover.get() > 0.45) return;
             if (event.key === "ArrowDown" || event.key === "ArrowRight") {
                 if (activeIndex < last) { event.preventDefault(); jumpTo(activeIndex + 1); }
             } else if (event.key === "ArrowUp" || event.key === "ArrowLeft") {
@@ -113,7 +117,7 @@ export function Timeline({ items, coveredBy }: TimelineProps) {
         };
         window.addEventListener("keydown", onKeyDown);
         return () => window.removeEventListener("keydown", onKeyDown);
-    }, [inView, activeIndex, last, jumpTo]);
+    }, [inView, activeIndex, last, jumpTo, cover]);
 
     return (
         <div ref={containerRef} className="relative" style={{ height: `calc(100vh + ${totalVh}vh)` }}>

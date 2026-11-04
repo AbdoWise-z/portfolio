@@ -1,7 +1,7 @@
 "use client";
 
-import {useState, useEffect, useCallback, useRef} from "react";
-import { motion, AnimatePresence, useInView, useScroll, useTransform } from "framer-motion";
+import {useState, useEffect, useCallback, useMemo, useRef} from "react";
+import { motion, AnimatePresence, useInView, useReducedMotion, useScroll, useTransform } from "framer-motion";
 import { useSectionProgress } from "@/hooks/use-section-progress";
 import { Github, Layers, Smartphone, Cpu, ChevronLeft, ChevronRight, Gamepad2, Truck, Type, MessageSquare, Search, Edit3, LayoutGrid, ExternalLink } from "lucide-react";
 import { Dialog, DialogContent, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
@@ -146,24 +146,53 @@ const projects: Project[] = [
     }
 ];
 
-const variants = {
-    enter: (direction: number) => ({
-        x: direction > 0 ? 1000 : -1000,
-        opacity: 0,
-        scale: 1.1,
-    }),
-    center: {
-        zIndex: 1,
-        x: 0,
-        opacity: 1,
-        scale: 1,
-    },
-    exit: (direction: number) => ({
-        zIndex: 0,
-        x: direction < 0 ? 1000 : -1000,
-        opacity: 0,
-        scale: 0.9,
-    })
+const EASE = [0.76, 0, 0.24, 1];
+
+/**
+ * Slide transition. The next project wipes over the current one with a slanted
+ * leading edge from the side it comes from (direction +1 is next, -1 is
+ * previous); its image eases in from that side while the old slide sinks back
+ * and darkens underneath. With reduced motion it is a plain crossfade.
+ */
+const makeSlideVariants = (reduce: boolean) => reduce
+    ? {
+        enter: { opacity: 0, zIndex: 2 },
+        center: { opacity: 1, zIndex: 2, transition: { duration: 0.35 } },
+        exit: { opacity: 0, zIndex: 1, transition: { duration: 0.35 } },
+    }
+    : {
+        enter: (direction: number) => ({
+            zIndex: 2,
+            clipPath: direction > 0
+                ? "polygon(100% 0%, 100% 0%, 100% 100%, 120% 100%)"
+                : "polygon(0% 0%, 0% 0%, -20% 100%, 0% 100%)",
+        }),
+        center: (direction: number) => ({
+            zIndex: 2,
+            clipPath: direction > 0
+                ? "polygon(-20% 0%, 100% 0%, 100% 100%, 0% 100%)"
+                : "polygon(0% 0%, 120% 0%, 100% 100%, 0% 100%)",
+            transition: { clipPath: { duration: 0.8, ease: EASE } },
+        }),
+        exit: {
+            zIndex: 1,
+            scale: 0.95,
+            opacity: 0,
+            transition: { scale: { duration: 0.8, ease: EASE }, opacity: { delay: 0.65, duration: 0.15 } },
+        },
+    };
+
+const imageVariants = {
+    enter: (direction: number) => ({ x: direction > 0 ? "8%" : "-8%", scale: 1.18 }),
+    center: { x: "0%", scale: 1, transition: { duration: 0.9, ease: EASE } },
+    exit: (direction: number) => ({ x: direction > 0 ? "-5%" : "5%", scale: 1.12, transition: { duration: 0.8, ease: EASE } }),
+};
+
+/** Black veil over a slide: clear while it shows, drawn over it as it exits. */
+const veilVariants = {
+    enter: { opacity: 0 },
+    center: { opacity: 0 },
+    exit: { opacity: 0.6, transition: { duration: 0.5 } },
 };
 
 /**
@@ -219,10 +248,16 @@ export default function ProjectsPage() {
     // Dissolve as the contact sheet rises, so nothing bleeds through its translucent panel.
     const opacity = useTransform(cover, [0, 0.15, 0.65], [1, 1, 0]);
 
-    // Arrow keys only drive the slideshow while it is on screen.
+    const reduceMotion = useReducedMotion();
+    const slideVariants = useMemo(() => makeSlideVariants(!!reduceMotion), [reduceMotion]);
+
+    // Arrow keys only drive the slideshow while it is on screen and not yet
+    // mostly covered by the Skills sheet (the sticky section stays in view
+    // under it, so the intersection check alone is not enough).
     useEffect(() => {
         if (!inView) return;
         const onKeyDown = (event: KeyboardEvent) => {
+            if (cover.get() > 0.5) return;
             if (event.key === "g" || event.key === "G") setGridOpen((o) => !o);
             if (gridOpen) return;
             if (event.key === "ArrowRight") paginate(1);
@@ -230,7 +265,7 @@ export default function ProjectsPage() {
         };
         window.addEventListener("keydown", onKeyDown);
         return () => window.removeEventListener("keydown", onKeyDown);
-    }, [inView, paginate, gridOpen]);
+    }, [inView, paginate, gridOpen, cover]);
 
     useSwipe(ref, {
         onSwipeLeft: () => paginate(1),
@@ -252,34 +287,32 @@ export default function ProjectsPage() {
                 <p className="section-gutter absolute left-0 top-24 z-20 text-xs font-semibold uppercase tracking-[0.3em] text-white/60 md:top-8" aria-hidden>
                     03 · Projects
                 </p>
-                <AnimatePresence initial={false} custom={direction} mode="popLayout">
+                <AnimatePresence initial={false} custom={direction}>
                     <motion.div
                         key={page}
                         custom={direction}
-                        variants={variants}
+                        variants={slideVariants}
                         initial="enter"
                         animate="center"
                         exit="exit"
-                        transition={{
-                            x: { type: "spring", stiffness: 300, damping: 30 },
-                            opacity: { duration: 0.4 },
-                            scale: { duration: 0.4 },
-                        }}
                         className="absolute inset-0 h-full w-full"
                         aria-roledescription="slide"
                         aria-label={`${projectIndex + 1} of ${projects.length}: ${currentProject.title}`}
                     >
-                        <div className="absolute inset-0 z-0" aria-hidden>
-                            <DriftImage image={currentProject.image} direction={direction} />
+                        <div className="absolute inset-0 z-0 overflow-hidden" aria-hidden>
+                            <motion.div variants={imageVariants} className="absolute inset-0">
+                                <DriftImage image={currentProject.image} direction={direction} />
+                            </motion.div>
                             <div className={cn("absolute inset-0 bg-gradient-to-br opacity-60 mix-blend-overlay", currentProject.color)} />
                             <div className="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-black/30" />
+                            <motion.div variants={veilVariants} className="absolute inset-0 bg-black" />
                         </div>
 
                         <div className="section-gutter pointer-events-none absolute inset-0 z-10 flex flex-col justify-center pb-24 pt-24 md:pt-0">
                             <motion.div
-                                initial={{ y: 40, opacity: 0 }}
+                                initial={{ y: 28, opacity: 0 }}
                                 animate={{ y: 0, opacity: 1 }}
-                                transition={{ delay: 0.2, duration: 0.5 }}
+                                transition={{ delay: 0.3, duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
                                 className="pointer-events-auto mx-auto w-full max-w-6xl space-y-6 md:space-y-8"
                             >
                                 <div className="flex flex-wrap items-center gap-4">

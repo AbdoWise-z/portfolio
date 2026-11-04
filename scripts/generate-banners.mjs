@@ -441,60 +441,177 @@ function workspace() {
   return svg(out);
 }
 
-/** Timeline: soft fluid blobs in warm and violet tones, kept dark. */
-function fluid() {
-  const rand = rng(127);
-  let out = `<defs><radialGradient id="bg" cx="50%" cy="50%" r="75%"><stop offset="0" stop-color="#1a0f2e"/><stop offset="1" stop-color="#07060f"/></radialGradient>
-    <filter id="soft" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="70"/></filter>
-    <linearGradient id="leftShade" x1="0" x2="1"><stop offset="0" stop-color="#05070f" stop-opacity="0.5"/><stop offset="0.55" stop-color="#05070f" stop-opacity="0"/></linearGradient></defs>
-    <rect width="${W}" height="${H}" fill="url(#bg)"/>`;
-  const blobs = [["#f97316", 1500, 300, 420, 260], ["#a855f7", 1150, 700, 520, 300], ["#ec4899", 1750, 800, 380, 240], ["#6366f1", 600, 250, 480, 220], ["#fb7185", 900, 950, 420, 180]];
-  let g = "";
-  for (const [c, x, y, rx, ry] of blobs) g += `<ellipse cx="${x}" cy="${y}" rx="${rx}" ry="${ry}" fill="${c}" opacity="0.55" transform="rotate(${r2(rand() * 60 - 30)} ${x} ${y})"/>`;
-  out += `<g filter="url(#soft)">${g}</g>`;
-  // Flow lines on top.
-  let lines = "";
-  for (let i = 0; i < 9; i++) {
-    const y = 120 + i * 100;
-    lines += `<path d="M0 ${y}C400 ${y - 120} 800 ${y + 160} 1200 ${y - 40}S1700 ${y + 80} 1920 ${y - 60}" stroke="#fde68a" stroke-opacity="0.18" stroke-width="2" fill="none"/>`;
+/** Timeline, M.Sc. AI: a layered neural network with a few lit activation paths. */
+function neuralNetwork() {
+  const rand = rng(139);
+  const accent = "#a78bfa", accent2 = "#22d3ee";
+  let out = backdrop(rand, { accent, accent2, nebulaX: 0.72, nebulaY: 0.5 });
+  const layers = [5, 8, 10, 8, 4];
+  const x0 = 1020, dx = 200, cy = 540;
+  const pos = layers.map((n, li) => Array.from({ length: n }, (_, i) => [x0 + li * dx, cy + (i - (n - 1) / 2) * Math.min(80, 560 / n)]));
+  let edges = "", hot = "";
+  for (let li = 0; li < layers.length - 1; li++) {
+    for (const a of pos[li]) for (const b of pos[li + 1]) {
+      const d = `M${a[0]} ${r2(a[1])}C${a[0] + dx / 2} ${r2(a[1])} ${b[0] - dx / 2} ${r2(b[1])} ${b[0]} ${r2(b[1])}`;
+      if (rand() < 0.1) hot += d; else edges += d;
+    }
   }
-  out += lines;
+  out += `<path d="${edges}" stroke="${accent}" stroke-opacity="0.13" stroke-width="1.2" fill="none"/>`;
+  out += lit(`<path d="${hot}" stroke="${accent2}" stroke-opacity="0.7" stroke-width="2" fill="none"/>`);
+  let nodes = "";
+  pos.forEach((layer, li) => layer.forEach(([x, y]) => {
+    const on = rand() < 0.35;
+    nodes += `<circle cx="${x}" cy="${r2(y)}" r="${li === layers.length - 1 ? 16 : 11}" fill="${on ? accent2 : "#0b1020"}" stroke="${on ? "#e0f2fe" : accent}" stroke-width="2.5"/>`;
+  }));
+  out += lit(nodes);
+  // The winning output lights up.
+  const [ox, oy] = pos[pos.length - 1][1];
+  out += lit(`<circle cx="${ox}" cy="${r2(oy)}" r="22" fill="#f0f9ff"/>`, true);
   return svg(out);
 }
 
-/** Timeline: PCB traces with pads and vias, gold on dark, busier to the right. */
+/** Timeline, B.Sc.: a university facade drawn as a blueprint, with a lit doorway. */
+function campusBlueprint() {
+  const rand = rng(149);
+  const accent = "#38bdf8", accent2 = "#0ea5e9";
+  let out = backdrop(rand, { accent, accent2, nebulaX: 0.72, nebulaY: 0.45 });
+  const ink = "#bae6fd";
+  const L = (d, w = 2, op = 0.8) => `<path d="${d}" stroke="${ink}" stroke-opacity="${op}" stroke-width="${w}" fill="none" stroke-linejoin="round" stroke-linecap="round"/>`;
+  const cx = 1440, base = 860, floor = base - 64, colH = 300, colTop = floor - colH;
+  let b = "";
+  for (let i = 0; i < 4; i++) b += L(`M${cx - 430 + i * 20} ${base - i * 16}H${cx + 430 - i * 20}V${base - i * 16 - 16}H${cx - 430 + i * 20}Z`, 2, 0.7);
+  for (let i = 0; i < 6; i++) {
+    const x = cx - 300 + i * 120;
+    b += L(`M${x - 18} ${floor - 10}V${colTop + 20}M${x + 18} ${floor - 10}V${colTop + 20}`, 2.5);
+    for (let f = -1; f <= 1; f++) b += L(`M${x + f * 9} ${floor - 14}V${colTop + 26}`, 1, 0.35);
+    b += L(`M${x - 28} ${colTop + 20}H${x + 28}V${colTop + 8}H${x - 28}Z`, 2.5);
+    b += L(`M${x - 24} ${floor}H${x + 24}V${floor - 10}H${x - 24}Z`, 2, 0.7);
+  }
+  b += L(`M${cx - 420} ${colTop + 8}H${cx + 420}V${colTop - 40}H${cx - 420}Z`, 2.5);
+  b += L(`M${cx - 440} ${colTop - 40}L${cx} ${colTop - 230}L${cx + 440} ${colTop - 40}Z`, 2.5);
+  b += L(`M${cx - 400} ${colTop - 54}L${cx} ${colTop - 212}L${cx + 400} ${colTop - 54}Z`, 1.5, 0.5);
+  b += `<rect x="${cx - 42}" y="${floor - 170}" width="84" height="170" fill="${accent}" opacity="0.35"/>`;
+  b += L(`M${cx - 42} ${floor}V${floor - 170}H${cx + 42}V${floor}`, 2.5);
+  for (const w of [-240, -120, 120, 240]) b += L(`M${cx + w - 24} ${floor - 150}H${cx + w + 24}V${floor - 60}H${cx + w - 24}Z`, 1.5, 0.6);
+  // Dimension lines, like a drawing sheet.
+  b += L(`M${cx - 440} ${base + 50}H${cx + 440}M${cx - 440} ${base + 40}V${base + 60}M${cx + 440} ${base + 40}V${base + 60}`, 1.5, 0.5);
+  b += L(`M${cx + 465} ${base}V${colTop - 230}M${cx + 457} ${base}H${cx + 473}M${cx + 457} ${colTop - 230}H${cx + 473}`, 1.5, 0.5);
+  out += lit(b);
+  out += `<path d="M${cx - 42} ${floor}L${cx - 200} ${base + 120}H${cx + 200}L${cx + 42} ${floor}Z" fill="${accent}" opacity="0.1"/>`;
+  return svg(out);
+}
+
+/** Timeline, Siemens: profiler lanes with spans, a digital signal trace and packets on a wire. */
+function profilerTraces() {
+  const rand = rng(151);
+  const accent = "#2dd4bf", accent2 = "#38bdf8";
+  let out = backdrop(rand, { accent, accent2, nebulaX: 0.72, nebulaY: 0.5 });
+  const lx = 980, lw = 880;
+  let lanes = "";
+  for (let t = 0; t < 6; t++) {
+    const y = 180 + t * 64;
+    lanes += `<path d="M${lx} ${y + 44}H${lx + lw}" stroke="#e0f2fe" stroke-opacity="0.12" stroke-width="1"/>`;
+    lanes += `<circle cx="${lx - 22}" cy="${y + 22}" r="6" fill="${accent}" opacity="0.7"/>`;
+    let x = lx + rand() * 40;
+    while (x < lx + lw - 40) {
+      const w = Math.min(30 + rand() * 160, lx + lw - x);
+      const warm = rand() < 0.2;
+      lanes += `<rect x="${r2(x)}" y="${y + 8}" width="${r2(w)}" height="28" rx="5" fill="${warm ? "#fb923c" : t % 2 ? accent2 : accent}" opacity="${r2(0.35 + rand() * 0.45)}"/>`;
+      x += w + 8 + rand() * 60;
+    }
+  }
+  out += lanes;
+  out += lit(`<path d="M1420 160V580" stroke="#f0f9ff" stroke-width="2" stroke-dasharray="6 6"/>`);
+  // Digital signal, like a logic analyser capture.
+  let sig = `M${lx} 760`, x = lx, hi = false;
+  while (x < lx + lw) {
+    x = Math.min(lx + lw, x + 20 + Math.round(rand() * 4) * 20);
+    hi = !hi;
+    sig += `H${x}V${hi ? 700 : 760}`;
+  }
+  out += `<rect x="${lx - 20}" y="660" width="${lw + 40}" height="140" rx="14" fill="#05070f" opacity="0.55" stroke="${accent}" stroke-opacity="0.3"/>`;
+  out += lit(`<path d="${sig}" stroke="${accent}" stroke-width="3" fill="none" stroke-linejoin="round"/>`);
+  // Packets on a wire.
+  out += `<path d="M${lx} 900H${lx + lw}" stroke="#e0f2fe" stroke-opacity="0.25" stroke-width="2"/>`;
+  for (let i = 0; i < 7; i++) {
+    const px = lx + 40 + i * 125;
+    out += lit(`<rect x="${px}" y="884" width="70" height="32" rx="6" fill="${i % 3 === 1 ? accent2 : accent}" opacity="0.85"/>`);
+    out += `<rect x="${px + 8}" y="896" width="14" height="8" rx="2" fill="#05070f" opacity="0.7"/><rect x="${px + 28}" y="896" width="34" height="8" rx="2" fill="#05070f" opacity="0.5"/>`;
+  }
+  return svg(out);
+}
+
+/** Timeline, competition win: a podium under spotlights, a trophy and confetti. */
+function podium() {
+  const rand = rng(157);
+  const accent = "#fbbf24", accent2 = "#f97316";
+  let out = backdrop(rand, { accent, accent2, nebulaX: 0.72, nebulaY: 0.4 });
+  const top = 820;
+  out += `<path d="M1180 0L1340 ${top}H1540Z" fill="${accent}" opacity="0.07"/><path d="M1700 0L1340 ${top}H1540Z" fill="${accent}" opacity="0.07"/>`;
+  for (const [x, w, h, c] of [[1180, 160, 140, "#cbd5e1"], [1340, 200, 220, accent], [1540, 160, 100, "#fb923c"]]) {
+    out += `<rect x="${x}" y="${top - h}" width="${w}" height="${h}" fill="#0f172a" stroke="${c}" stroke-opacity="0.8" stroke-width="3"/>`;
+    out += `<rect x="${x}" y="${top - h}" width="${w}" height="14" fill="${c}" opacity="0.85"/>`;
+    out += `<rect x="${x + 16}" y="${top - h + 40}" width="${w - 32}" height="${h - 70}" rx="6" fill="${c}" opacity="0.08"/>`;
+  }
+  const tx = 1440, ty = top - 220;
+  let trophy = `<path d="M${tx - 46} ${ty - 150}H${tx + 46}V${ty - 90}C${tx + 46} ${ty - 50} ${tx + 20} ${ty - 34} ${tx} ${ty - 34}C${tx - 20} ${ty - 34} ${tx - 46} ${ty - 50} ${tx - 46} ${ty - 90}Z" fill="${accent}"/>`;
+  trophy += `<path d="M${tx - 46} ${ty - 140}C${tx - 90} ${ty - 140} ${tx - 90} ${ty - 80} ${tx - 50} ${ty - 76}M${tx + 46} ${ty - 140}C${tx + 90} ${ty - 140} ${tx + 90} ${ty - 80} ${tx + 50} ${ty - 76}" stroke="${accent}" stroke-width="8" fill="none" stroke-linecap="round"/>`;
+  trophy += `<rect x="${tx - 8}" y="${ty - 34}" width="16" height="18" fill="${accent}"/><rect x="${tx - 34}" y="${ty - 16}" width="68" height="16" rx="4" fill="${accent}"/>`;
+  out += lit(trophy, true);
+  for (let i = 0; i < 70; i++) {
+    const x = 1000 + rand() * 860, y = 60 + rand() * 700, s = 6 + rand() * 10;
+    const c = ["#fde68a", "#f472b6", "#22d3ee", "#a78bfa", "#4ade80"][i % 5];
+    out += `<rect x="${r2(x)}" y="${r2(y)}" width="${r2(s)}" height="${r2(s * 0.5)}" rx="1.5" fill="${c}" opacity="${r2(0.4 + rand() * 0.55)}" transform="rotate(${r2(rand() * 360)} ${r2(x)} ${r2(y)})"/>`;
+  }
+  out += `<path d="M1000 ${top}H1860" stroke="#e2e8f0" stroke-opacity="0.35" stroke-width="2"/><rect x="1180" y="${top}" width="520" height="140" fill="${accent}" opacity="0.06"/>`;
+  return svg(out);
+}
+
+/** Timeline, embedded: a PCB with a microcontroller whose traces fan out through 45-degree bends to pads and parts. */
 function circuitBoard() {
   const rand = rng(131);
   const accent = "#d4a24c", accent2 = "#22d3ee";
   let out = backdrop(rand, { accent, accent2, nebulaX: 0.7, nebulaY: 0.5 });
-  let traces = "", pads = "";
-  for (let i = 0; i < 70; i++) {
-    let x = Math.round((400 + rand() * 1500) / 20) * 20, y = Math.round(rand() * H / 20) * 20;
-    let d = `M${x} ${y}`;
-    pads += `<circle cx="${x}" cy="${y}" r="6" fill="#05070f" stroke="${accent}" stroke-width="3"/>`;
-    const steps = 3 + Math.floor(rand() * 4);
-    for (let s = 0; s < steps; s++) {
-      const dir = Math.floor(rand() * 4);
-      const len = 40 + Math.round(rand() * 8) * 20;
-      const diag = rand() < 0.4;
-      if (dir === 0) { x += len; if (diag) { y += 20; } }
-      else if (dir === 1) { x -= len; if (diag) { y -= 20; } }
-      else if (dir === 2) { y += len; if (diag) { x += 20; } }
-      else { y -= len; if (diag) { x -= 20; } }
-      x = Math.max(300, Math.min(W - 20, x)); y = Math.max(20, Math.min(H - 20, y));
-      d += `L${x} ${y}`;
+  const bx = 960, by = 110, bw = 880, bh = 860;
+  out += `<rect x="${bx}" y="${by}" width="${bw}" height="${bh}" rx="26" fill="#0d1b1e" opacity="0.7" stroke="${accent}" stroke-opacity="0.5" stroke-width="2"/>`;
+  for (const [hx, hy] of [[bx + 40, by + 40], [bx + bw - 40, by + 40], [bx + 40, by + bh - 40], [bx + bw - 40, by + bh - 40]])
+    out += `<circle cx="${hx}" cy="${hy}" r="14" fill="#05070f" stroke="${accent}" stroke-width="4"/>`;
+  const pad = (x, y, big = false) => `<circle cx="${r2(x)}" cy="${r2(y)}" r="${big ? 9 : 6}" fill="${big ? accent : "#05070f"}" stroke="${accent}" stroke-width="3"/>`;
+  const smd = (x, y, rot = 0) => `<g transform="rotate(${rot} ${r2(x)} ${r2(y)})"><rect x="${r2(x - 16)}" y="${r2(y - 9)}" width="32" height="18" rx="2" fill="#1f2937" stroke="${accent}" stroke-opacity="0.7" stroke-width="1.5"/><rect x="${r2(x - 16)}" y="${r2(y - 9)}" width="7" height="18" fill="${accent}" opacity="0.8"/><rect x="${r2(x + 9)}" y="${r2(y - 9)}" width="7" height="18" fill="${accent}" opacity="0.8"/></g>`;
+  // Microcontroller. Each side's traces are drawn for the top edge, then the group is rotated into place.
+  const cx = 1400, cy = 540, half = 100, pins = 9, pitch = 20;
+  let fan = "";
+  for (let side = 0; side < 4; side++) {
+    let traces = "", ends = "";
+    for (let i = 0; i < pins; i++) {
+      const off = (i - (pins - 1) / 2) * pitch;
+      const s = off < 0 ? -1 : 1;
+      const run1 = 30 + i * 4, diag = 30 + Math.abs(off) * 0.8, run2 = 40 + Math.round(rand() * 4) * 30;
+      const x = cx + off, y0 = cy - half;
+      const ex = x + s * diag, ey = y0 - run1 - diag - run2;
+      traces += `M${x} ${y0}V${y0 - run1}L${ex} ${y0 - run1 - diag}V${ey}`;
+      const kind = rand();
+      if (kind < 0.3 && run2 >= 70) ends += smd(ex, ey + run2 / 2, 90);
+      ends += pad(ex, ey, kind > 0.8);
     }
-    traces += d;
-    pads += `<circle cx="${x}" cy="${y}" r="${rand() < 0.5 ? 6 : 9}" fill="${rand() < 0.5 ? "#05070f" : accent}" stroke="${accent}" stroke-width="3"/>`;
+    fan += `<g transform="rotate(${side * 90} ${cx} ${cy})"><path d="${traces}" stroke="${accent}" stroke-opacity="0.85" stroke-width="3" fill="none" stroke-linejoin="round"/>${ends}</g>`;
   }
-  out += `<path d="${traces}" stroke="${accent}" stroke-opacity="0.75" stroke-width="3" fill="none" stroke-linejoin="round"/>` + pads;
-  // A few components.
-  for (let i = 0; i < 6; i++) {
-    const x = 1000 + rand() * 760, y = 120 + rand() * 820;
-    out += `<rect x="${r2(x)}" y="${r2(y)}" width="${60 + (i % 3) * 30}" height="34" rx="4" fill="#111827" stroke="${accent}" stroke-opacity="0.8" stroke-width="2"/>`;
+  let chip = `<rect x="${cx - half}" y="${cy - half}" width="${half * 2}" height="${half * 2}" rx="10" fill="#0b1020" stroke="${accent2}" stroke-width="3"/>`;
+  chip += `<rect x="${cx - 56}" y="${cy - 56}" width="112" height="112" rx="8" fill="${accent2}" opacity="0.3"/><circle cx="${cx - half + 18}" cy="${cy - half + 18}" r="5" fill="#e0f2fe" opacity="0.8"/>`;
+  for (let i = 0; i < pins; i++) {
+    const off = (i - (pins - 1) / 2) * pitch;
+    chip += `<path d="M${cx + off} ${cy - half}V${cy - half - 14}M${cx + off} ${cy + half}V${cy + half + 14}M${cx - half} ${cy + off}H${cx - half - 14}M${cx + half} ${cy + off}H${cx + half + 14}" stroke="${accent2}" stroke-width="4"/>`;
   }
-  out += lit(`<rect x="1420" y="420" width="220" height="220" rx="12" fill="#0b1020" stroke="${accent2}" stroke-width="3"/><rect x="1470" y="470" width="120" height="120" rx="8" fill="${accent2}" opacity="0.3"/>`, true);
-  for (let i = 0; i < 9; i++) out += `<path d="M${1440 + i * 22} 420V396M${1440 + i * 22} 640V664M1420 ${440 + i * 22}H1396M1640 ${440 + i * 22}H1664" stroke="${accent2}" stroke-width="3"/>`;
+  out += fan + lit(chip, true);
+  // Crystal and capacitors (top left), a regulator (top right), a pin header (bottom right), an edge connector (bottom left).
+  let parts = `<ellipse cx="1060" cy="250" rx="34" ry="16" fill="#334155" stroke="#cbd5e1" stroke-opacity="0.7" stroke-width="2"/><path d="M1046 266V300M1074 266V300" stroke="${accent}" stroke-width="3"/>` + pad(1046, 304) + pad(1074, 304);
+  parts += smd(1130, 300) + smd(1180, 300);
+  parts += `<rect x="1670" y="186" width="50" height="14" fill="#64748b"/><rect x="1660" y="200" width="70" height="48" rx="4" fill="#1f2937" stroke="${accent}" stroke-opacity="0.7" stroke-width="2"/>`;
+  for (let k = 0; k < 3; k++) parts += `<path d="M${1675 + k * 20} 248V280" stroke="${accent}" stroke-width="3"/>` + pad(1675 + k * 20, 284);
+  for (let c = 0; c < 8; c++) for (let r = 0; r < 2; r++) parts += `<rect x="${1632 + c * 22}" y="${872 + r * 22}" width="16" height="16" rx="${c === 0 && r === 0 ? 0 : 8}" fill="#05070f" stroke="${accent}" stroke-width="3"/>`;
+  parts += `<rect x="${bx + 20}" y="800" width="90" height="56" rx="4" fill="#334155" stroke="#cbd5e1" stroke-opacity="0.7" stroke-width="2"/><rect x="${bx + 30}" y="814" width="70" height="28" rx="2" fill="#0b1020"/>`;
+  out += parts;
+  out += `<path d="M1010 220H1205V330H1010Z M1640 170H1750V300H1640Z" stroke="#e2e8f0" stroke-opacity="0.3" stroke-width="1.5" fill="none" stroke-dasharray="6 5"/>`;
   return svg(out);
 }
 
@@ -510,7 +627,10 @@ const IMAGES = {
   "creative_writing_platform": writingPlatform,
   "abstract_geometric_cyber_aesthetic_background": cyberGeometric,
   "modern_minimal_office_workspace_background": workspace,
-  "creative_fluid_gradient_background": fluid,
+  "neural_network_background": neuralNetwork,
+  "campus_blueprint_background": campusBlueprint,
+  "profiler_traces_background": profilerTraces,
+  "podium_background": podium,
   "futuristic_circuit_board_background": circuitBoard,
 };
 
