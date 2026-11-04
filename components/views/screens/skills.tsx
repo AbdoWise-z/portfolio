@@ -60,7 +60,7 @@ const Skills = () => {
       id={SECTIONS.skills}
       className="section-gutter section-panel sheet relative z-[35] -mt-[100vh] scroll-mt-24 pb-32 pt-24 md:pb-44 md:pt-32"
     >
-      <motion.div style={{ scale, opacity }} className="mx-auto w-full max-w-5xl origin-top">
+      <motion.div style={{ scale, opacity }} data-nav-focus className="mx-auto w-full max-w-5xl origin-top">
         <h2 className="eyebrow mb-4">04 · Skills</h2>
         <p className="mb-12 max-w-2xl text-2xl font-bold text-slate-900 dark:text-cyan-50 md:text-4xl">
           Tools I reach for, from the browser down to the silicon.
