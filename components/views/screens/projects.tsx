@@ -351,7 +351,7 @@ export default function ProjectsPage() {
                             variant="ghost"
                             size="icon"
                             aria-label="Previous project"
-                            className="h-11 w-11 rounded-full border border-white/10 bg-black/30 text-white/70 hover:border-white/30 hover:bg-white/10 hover:text-white"
+                            className="h-11 w-11 rounded-full border border-white/20 bg-black/30 text-white/70 hover:border-white/80 hover:bg-white/10 hover:text-white"
                             onClick={() => paginate(-1)}
                         >
                             <ChevronLeft className="h-6 w-6" />
@@ -397,7 +397,7 @@ export default function ProjectsPage() {
                             variant="ghost"
                             size="icon"
                             aria-label="Next project"
-                            className="h-11 w-11 rounded-full border border-white/10 bg-black/30 text-white/70 hover:border-white/30 hover:bg-white/10 hover:text-white"
+                            className="h-11 w-11 rounded-full border border-white/20 bg-black/30 text-white/70 hover:border-white/80 hover:bg-white/10 hover:text-white"
                             onClick={() => paginate(1)}
                         >
                             <ChevronRight className="h-6 w-6" />
@@ -410,7 +410,7 @@ export default function ProjectsPage() {
                                     variant="ghost"
                                     size="icon"
                                     aria-label="Show all projects"
-                                    className="ml-1 h-11 w-11 rounded-full border border-white/10 bg-black/30 text-white/70 hover:border-white/30 hover:bg-white/10 hover:text-white"
+                                    className="ml-1 h-11 w-11 rounded-full border border-white/20 bg-black/30 text-white/70 hover:border-white/80 hover:bg-white/10 hover:text-white"
                                 >
                                     <LayoutGrid className="h-5 w-5" />
                                 </Button>
