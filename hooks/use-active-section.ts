@@ -1,6 +1,14 @@
 import { useEffect, useState } from "react";
 
-/** Id of the section currently occupying the middle of the viewport, or null before any does. */
+/**
+ * Id of the section the reader is on, or null while still on the hero.
+ *
+ * The sections stack as sheets (pinned predecessors, negative margins), so
+ * intersection alone is misleading: a covered sheet still intersects. Instead,
+ * the active section is the last one in page order whose top edge has risen
+ * past the middle of the viewport, which is the point where a sliding sheet
+ * visually takes over. Recomputed on scroll and resize.
+ */
 export function useActiveSection(ids: readonly string[]): string | null {
     const [active, setActive] = useState<string | null>(null);
 
@@ -8,17 +16,28 @@ export function useActiveSection(ids: readonly string[]): string | null {
         const elements = ids.map((id) => document.getElementById(id)).filter((el): el is HTMLElement => !!el);
         if (elements.length === 0) return;
 
-        const observer = new IntersectionObserver(
-            (entries) => {
-                for (const entry of entries) {
-                    if (entry.isIntersecting) setActive(entry.target.id);
-                }
-            },
-            // A thin band across the middle of the viewport: whichever section crosses it is active.
-            { rootMargin: "-45% 0px -45% 0px", threshold: 0 },
-        );
-        elements.forEach((el) => observer.observe(el));
-        return () => observer.disconnect();
+        let frame = 0;
+        const update = () => {
+            frame = 0;
+            const line = window.innerHeight * 0.5;
+            let current: string | null = null;
+            for (const el of elements) {
+                if (el.getBoundingClientRect().top <= line) current = el.id;
+            }
+            setActive(current);
+        };
+        const schedule = () => {
+            if (!frame) frame = requestAnimationFrame(update);
+        };
+
+        update();
+        window.addEventListener("scroll", schedule, { passive: true });
+        window.addEventListener("resize", schedule);
+        return () => {
+            if (frame) cancelAnimationFrame(frame);
+            window.removeEventListener("scroll", schedule);
+            window.removeEventListener("resize", schedule);
+        };
     }, [ids]);
 
     return active;
