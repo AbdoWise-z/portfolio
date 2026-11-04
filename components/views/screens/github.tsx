@@ -40,7 +40,7 @@ const Stat = ({ icon, label, value }: { icon: React.ReactNode; label: string; va
     </span>
     <span className="min-w-0">
       <span className="block text-2xl font-bold tabular-nums text-slate-900 dark:text-cyan-50">{value}</span>
-      <span className="block truncate text-xs text-muted-foreground">{label}</span>
+      <span className="block text-xs leading-tight text-muted-foreground">{label}</span>
     </span>
   </motion.div>
 );
@@ -186,41 +186,54 @@ const Github = ({ data }: { data: GithubData | null }) => {
               </motion.div>
             )}
 
-            {/* Top repositories */}
+            {/* Recently updated repositories, as rows like GitHub's repositories tab */}
             {data.repos.length > 0 && (
-              <div>
-                <motion.h3 variants={card} className="mb-3 text-base font-bold text-slate-900 dark:text-cyan-50">Most starred</motion.h3>
-                <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+              <motion.div variants={card} className={cn(panel, "p-0 md:p-0")}>
+                <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 px-5 pt-5 md:px-6">
+                  <h3 className="text-base font-bold text-slate-900 dark:text-cyan-50">Recently updated</h3>
+                  <a
+                    href={`${data.user.url}?tab=repositories`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-xs text-muted-foreground transition-colors hover:text-foreground hover:underline"
+                  >
+                    All repositories →
+                  </a>
+                </div>
+                <ul className="mt-2 divide-y divide-foreground/10">
                   {data.repos.map((r) => (
-                    <motion.li key={r.name} variants={card}>
+                    <li key={r.name}>
                       <a
                         href={r.url}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className={cn(panel, "group flex h-full flex-col gap-3 p-4 transition-colors hover:border-foreground/30 md:p-5")}
+                        className="group block px-5 py-4 transition-colors hover:bg-foreground/5 md:px-6"
                       >
-                        <span className="flex items-start justify-between gap-3">
-                          <span className="truncate font-bold text-slate-900 group-hover:underline dark:text-cyan-50">{r.name}</span>
-                          <span className="flex shrink-0 items-center gap-3 text-xs tabular-nums text-muted-foreground">
-                            <span className="flex items-center gap-1"><Star className="h-3.5 w-3.5" aria-hidden />{r.stars}</span>
-                            <span className="flex items-center gap-1"><GitFork className="h-3.5 w-3.5" aria-hidden />{r.forks}</span>
+                        <span className="flex flex-wrap items-center gap-2">
+                          <span className="truncate font-bold text-cyan-700 group-hover:underline dark:text-cyan-300">{r.name}</span>
+                          <span className="rounded-full border border-foreground/15 px-2 py-0.5 text-[11px] font-medium text-muted-foreground">
+                            {r.fork ? "Fork" : "Public"}
                           </span>
                         </span>
-                        <span className="line-clamp-2 flex-1 text-sm text-muted-foreground">{r.description ?? "No description yet."}</span>
-                        <span className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
+                        {r.description && (
+                          <span className="mt-1 line-clamp-2 block text-sm text-muted-foreground">{r.description}</span>
+                        )}
+                        <span className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs tabular-nums text-muted-foreground">
                           {r.language && (
                             <span className="flex items-center gap-1.5">
                               <span className="h-2.5 w-2.5 rounded-full" style={{ background: languageColor(r.language) }} aria-hidden />
                               {r.language}
                             </span>
                           )}
+                          {r.stars > 0 && <span className="flex items-center gap-1"><Star className="h-3.5 w-3.5" aria-hidden />{r.stars}</span>}
+                          {r.forks > 0 && <span className="flex items-center gap-1"><GitFork className="h-3.5 w-3.5" aria-hidden />{r.forks}</span>}
                           <span>Updated {r.updated}</span>
                         </span>
                       </a>
-                    </motion.li>
+                    </li>
                   ))}
                 </ul>
-              </div>
+              </motion.div>
             )}
           </motion.div>
         )}

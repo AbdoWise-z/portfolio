@@ -7,8 +7,11 @@ import { SOCIAL_LINKS } from "@/lib/site";
  * Without a token this uses the public REST API (60 requests an hour per
  * server, of which one page view costs about six, once an hour) and builds an
  * activity calendar from the last 90 days of public events. With GITHUB_TOKEN
- * set (no scopes needed) it fetches the real contributions calendar for the
- * past year through GraphQL instead.
+ * set it fetches the real contributions calendar for the past year through
+ * GraphQL instead, queried as the token's owner so private contributions are
+ * counted the way the signed-in profile page counts them (a classic token with
+ * the `repo` scope). Repositories always come from the public listing, so
+ * private repositories are never shown.
  */
 
 export const GITHUB_USER = new URL(SOCIAL_LINKS.github).pathname.replace(/\//g, "");
@@ -23,7 +26,8 @@ export interface GithubRepo {
     language: string | null;
     stars: number;
     forks: number;
-    /** "Mar 2026", formatted on the server so it is identical on both sides of hydration. */
+    fork: boolean;
+    /** "3 days ago" or "on Mar 3", worded like GitHub and rendered on the server so it is identical on both sides of hydration. */
     updated: string;
     topics: string[];
 }
@@ -67,18 +71,16 @@ type RestRepo = {
     forks_count: number; pushed_at: string; topics?: string[]; fork: boolean;
 };
 type RestEvent = { created_at: string };
-type GraphCalendar = {
-    data?: {
-        user?: {
-            contributionsCollection?: {
-                contributionCalendar?: {
-                    totalContributions: number;
-                    weeks: { contributionDays: { date: string; contributionCount: number; contributionLevel: string }[] }[];
-                };
-            };
+type GraphUser = {
+    login?: string;
+    contributionsCollection?: {
+        contributionCalendar?: {
+            totalContributions: number;
+            weeks: { contributionDays: { date: string; contributionCount: number; contributionLevel: string }[] }[];
         };
     };
 };
+type GraphCalendar = { data?: { viewer?: GraphUser; user?: GraphUser } };
 
 const headers = (): Record<string, string> => {
     const h: Record<string, string> = { Accept: "application/vnd.github+json", "User-Agent": "portfolio-site" };
@@ -108,8 +110,22 @@ async function getPages<T>(path: string, maxPages: number): Promise<T[]> {
     return all;
 }
 
-const monthYear = new Intl.DateTimeFormat("en-US", { month: "short", year: "numeric", timeZone: "UTC" });
+const monthDay = new Intl.DateTimeFormat("en-US", { month: "short", day: "numeric", timeZone: "UTC" });
+const monthDayYear = new Intl.DateTimeFormat("en-US", { month: "short", day: "numeric", year: "numeric", timeZone: "UTC" });
 const isoDay = (d: Date) => d.toISOString().slice(0, 10);
+
+/** "Updated …" wording as GitHub's repository list uses it. */
+function updatedLabel(iso: string, now: Date): string {
+    const then = new Date(iso);
+    const ago = (n: number, unit: string) => `${n} ${unit}${n === 1 ? "" : "s"} ago`;
+    const s = Math.max(0, (now.getTime() - then.getTime()) / 1000);
+    if (s < 60) return "just now";
+    if (s < 3600) return ago(Math.floor(s / 60), "minute");
+    if (s < 86400) return ago(Math.floor(s / 3600), "hour");
+    if (s < 86400 * 2) return "yesterday";
+    if (s < 86400 * 30) return ago(Math.floor(s / 86400), "day");
+    return `on ${(then.getUTCFullYear() === now.getUTCFullYear() ? monthDay : monthDayYear).format(then)}`;
+}
 
 const LEVELS: Record<string, GithubDay["level"]> = {
     NONE: 0, FIRST_QUARTILE: 1, SECOND_QUARTILE: 2, THIRD_QUARTILE: 3, FOURTH_QUARTILE: 4,
@@ -131,14 +147,22 @@ function toWeeks(days: GithubDay[]): GithubDay[][] {
 
 async function contributionsCalendar(): Promise<GithubData["calendar"] | null> {
     if (!process.env.GITHUB_TOKEN) return null;
-    const query = `query($login: String!) { user(login: $login) { contributionsCollection { contributionCalendar {
-        totalContributions weeks { contributionDays { date contributionCount contributionLevel } } } } } }`;
-    const res = await getJson<GraphCalendar>(`${API}/graphql`, {
+    const fields = `contributionsCollection { contributionCalendar {
+        totalContributions weeks { contributionDays { date contributionCount contributionLevel } } } }`;
+    const graphql = (query: string, variables?: Record<string, string>) => getJson<GraphCalendar>(`${API}/graphql`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ query, variables: { login: GITHUB_USER } }),
+        body: JSON.stringify({ query, variables }),
     });
-    const cal = res?.data?.user?.contributionsCollection?.contributionCalendar;
+    // Ask as the token's owner first: that view counts private contributions,
+    // like the profile page does when signed in. A token for another account
+    // falls back to the public view of the profile.
+    const viewer = (await graphql(`query { viewer { login ${fields} } }`))?.data?.viewer;
+    let cal = viewer?.login?.toLowerCase() === GITHUB_USER.toLowerCase() ? viewer.contributionsCollection?.contributionCalendar : undefined;
+    if (!cal) {
+        const res = await graphql(`query($login: String!) { user(login: $login) { ${fields} } }`, { login: GITHUB_USER });
+        cal = res?.data?.user?.contributionsCollection?.contributionCalendar;
+    }
     if (!cal) return null;
     const days: GithubDay[] = cal.weeks.flatMap((w) =>
         w.contributionDays.map((d) => ({ date: d.date, count: d.contributionCount, level: LEVELS[d.contributionLevel] ?? 0 })),
@@ -186,9 +210,11 @@ export async function getGithubData(): Promise<GithubData | null> {
         .slice(0, 6)
         .map(([name, n]) => ({ name, repos: n, share: n / languageTotal }));
 
-    const top = [...own]
-        .sort((a, b) => b.stargazers_count - a.stargazers_count || b.pushed_at.localeCompare(a.pushed_at))
-        .slice(0, 6)
+    // Most recently pushed first, forks included, as the repositories tab lists them.
+    const now = new Date();
+    const recent = [...repos]
+        .sort((a, b) => b.pushed_at.localeCompare(a.pushed_at))
+        .slice(0, 8)
         .map<GithubRepo>((r) => ({
             name: r.name,
             url: r.html_url,
@@ -196,7 +222,8 @@ export async function getGithubData(): Promise<GithubData | null> {
             language: r.language,
             stars: r.stargazers_count,
             forks: r.forks_count,
-            updated: monthYear.format(new Date(r.pushed_at)),
+            fork: r.fork,
+            updated: updatedLabel(r.pushed_at, now),
             topics: (r.topics ?? []).slice(0, 4),
         }));
 
@@ -217,7 +244,7 @@ export async function getGithubData(): Promise<GithubData | null> {
             forks: own.reduce((n, r) => n + r.forks_count, 0),
         },
         languages,
-        repos: top,
+        repos: recent,
         calendar,
     };
 }

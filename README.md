@@ -22,7 +22,7 @@ Create a `.env` file (not committed) with:
 ```
 NEXT_PUBLIC_MEASUREMENT_ID=G-XXXXXXXXXX   # Google Analytics, optional
 NEXT_PUBLIC_SITE_URL=https://your-domain  # used for metadata, sitemap, robots
-GITHUB_TOKEN=                             # optional, no scopes: real contributions calendar in the GitHub section
+GITHUB_TOKEN=                             # optional, your own classic token with `repo` scope: real contributions calendar, private ones counted
 ```
 
 See `.env.example`. The project and timeline backgrounds are drawn as vector art by
