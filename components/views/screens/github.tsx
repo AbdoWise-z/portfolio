@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useMemo, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import Image from "next/image";
 import { motion, useScroll, useTransform } from "framer-motion";
 import { Activity, BookMarked, ExternalLink, GitFork, Star, Users } from "lucide-react";
@@ -46,9 +47,20 @@ const Stat = ({ icon, label, value }: { icon: React.ReactNode; label: React.Reac
 );
 
 const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+const MONTHS_LONG = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+const WEEKDAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 const DAY_LABELS: Record<number, string> = { 1: "Mon", 3: "Wed", 5: "Fri" };
 /** "YYYY-MM" of a cell, or "" for padding. */
 const monthOf = (d?: GithubDay) => (d?.date ? d.date.slice(0, 7) : "");
+const contributions = (n: number) => `${n} contribution${n === 1 ? "" : "s"}`;
+/** "Tue, Nov 3, 2026" from an ISO date, without locale formatting so it never differs between renders. */
+const dayName = (iso: string) => {
+  const d = new Date(iso + "T00:00:00Z");
+  return `${WEEKDAYS[d.getUTCDay()]}, ${MONTHS[d.getUTCMonth()]} ${d.getUTCDate()}, ${d.getUTCFullYear()}`;
+};
+const monthName = (key: string) => `${MONTHS_LONG[Number(key.slice(5)) - 1]} ${key.slice(0, 4)}`;
+
+type Hover = { month: string; date: string; count: number; x: number; y: number };
 
 /** A month label above the first column of each month, unless the next label would run into it. */
 function monthLabels(weeks: GithubDay[][]): ({ text: string; key: string } | null)[] {
@@ -70,10 +82,17 @@ function monthLabels(weeks: GithubDay[][]): ({ text: string; key: string } | nul
  * Contribution calendar with day and month labels. Hovering a cell outlines
  * its whole month: every cell of that month draws a line on each side whose
  * neighbour belongs to another month, extended into the gap so the pieces join.
+ * A tooltip (portalled to the body, since the section is transformed) gives
+ * the day's contributions and the month's total.
  */
 const Calendar = ({ weeks }: { weeks: GithubDay[][] }) => {
-  const [hover, setHover] = useState<string | null>(null);
+  const [hover, setHover] = useState<Hover | null>(null);
   const labels = useMemo(() => monthLabels(weeks), [weeks]);
+  const monthTotals = useMemo(() => {
+    const totals = new Map<string, number>();
+    for (const week of weeks) for (const d of week) if (d.date) totals.set(monthOf(d), (totals.get(monthOf(d)) ?? 0) + d.count);
+    return totals;
+  }, [weeks]);
   const month = (wi: number, di: number) => monthOf(weeks[wi]?.[di]);
   const line = "absolute bg-foreground/70";
   return (
@@ -89,7 +108,7 @@ const Calendar = ({ weeks }: { weeks: GithubDay[][] }) => {
             {labels.map((l, wi) => (
               <span
                 key={wi}
-                className={cn("w-[11px] shrink-0 whitespace-nowrap transition-colors", l && l.key === hover && "font-semibold text-foreground")}
+                className={cn("w-[11px] shrink-0 whitespace-nowrap transition-colors", l && l.key === hover?.month && "font-semibold text-foreground")}
               >
                 {l?.text ?? ""}
               </span>
@@ -100,12 +119,16 @@ const Calendar = ({ weeks }: { weeks: GithubDay[][] }) => {
               <div key={wi} className="flex flex-col gap-[3px]">
                 {week.map((d, di) => {
                   const m = monthOf(d);
-                  const on = !!hover && m === hover;
+                  const on = !!hover && m === hover.month;
                   return (
                     <span
                       key={d.date || `pad-${wi}-${di}`}
-                      title={d.date ? `${d.count} on ${d.date}` : undefined}
-                      onMouseEnter={d.date ? () => setHover(m) : undefined}
+                      data-date={d.date || undefined}
+                      aria-label={d.date ? `${contributions(d.count)} on ${dayName(d.date)}` : undefined}
+                      onMouseEnter={d.date ? (e) => {
+                        const r = e.currentTarget.getBoundingClientRect();
+                        setHover({ month: m, date: d.date, count: d.count, x: r.left + r.width / 2, y: r.top });
+                      } : undefined}
                       className={cn(
                         "relative block h-[11px] w-[11px] rounded-[2px] transition-opacity",
                         d.date ? LEVEL_CLASS[d.level] : "invisible",
@@ -128,6 +151,17 @@ const Calendar = ({ weeks }: { weeks: GithubDay[][] }) => {
           </div>
         </div>
       </div>
+      {hover && createPortal(
+        <div
+          role="tooltip"
+          style={{ left: hover.x, top: hover.y - 8 }}
+          className="pointer-events-none fixed z-[70] -translate-x-1/2 -translate-y-full whitespace-nowrap rounded-lg border border-foreground/15 bg-background/95 px-3 py-2 text-xs shadow-lg backdrop-blur"
+        >
+          <p className="font-semibold text-foreground">{contributions(hover.count)} on {dayName(hover.date)}</p>
+          <p className="mt-0.5 text-muted-foreground">{monthName(hover.month)}: {contributions(monthTotals.get(hover.month) ?? 0)}</p>
+        </div>,
+        document.body,
+      )}
     </div>
   );
 };
