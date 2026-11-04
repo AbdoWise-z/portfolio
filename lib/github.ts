@@ -4,14 +4,15 @@ import { SOCIAL_LINKS } from "@/lib/site";
  * GitHub profile data for the GitHub section, fetched on the server and cached
  * for an hour (Next's fetch cache), so visitors never hit the API themselves.
  *
- * Without a token this uses the public REST API (60 requests an hour per
- * server, of which one page view costs about six, once an hour) and builds an
- * activity calendar from the last 90 days of public events. With GITHUB_TOKEN
- * set it fetches the real contributions calendar for the past year through
- * GraphQL instead, queried as the token's owner so private contributions are
- * counted the way the signed-in profile page counts them (a classic token with
- * the `repo` scope). Repositories always come from the public listing, so
- * private repositories are never shown.
+ * The profile and repositories come from the public REST API (60 requests an
+ * hour per server without a token, of which one page view costs about six,
+ * once an hour). The contributions calendar is read from the public profile
+ * page's own calendar fragment, which needs no token and counts private
+ * contributions when the profile is set to include them. With GITHUB_TOKEN set
+ * the calendar comes from GraphQL instead, queried as the token's owner so
+ * private contributions are counted either way, and the rate limit is higher.
+ * If both fail, the last 90 days of public events stand in. Repositories always
+ * come from the public listing, so private repositories are never shown.
  */
 
 export const GITHUB_USER = new URL(SOCIAL_LINKS.github).pathname.replace(/\//g, "");
@@ -170,6 +171,40 @@ async function contributionsCalendar(): Promise<GithubData["calendar"] | null> {
     return { weeks: toWeeks(days), total: cal.totalContributions, source: "contributions" };
 }
 
+async function getText(url: string): Promise<string | null> {
+    try {
+        const res = await fetch(url, { headers: { "User-Agent": "portfolio-site" }, next: { revalidate: REVALIDATE } });
+        if (!res.ok) return null;
+        return await res.text();
+    } catch {
+        return null;
+    }
+}
+
+/**
+ * The public profile's calendar, from the fragment github.com renders it with.
+ * Each day is a cell with data-date, id and data-level, and a tooltip keyed by
+ * that id carries the count ("No contributions on …" or "3 contributions on …").
+ */
+async function profileCalendar(): Promise<GithubData["calendar"] | null> {
+    const html = await getText(`https://github.com/users/${GITHUB_USER}/contributions`);
+    if (!html) return null;
+    const counts = new Map<string, number>();
+    const tip = /<tool-tip\b[^>]*\sfor="(contribution-day-component-[\d-]+)"[^>]*>\s*(\d[\d,]*|No)\s+contributions?\b/g;
+    for (let m = tip.exec(html); m; m = tip.exec(html)) counts.set(m[1], m[2] === "No" ? 0 : parseInt(m[2].replace(/,/g, ""), 10));
+    const days: GithubDay[] = [];
+    const cell = /<td\b[^>]*ContributionCalendar-day[^>]*>/g;
+    for (let m = cell.exec(html); m; m = cell.exec(html)) {
+        const date = /data-date="(\d{4}-\d{2}-\d{2})"/.exec(m[0])?.[1];
+        const id = /\sid="([^"]+)"/.exec(m[0])?.[1] ?? "";
+        const level = Number(/data-level="(\d)"/.exec(m[0])?.[1] ?? 0);
+        if (date) days.push({ date, count: counts.get(id) ?? 0, level: Math.min(4, Math.max(0, level)) as GithubDay["level"] });
+    }
+    if (days.length < 300) return null; // not the calendar we expect
+    days.sort((a, b) => a.date.localeCompare(b.date));
+    return { weeks: toWeeks(days), total: days.reduce((n, d) => n + d.count, 0), source: "contributions" };
+}
+
 /** Fallback: public events of the last 90 days (the most the API serves), one cell per day. */
 async function eventsCalendar(): Promise<GithubData["calendar"]> {
     const events = await getPages<RestEvent>(`/users/${GITHUB_USER}/events/public`, 3);
@@ -198,7 +233,7 @@ export async function getGithubData(): Promise<GithubData | null> {
 
     const [repos, calendar] = await Promise.all([
         getPages<RestRepo>(`/users/${GITHUB_USER}/repos?type=owner&sort=pushed`, 2),
-        contributionsCalendar().then((c) => c ?? eventsCalendar()),
+        contributionsCalendar().then((c) => c ?? profileCalendar()).then((c) => c ?? eventsCalendar()),
     ]);
 
     const own = repos.filter((r) => !r.fork);
