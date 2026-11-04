@@ -68,7 +68,7 @@ const ContactMe = () => {
     >
       <div className="mx-auto grid w-full max-w-5xl flex-1 gap-12 lg:grid-cols-[1fr_1.2fr] lg:gap-20">
         <div>
-          <h2 className="eyebrow mb-6">05 · Contact</h2>
+          <h2 className="eyebrow mb-6">06 · Contact</h2>
           <p className="text-3xl font-bold text-foreground md:text-5xl">{"Let's talk."}</p>
           <p className="mt-4 max-w-md text-muted-foreground">
             Have a project, a question, or just want to say hi? Send a message with the form, or reach me directly.

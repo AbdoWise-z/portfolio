@@ -50,8 +50,8 @@ const card = {
 
 /** Skills sheet: slides over the pinned projects slideshow. */
 const Skills = () => {
-  // Recede slightly once the contact curtain is well over the bottom edge.
-  const cover = useSectionProgress(SECTIONS.contact, ["start 0.8", "start 0.25"]);
+  // Recede slightly once the GitHub curtain is well over the bottom edge.
+  const cover = useSectionProgress(SECTIONS.github, ["start 0.8", "start 0.25"]);
   const scale = useTransform(cover, [0, 1], [1, 0.965]);
   const opacity = useTransform(cover, [0, 1], [1, 0.55]);
 

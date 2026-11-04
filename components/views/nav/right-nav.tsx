@@ -17,6 +17,7 @@ const LINKS = [
   { label: "Timeline", id: SECTIONS.timeline },
   { label: "Projects", id: SECTIONS.projects },
   { label: "Skills", id: SECTIONS.skills },
+  { label: "GitHub", id: SECTIONS.github },
   { label: "Contact", id: SECTIONS.contact },
 ];
 const IDS = LINKS.map((l) => l.id);
@@ -58,7 +59,7 @@ const RightNav = () => {
             <nav aria-label="Sections" className="mt-8 flex flex-col gap-2">
               {LINKS.map((link, i) => (
                 <React.Fragment key={link.id}>
-                  {(i === 1 || i === 4) && <Separator className="my-2" />}
+                  {(i === 1 || i === 5) && <Separator className="my-2" />}
                   <Button asChild variant={active === link.id ? "secondary" : "outline"} className="rounded-full">
                     <a
                       href={`#${link.id}`}

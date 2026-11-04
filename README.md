@@ -20,6 +20,7 @@ Create a `.env` file (not committed) with:
 ```
 NEXT_PUBLIC_MEASUREMENT_ID=G-XXXXXXXXXX   # Google Analytics, optional
 NEXT_PUBLIC_SITE_URL=https://your-domain  # used for metadata, sitemap, robots
+GITHUB_TOKEN=                             # optional, no scopes: real contributions calendar in the GitHub section
 ```
 
 See `.env.example`. To regenerate the WebP banners from new PNG/JPG sources run `npm run images`.
