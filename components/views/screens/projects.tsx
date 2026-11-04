@@ -12,6 +12,7 @@ import Image, {StaticImageData} from "next/image";
 import {useSwipe} from "@/hooks/use-swipe";
 import {SECTIONS} from "@/lib/site";
 import Magnetic from "@/components/views/magnetic";
+import SecretContent from "@/components/views/secret-content";
 
 import project1 from "@/public/banners/reinforcement_learning_agent_simulation.webp";
 import project2 from "@/public/banners/cpu_architecture_schematic.webp";
@@ -239,7 +240,7 @@ const veilVariants = {
  * state, because the surrounding AnimatePresence (initial={false}) would
  * otherwise skip a mount animation on the first slide.
  */
-const DriftImage = ({ image, direction }: { image: StaticImageData; direction: number }) => {
+const DriftImage = ({ image, direction, children }: { image: StaticImageData; direction: number; children?: React.ReactNode }) => {
     const [started, setStarted] = useState(false);
     useEffect(() => setStarted(true), []);
     return (
@@ -249,7 +250,63 @@ const DriftImage = ({ image, direction }: { image: StaticImageData; direction: n
             transition={{ duration: 12, ease: "linear" }}
         >
             <Image src={image} alt="" fill sizes="100vw" className="object-cover" />
+            {children}
         </motion.div>
+    );
+};
+
+/** Natural size of the banner art, for mapping a spot in it to the screen. */
+const BANNER = { width: 1920, height: 1080 };
+/** The fourth message's text bar in the Discordo art (see scripts/generate-banners.mjs, chatApp). */
+const DISCORDO_MESSAGE = { x: 1316, y: 503, w: 445, h: 32 };
+
+/**
+ * A line of real text hidden in the Discordo banner: the lens reveals it in
+ * place of one message's placeholder bar. The box sits over that bar, mapped
+ * through the same cover fit the image uses, and it lives inside the drifting
+ * wrapper so it moves with the image. Inside the lens everything is inverted,
+ * so white text on the panel's navy ends up dark on light, like the page copy.
+ */
+const HiddenMessage = () => {
+    const ref = useRef<HTMLDivElement>(null);
+    const [box, setBox] = useState<{ left: number; top: number; width: number; height: number; font: number } | null>(null);
+    useEffect(() => {
+        const el = ref.current;
+        if (!el) return;
+        const update = () => {
+            // Layout size, not the transformed one: the drift scales this wrapper.
+            const cw = el.offsetWidth, ch = el.offsetHeight;
+            const s = Math.max(cw / BANNER.width, ch / BANNER.height);
+            const ox = (cw - BANNER.width * s) / 2, oy = (ch - BANNER.height * s) / 2;
+            const a = DISCORDO_MESSAGE;
+            setBox({ left: ox + a.x * s, top: oy + a.y * s, width: a.w * s, height: a.h * s, font: 15 * s });
+        };
+        update();
+        const ro = new ResizeObserver(update);
+        ro.observe(el);
+        return () => ro.disconnect();
+    }, []);
+    return (
+        <div ref={ref} className="pointer-events-none absolute inset-0" aria-hidden>
+            {box && (
+                <div
+                    data-hidden-message
+                    className="pointer-events-auto absolute"
+                    style={{ left: box.left, top: box.top, width: box.width, height: box.height, fontSize: box.font }}
+                >
+                    <SecretContent
+                        focusMaskWidth={Math.round(box.width * 1.15)}
+                        secret={
+                            <div className="flex h-full w-full items-center whitespace-nowrap rounded-[0.3em] bg-[#0f172a] pl-[0.3em] font-medium text-white">
+                                Click 5-times quickly for a surprise
+                            </div>
+                        }
+                    >
+                        <div style={{ width: box.width, height: box.height }} />
+                    </SecretContent>
+                </div>
+            )}
+        </div>
     );
 };
 
@@ -347,11 +404,14 @@ export default function ProjectsPage() {
                         <div className="absolute inset-0 z-0 overflow-hidden" aria-hidden>
                             {/* Children resolve `custom` from their own props, so the direction is passed again. */}
                             <motion.div variants={imageVariants} custom={direction} className="absolute inset-0">
-                                <DriftImage image={currentProject.image} direction={direction} />
+                                <DriftImage image={currentProject.image} direction={direction}>
+                                    {currentProject.id === "discordo" && <HiddenMessage />}
+                                </DriftImage>
                             </motion.div>
-                            <div className={cn("absolute inset-0 bg-gradient-to-br opacity-60 mix-blend-overlay", currentProject.color)} />
-                            <div className="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-black/30" />
-                            <motion.div variants={veilVariants} className="absolute inset-0 bg-black" />
+                            {/* Decorative layers let the pointer through to the hidden message below. */}
+                            <div className={cn("pointer-events-none absolute inset-0 bg-gradient-to-br opacity-60 mix-blend-overlay", currentProject.color)} />
+                            <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black via-black/50 to-black/30" />
+                            <motion.div variants={veilVariants} className="pointer-events-none absolute inset-0 bg-black" />
                         </div>
 
                         {/* Leading edge of the wipe: halo, then the line. */}
@@ -363,7 +423,7 @@ export default function ProjectsPage() {
                                 initial={{ y: 28, opacity: 0 }}
                                 animate={{ y: 0, opacity: 1 }}
                                 transition={{ delay: 0.3, duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
-                                className="pointer-events-auto mx-auto w-full max-w-6xl space-y-6 md:space-y-8"
+                                className="mx-auto w-full max-w-6xl space-y-6 md:space-y-8"
                             >
                                 <div className="flex flex-wrap items-center gap-4">
                                     <div className="rounded-2xl border border-white/10 bg-white/10 p-4 text-white shadow-2xl">
@@ -394,7 +454,7 @@ export default function ProjectsPage() {
                                 </ul>
 
                                 {(currentProject.sources || currentProject.demo) && (
-                                    <div className="flex flex-wrap gap-3 pt-2">
+                                    <div className="pointer-events-auto flex flex-wrap gap-3 pt-2">
                                         {currentProject.demo && (
                                             <Magnetic>
                                                 <a
