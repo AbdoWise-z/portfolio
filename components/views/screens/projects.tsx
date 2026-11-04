@@ -154,6 +154,14 @@ const EASE = [0.76, 0, 0.24, 1];
  * previous); its image eases in from that side while the old slide sinks back
  * and darkens underneath. With reduced motion it is a plain crossfade.
  */
+const WIPE = { duration: 0.8, ease: EASE };
+
+/**
+ * The resting state lists every property the exit touches. A slide can come
+ * back while it is still leaving (Right then Left within the wipe), and it then
+ * animates to this state from wherever it got to, instead of staying shrunken
+ * and faded.
+ */
 const makeSlideVariants = (reduce: boolean) => reduce
     ? {
         enter: { opacity: 0, zIndex: 2 },
@@ -163,23 +171,52 @@ const makeSlideVariants = (reduce: boolean) => reduce
     : {
         enter: (direction: number) => ({
             zIndex: 2,
+            scale: 1,
+            opacity: 1,
             clipPath: direction > 0
                 ? "polygon(100% 0%, 100% 0%, 100% 100%, 120% 100%)"
                 : "polygon(0% 0%, 0% 0%, -20% 100%, 0% 100%)",
         }),
         center: (direction: number) => ({
             zIndex: 2,
+            scale: 1,
+            opacity: 1,
             clipPath: direction > 0
                 ? "polygon(-20% 0%, 100% 0%, 100% 100%, 0% 100%)"
                 : "polygon(0% 0%, 120% 0%, 100% 100%, 0% 100%)",
-            transition: { clipPath: { duration: 0.8, ease: EASE } },
+            transition: { clipPath: WIPE, scale: { duration: 0.4, ease: EASE }, opacity: { duration: 0.2 } },
         }),
         exit: {
             zIndex: 1,
             scale: 0.95,
             opacity: 0,
-            transition: { scale: { duration: 0.8, ease: EASE }, opacity: { delay: 0.65, duration: 0.15 } },
+            transition: { scale: WIPE, opacity: { delay: 0.65, duration: 0.15 } },
         },
+    };
+
+/**
+ * A thin bright line along the wipe's leading edge. It is a strip clipped to
+ * the same moving polygon as the slide, offset by `w` percent of the width,
+ * so the slide's own clip trims it exactly at the edge. Two strips: a crisp
+ * line and a wider, fainter halo behind it.
+ */
+const makeEdgeVariants = (reduce: boolean, w: number) => reduce
+    ? { enter: { opacity: 0 }, center: { opacity: 0 }, exit: { opacity: 0 } }
+    : {
+        enter: (direction: number) => ({
+            opacity: 1,
+            clipPath: direction > 0
+                ? `polygon(${100 - w}% 0%, ${100 + w}% 0%, ${120 + w}% 100%, ${120 - w}% 100%)`
+                : `polygon(${-w}% 0%, ${w}% 0%, ${-20 + w}% 100%, ${-20 - w}% 100%)`,
+        }),
+        center: (direction: number) => ({
+            opacity: 1,
+            clipPath: direction > 0
+                ? `polygon(${-20 - w}% 0%, ${-20 + w}% 0%, ${w}% 100%, ${-w}% 100%)`
+                : `polygon(${120 - w}% 0%, ${120 + w}% 0%, ${100 + w}% 100%, ${100 - w}% 100%)`,
+            transition: { clipPath: WIPE, opacity: { duration: 0.2 } },
+        }),
+        exit: { opacity: 0, transition: { duration: 0.25 } },
     };
 
 const imageVariants = {
@@ -218,18 +255,22 @@ const pad = (n: number) => String(n).padStart(2, "0");
 
 /** Full-screen project slideshow with arrow keys, swipe, and on-screen controls. */
 export default function ProjectsPage() {
-    const [[page, direction], setPage] = useState([0, 0]);
+    // `tick` counts transitions and keys the slides, so going back to a project
+    // mid-wipe mounts a fresh slide instead of re-entering the one still leaving
+    // (AnimatePresence leaves re-entered children stuck behind).
+    const [[page, direction, tick], setPage] = useState<[number, number, number]>([0, 0, 0]);
 
     // Positive modulo so paging below zero still wraps in the right direction.
     const projectIndex = ((page % projects.length) + projects.length) % projects.length;
     const currentProject = projects[projectIndex];
 
     const paginate = useCallback((newDirection: number) => {
-        setPage(([p]) => [p + newDirection, newDirection]);
+        setPage(([p, , t]) => [p + newDirection, newDirection, t + 1]);
     }, []);
 
     const goTo = (index: number) => {
-        setPage([index, index > projectIndex ? 1 : -1]);
+        if (index === projectIndex) return;
+        setPage(([, , t]) => [index, index > projectIndex ? 1 : -1, t + 1]);
     };
 
     const [gridOpen, setGridOpen] = useState(false);
@@ -250,6 +291,8 @@ export default function ProjectsPage() {
 
     const reduceMotion = useReducedMotion();
     const slideVariants = useMemo(() => makeSlideVariants(!!reduceMotion), [reduceMotion]);
+    const edgeLine = useMemo(() => makeEdgeVariants(!!reduceMotion, 0.2), [reduceMotion]);
+    const edgeHalo = useMemo(() => makeEdgeVariants(!!reduceMotion, 1.2), [reduceMotion]);
 
     // Arrow keys only drive the slideshow while it is on screen and not yet
     // mostly covered by the Skills sheet (the sticky section stays in view
@@ -289,7 +332,7 @@ export default function ProjectsPage() {
                 </p>
                 <AnimatePresence initial={false} custom={direction}>
                     <motion.div
-                        key={page}
+                        key={tick}
                         custom={direction}
                         variants={slideVariants}
                         initial="enter"
@@ -307,6 +350,10 @@ export default function ProjectsPage() {
                             <div className="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-black/30" />
                             <motion.div variants={veilVariants} className="absolute inset-0 bg-black" />
                         </div>
+
+                        {/* Leading edge of the wipe: halo, then the line. */}
+                        <motion.div variants={edgeHalo} className="pointer-events-none absolute inset-0 z-20 bg-white/25" aria-hidden />
+                        <motion.div variants={edgeLine} className="pointer-events-none absolute inset-0 z-20 bg-white/90" aria-hidden />
 
                         <div className="section-gutter pointer-events-none absolute inset-0 z-10 flex flex-col justify-center pb-24 pt-24 md:pt-0">
                             <motion.div
