@@ -1,11 +1,17 @@
 "use client";
 
 import SecretContent from "@/components/views/secret-content";
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
+import dynamic from "next/dynamic";
 import { motion, useMotionValue, useScroll, useSpring, useTransform } from "framer-motion";
 import { useSectionProgress } from "@/hooks/use-section-progress";
 import { SECTIONS } from "@/lib/site";
 import { scrollToSection } from "@/lib/scroll-to-section";
+
+/** Easter egg: five quick clicks on the hero open a retro space shooter. Loaded on first use. */
+const SpaceShooter = dynamic(() => import("@/components/views/space-shooter"), { ssr: false });
+const EGG_CLICKS = 5;
+const EGG_WINDOW_MS = 1200;
 
 const line = "text-center text-4xl font-bold leading-tight md:text-7xl xl:text-8xl";
 const ink = "text-slate-900 dark:text-cyan-50";
@@ -32,6 +38,18 @@ const Landing = () => {
   const y = useTransform([hold, cover], ([h, c]: number[]) => h * -14 + c * -60);
   const hintOpacity = useTransform(hold, [0, 0.5], [1, 0]);
 
+  const [game, setGame] = useState<"idle" | "open" | "closed">("idle");
+  const clicks = useRef<number[]>([]);
+  const onHeroClick = (e: React.MouseEvent) => {
+    if ((e.target as HTMLElement).closest("a, button")) return;
+    const now = performance.now();
+    clicks.current = [...clicks.current.filter((t) => now - t < EGG_WINDOW_MS), now];
+    if (clicks.current.length >= EGG_CLICKS) {
+      clicks.current = [];
+      setGame("open");
+    }
+  };
+
   // Mild pointer parallax: the headline drifts a few pixels against the mouse.
   const px = useMotionValue(0);
   const py = useMotionValue(0);
@@ -49,7 +67,10 @@ const Landing = () => {
 
   return (
     <>
-    <section className="sticky top-0 z-0 flex h-screen supports-[height:100dvh]:h-dvh select-none flex-col items-center justify-center px-6">
+    <section
+      onClick={onHeroClick}
+      className="sticky top-0 z-0 flex h-screen supports-[height:100dvh]:h-dvh select-none touch-manipulation flex-col items-center justify-center px-6"
+    >
       <motion.div style={{ opacity, scale, y }} className="flex flex-col items-center">
         <motion.div
           style={{ x: parallaxX, y: parallaxY }}
@@ -105,6 +126,7 @@ const Landing = () => {
       </motion.div>
     </section>
     <div ref={holdRef} className="h-[45vh]" aria-hidden />
+    {game !== "idle" && <SpaceShooter open={game === "open"} onOpenChange={(o) => setGame(o ? "open" : "closed")} />}
     </>
   );
 };
